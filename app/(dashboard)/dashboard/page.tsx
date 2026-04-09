@@ -14,28 +14,26 @@ const LIMITES: Record<string, number | null> = { gratuito: 5, essencial: 50, pro
 
 const DATAS_2026 = [
   { data: '2026-04-10', label: 'Semana Santa',              emoji: '✝️',  relevancia: 'alta' },
-  { data: '2026-04-12', label: 'Páscoa',                   emoji: '🐰', relevancia: 'alta' },
-  { data: '2026-04-19', label: 'Dia do Índio',             emoji: '🪶', relevancia: 'media' },
-  { data: '2026-04-21', label: 'Tiradentes',               emoji: '⚔️',  relevancia: 'alta' },
-  { data: '2026-04-22', label: 'Dia da Terra',             emoji: '🌍', relevancia: 'media' },
-  { data: '2026-05-01', label: 'Dia do Trabalho',          emoji: '✊', relevancia: 'alta' },
-  { data: '2026-05-10', label: 'Dia das Mães',             emoji: '💐', relevancia: 'alta' },
-  { data: '2026-05-15', label: 'Dia do Municipal',         emoji: '🏛️',  relevancia: 'alta' },
-  { data: '2026-06-05', label: 'Dia do Meio Ambiente',     emoji: '🌿', relevancia: 'media' },
-  { data: '2026-06-12', label: 'Dia dos Namorados',        emoji: '❤️',  relevancia: 'media' },
-  { data: '2026-06-13', label: 'Corpus Christi',           emoji: '⛪', relevancia: 'media' },
-  { data: '2026-06-24', label: 'São João',                 emoji: '🎆', relevancia: 'alta' },
-  { data: '2026-07-09', label: 'Revolução Constitucional', emoji: '📜', relevancia: 'alta' },
-  { data: '2026-08-11', label: 'Dia do Estudante',         emoji: '🎓', relevancia: 'media' },
-  { data: '2026-09-07', label: 'Independência do Brasil',  emoji: '🇧🇷', relevancia: 'alta' },
-  { data: '2026-10-02', label: '1º Turno Eleições',        emoji: '🗳️',  relevancia: 'critica' },
-  { data: '2026-10-04', label: 'Dia de São Francisco',     emoji: '🕊️',  relevancia: 'media' },
-  { data: '2026-10-12', label: 'Nossa Sra. Aparecida',     emoji: '🙏', relevancia: 'alta' },
-  { data: '2026-10-25', label: '2º Turno Eleições',        emoji: '🗳️',  relevancia: 'critica' },
-  { data: '2026-11-02', label: 'Finados',                  emoji: '🕯️',  relevancia: 'media' },
-  { data: '2026-11-15', label: 'Proclamação da República', emoji: '🏛️',  relevancia: 'alta' },
-  { data: '2026-11-20', label: 'Consciência Negra',        emoji: '✊🏿', relevancia: 'alta' },
-  { data: '2026-12-25', label: 'Natal',                    emoji: '🎄', relevancia: 'alta' },
+  { data: '2026-04-21', label: 'Tiradentes',                emoji: '⚔️',  relevancia: 'alta' },
+  { data: '2026-04-22', label: 'Dia da Terra',              emoji: '🌍', relevancia: 'media' },
+  { data: '2026-05-01', label: 'Dia do Trabalho',           emoji: '✊', relevancia: 'alta' },
+  { data: '2026-05-10', label: 'Dia das Mães',              emoji: '💐', relevancia: 'alta' },
+  { data: '2026-05-15', label: 'Dia do Municipal',          emoji: '🏛️',  relevancia: 'alta' },
+  { data: '2026-06-05', label: 'Dia do Meio Ambiente',      emoji: '🌿', relevancia: 'media' },
+  { data: '2026-06-12', label: 'Dia dos Namorados',         emoji: '❤️',  relevancia: 'media' },
+  { data: '2026-06-13', label: 'Corpus Christi',            emoji: '⛪', relevancia: 'media' },
+  { data: '2026-06-24', label: 'São João',                  emoji: '🎆', relevancia: 'alta' },
+  { data: '2026-07-09', label: 'Revolução Constitucional',  emoji: '📜', relevancia: 'alta' },
+  { data: '2026-08-11', label: 'Dia do Estudante',          emoji: '🎓', relevancia: 'media' },
+  { data: '2026-09-07', label: 'Independência do Brasil',   emoji: '🇧🇷', relevancia: 'alta' },
+  { data: '2026-10-02', label: '1º Turno Eleições',         emoji: '🗳️',  relevancia: 'critica' },
+  { data: '2026-10-04', label: 'Dia de São Francisco',      emoji: '🕊️',  relevancia: 'media' },
+  { data: '2026-10-12', label: 'Nossa Sra. Aparecida',      emoji: '🙏', relevancia: 'alta' },
+  { data: '2026-10-25', label: '2º Turno Eleições',         emoji: '🗳️',  relevancia: 'critica' },
+  { data: '2026-11-02', label: 'Finados',                   emoji: '🕯️',  relevancia: 'media' },
+  { data: '2026-11-15', label: 'Proclamação da República',  emoji: '🏛️',  relevancia: 'alta' },
+  { data: '2026-11-20', label: 'Consciência Negra',         emoji: '✊🏿', relevancia: 'alta' },
+  { data: '2026-12-25', label: 'Natal',                     emoji: '🎄', relevancia: 'alta' },
 ]
 
 function getDiasRestantes(dataStr: string): number {
@@ -157,10 +155,8 @@ export default async function DashboardPage() {
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 12 }}>
             {AGENTES.map(({ id, label, icon, cor, bg, desc }) => (
               <Link key={id} href={`/agentes/${id}`} style={{ textDecoration: 'none' }}>
-                <div style={{ background: 'rgba(255,255,255,0.7)', backdropFilter: 'blur(8px)', border: '1px solid rgba(123,79,216,0.1)', borderRadius: 16, padding: 20, boxSizing: 'border-box', transition: 'box-shadow 0.15s', cursor: 'pointer' }}>
-                  <div style={{ width: 42, height: 42, borderRadius: 12, background: bg, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20, marginBottom: 12 }}>
-                    {icon}
-                  </div>
+                <div style={{ background: 'rgba(255,255,255,0.7)', backdropFilter: 'blur(8px)', border: '1px solid rgba(123,79,216,0.1)', borderRadius: 16, padding: 20, boxSizing: 'border-box', cursor: 'pointer' }}>
+                  <div style={{ width: 42, height: 42, borderRadius: 12, background: bg, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20, marginBottom: 12 }}>{icon}</div>
                   <div style={{ fontSize: 14, fontWeight: 700, color: '#2D1B6E', marginBottom: 4 }}>{label}</div>
                   <p style={{ fontSize: 12, color: 'rgba(45,27,110,0.5)', lineHeight: 1.5, margin: '0 0 14px' }}>{desc}</p>
                   <div style={{ fontSize: 12, fontWeight: 600, color: cor }}>Usar agente →</div>
@@ -219,9 +215,7 @@ export default async function DashboardPage() {
                 <div key={i} style={{ background: 'rgba(255,255,255,0.7)', backdropFilter: 'blur(8px)', border: '1px solid rgba(123,79,216,0.1)', borderRadius: 16, padding: 16 }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                      <div style={{ width: 28, height: 28, borderRadius: 8, background: ag?.bg, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14 }}>
-                        {ag?.icon}
-                      </div>
+                      <div style={{ width: 28, height: 28, borderRadius: 8, background: ag?.bg, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14 }}>{ag?.icon}</div>
                       <span style={{ fontSize: 13, fontWeight: 600, color: '#2D1B6E' }}>{ag?.label}</span>
                     </div>
                     <span style={{ fontSize: 11, color: 'rgba(45,27,110,0.4)' }}>
