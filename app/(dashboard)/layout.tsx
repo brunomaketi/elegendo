@@ -9,6 +9,7 @@ const NAV = [
   { href: '/agentes/estrategista', label: 'Estrategista',  icon: '🧠' },
   { href: '/agentes/copy',         label: 'Copy Político', icon: '✍️' },
   { href: '/agentes/consciencia',  label: 'Consciência',   icon: '📊' },
+  { href: '/historico',            label: 'Histórico',     icon: '🕐' },
   { href: '/perfil',               label: 'Configurações', icon: '⚙️' },
 ]
 
