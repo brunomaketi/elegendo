@@ -6,11 +6,7 @@ const PLANOS = [
     id: 'gratuito',
     nome: 'Gratuito',
     preco: 0,
-    periodo: '',
     descricao: 'Para conhecer o Elegendo',
-    cor: '#8A8A9A',
-    bg: '#F7F5F0',
-    border: '#E8E0D0',
     destaque: false,
     beneficios: [
       { texto: '5 gerações por mês', ok: true },
@@ -26,11 +22,7 @@ const PLANOS = [
     id: 'pro',
     nome: 'Pro',
     preco: 47,
-    periodo: '/mês',
     descricao: 'Para o candidato sério',
-    cor: '#C9A84C',
-    bg: '#1A1A2E',
-    border: '#C9A84C',
     destaque: true,
     badge: 'Mais popular',
     beneficios: [
@@ -47,11 +39,7 @@ const PLANOS = [
     id: 'agencia',
     nome: 'Agência',
     preco: 97,
-    periodo: '/mês',
     descricao: 'Para assessores e gestores',
-    cor: '#1D9E75',
-    bg: '#FFFFFF',
-    border: '#1D9E75',
     destaque: false,
     beneficios: [
       { texto: 'Gerações ilimitadas', ok: true },
@@ -95,112 +83,146 @@ export default function PlanosPage() {
   }
 
   return (
-    <div style={{ maxWidth: '1000px', margin: '0 auto', padding: '40px 28px', fontFamily: 'var(--font-inter), sans-serif' }}>
+    <div style={{ maxWidth: 1020, margin: '0 auto', padding: '44px 28px', fontFamily: 'var(--font-inter), sans-serif' }}>
 
-      <div style={{ textAlign: 'center', marginBottom: '48px' }}>
-        <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '5px 14px', background: '#FFF8E6', border: '1px solid #F0D080', borderRadius: '20px', marginBottom: '16px' }}>
-          <span style={{ fontSize: '12px' }}>🗳️</span>
-          <span style={{ fontSize: '12px', fontWeight: 600, color: '#633806' }}>Eleições 2026 — Comece agora</span>
+      {/* Header */}
+      <div style={{ textAlign: 'center', marginBottom: 52 }}>
+        <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '5px 14px', background: 'rgba(123,79,216,0.08)', border: '1px solid rgba(123,79,216,0.2)', borderRadius: 20, marginBottom: 16 }}>
+          <span style={{ fontSize: 12 }}>🗳️</span>
+          <span style={{ fontSize: 12, fontWeight: 600, color: '#7B4FD8' }}>Eleições 2026 — Comece agora</span>
         </div>
-        <h1 style={{ fontSize: '32px', fontWeight: 800, color: '#1A1A2E', margin: '0 0 12px', lineHeight: 1.2 }}>
+        <h1 style={{ fontSize: 34, fontWeight: 800, color: '#2D1B6E', margin: '0 0 14px', lineHeight: 1.2, letterSpacing: '-0.02em' }}>
           Escolha o plano certo<br />para sua campanha
         </h1>
-        <p style={{ fontSize: '16px', color: '#8A8A9A', margin: 0, maxWidth: '480px', marginLeft: 'auto', marginRight: 'auto', lineHeight: 1.6 }}>
+        <p style={{ fontSize: 15, color: 'rgba(45,27,110,0.5)', margin: '0 auto', maxWidth: 460, lineHeight: 1.7 }}>
           Você não está pagando por tokens.<br />
-          Está pagando por <strong style={{ color: '#1A1A2E' }}>estratégia política pronta.</strong>
+          Está pagando por <strong style={{ color: '#2D1B6E' }}>estratégia política pronta.</strong>
         </p>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px', marginBottom: '48px', alignItems: 'start' }}>
-        {PLANOS.map((plano) => (
-          <div key={plano.id} style={{ background: plano.bg, border: `2px solid ${plano.border}`, borderRadius: '16px', padding: '28px 24px', position: 'relative', transform: plano.destaque ? 'scale(1.04)' : 'none', boxShadow: plano.destaque ? '0 8px 40px rgba(26,26,46,0.15)' : 'none' }}>
-            {plano.badge && (
-              <div style={{ position: 'absolute', top: '-13px', left: '50%', transform: 'translateX(-50%)', background: '#C9A84C', color: '#1A1A2E', fontSize: '11px', fontWeight: 700, padding: '4px 14px', borderRadius: '20px', whiteSpace: 'nowrap' }}>
-                {plano.badge}
-              </div>
-            )}
-            <div style={{ marginBottom: '16px' }}>
-              <div style={{ fontSize: '13px', fontWeight: 700, color: plano.destaque ? '#E8D5A3' : plano.cor, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '4px' }}>{plano.nome}</div>
-              <div style={{ fontSize: '13px', color: plano.destaque ? 'rgba(232,213,163,0.6)' : '#8A8A9A' }}>{plano.descricao}</div>
-            </div>
-            <div style={{ marginBottom: '24px' }}>
-              {plano.preco === 0 ? (
-                <div style={{ fontSize: '36px', fontWeight: 800, color: plano.destaque ? '#fff' : '#1A1A2E', lineHeight: 1 }}>Grátis</div>
-              ) : (
-                <div style={{ display: 'flex', alignItems: 'baseline', gap: '4px' }}>
-                  <span style={{ fontSize: '14px', fontWeight: 600, color: plano.destaque ? '#E8D5A3' : '#8A8A9A' }}>R$</span>
-                  <span style={{ fontSize: '42px', fontWeight: 800, color: plano.destaque ? '#fff' : '#1A1A2E', lineHeight: 1 }}>{plano.preco}</span>
-                  <span style={{ fontSize: '13px', color: plano.destaque ? 'rgba(255,255,255,0.5)' : '#8A8A9A' }}>{plano.periodo}</span>
+      {/* Cards */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16, marginBottom: 48, alignItems: 'start' }}>
+        {PLANOS.map((plano) => {
+          const isDestaque = plano.destaque
+          const isAgencia = plano.id === 'agencia'
+          return (
+            <div key={plano.id} style={{
+              background: isDestaque ? 'linear-gradient(145deg, #2D1B6E 0%, #4A2FA0 100%)' : 'rgba(255,255,255,0.85)',
+              backdropFilter: 'blur(8px)',
+              border: isDestaque ? '2px solid rgba(123,79,216,0.6)' : '1px solid rgba(123,79,216,0.12)',
+              borderRadius: 20,
+              padding: '28px 24px',
+              position: 'relative',
+              transform: isDestaque ? 'scale(1.04)' : 'none',
+              boxShadow: isDestaque ? '0 12px 48px rgba(123,79,216,0.25)' : '0 2px 12px rgba(45,27,110,0.05)',
+            }}>
+              {plano.badge && (
+                <div style={{ position: 'absolute', top: -13, left: '50%', transform: 'translateX(-50%)', background: 'linear-gradient(135deg, #7B4FD8, #5B3BAA)', color: '#fff', fontSize: 11, fontWeight: 700, padding: '4px 14px', borderRadius: 20, whiteSpace: 'nowrap', boxShadow: '0 4px 12px rgba(123,79,216,0.4)' }}>
+                  {plano.badge}
                 </div>
               )}
-            </div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '24px' }}>
-              {plano.beneficios.map((b, i) => (
-                <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '10px', opacity: b.ok ? 1 : 0.35 }}>
-                  <div style={{ width: '18px', height: '18px', borderRadius: '50%', background: b.ok ? (plano.destaque ? '#C9A84C' : plano.cor) : 'transparent', border: b.ok ? 'none' : `1.5px solid ${plano.destaque ? 'rgba(255,255,255,0.2)' : '#D5D5E0'}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                    {b.ok && <span style={{ color: plano.destaque ? '#1A1A2E' : '#fff', fontSize: '10px', fontWeight: 700 }}>✓</span>}
-                  </div>
-                  <span style={{ fontSize: '13px', color: plano.destaque ? (b.ok ? '#fff' : 'rgba(255,255,255,0.35)') : (b.ok ? '#1A1A2E' : '#8A8A9A') }}>{b.texto}</span>
-                </div>
-              ))}
-            </div>
-            {planoAtual === plano.id ? (
-              <div style={{ padding: '12px', borderRadius: '10px', background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.1)', textAlign: 'center', fontSize: '13px', fontWeight: 600, color: '#8A8A9A' }}>
-                Plano atual
+
+              {/* Nome + desc */}
+              <div style={{ marginBottom: 20 }}>
+                <div style={{ fontSize: 12, fontWeight: 700, color: isDestaque ? 'rgba(255,255,255,0.5)' : 'rgba(45,27,110,0.4)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 4 }}>{plano.nome}</div>
+                <div style={{ fontSize: 13, color: isDestaque ? 'rgba(255,255,255,0.65)' : 'rgba(45,27,110,0.5)' }}>{plano.descricao}</div>
               </div>
-            ) : (
-              <button
-                onClick={() => handleAssinar(plano.id)}
-                disabled={loading === plano.id}
-                style={{ width: '100%', padding: '13px', borderRadius: '10px', border: 'none', cursor: loading === plano.id ? 'not-allowed' : 'pointer', background: plano.destaque ? '#C9A84C' : plano.id === 'agencia' ? '#1D9E75' : '#1A1A2E', color: plano.destaque ? '#1A1A2E' : '#fff', fontSize: '14px', fontWeight: 700, fontFamily: 'var(--font-inter), sans-serif' }}
-              >
-                {loading === plano.id ? 'Aguarde...' : `Assinar ${plano.nome} →`}
-              </button>
-            )}
-          </div>
-        ))}
+
+              {/* Preço */}
+              <div style={{ marginBottom: 28, paddingBottom: 24, borderBottom: `1px solid ${isDestaque ? 'rgba(255,255,255,0.1)' : 'rgba(123,79,216,0.08)'}` }}>
+                {plano.preco === 0 ? (
+                  <div style={{ fontSize: 38, fontWeight: 800, color: isDestaque ? '#fff' : '#2D1B6E', lineHeight: 1 }}>Grátis</div>
+                ) : (
+                  <div style={{ display: 'flex', alignItems: 'baseline', gap: 4 }}>
+                    <span style={{ fontSize: 14, fontWeight: 600, color: isDestaque ? 'rgba(255,255,255,0.5)' : 'rgba(45,27,110,0.4)' }}>R$</span>
+                    <span style={{ fontSize: 44, fontWeight: 800, color: isDestaque ? '#fff' : '#2D1B6E', lineHeight: 1 }}>{plano.preco}</span>
+                    <span style={{ fontSize: 13, color: isDestaque ? 'rgba(255,255,255,0.4)' : 'rgba(45,27,110,0.4)' }}>/mês</span>
+                  </div>
+                )}
+              </div>
+
+              {/* Benefícios */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 11, marginBottom: 28 }}>
+                {plano.beneficios.map((b, i) => (
+                  <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10, opacity: b.ok ? 1 : 0.3 }}>
+                    <div style={{ width: 18, height: 18, borderRadius: '50%', background: b.ok ? (isDestaque ? 'rgba(255,255,255,0.2)' : 'rgba(123,79,216,0.12)') : 'transparent', border: b.ok ? 'none' : `1.5px solid ${isDestaque ? 'rgba(255,255,255,0.2)' : 'rgba(45,27,110,0.15)'}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                      {b.ok && (
+                        <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
+                          <path d="M2 5l2.5 2.5L8 3" stroke={isDestaque ? '#fff' : '#7B4FD8'} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                        </svg>
+                      )}
+                    </div>
+                    <span style={{ fontSize: 13, color: isDestaque ? (b.ok ? '#fff' : 'rgba(255,255,255,0.3)') : (b.ok ? '#2D1B6E' : 'rgba(45,27,110,0.3)') }}>{b.texto}</span>
+                  </div>
+                ))}
+              </div>
+
+              {/* Botão */}
+              {planoAtual === plano.id ? (
+                <div style={{ padding: '12px', borderRadius: 12, background: isDestaque ? 'rgba(255,255,255,0.08)' : 'rgba(123,79,216,0.06)', textAlign: 'center', fontSize: 13, fontWeight: 600, color: isDestaque ? 'rgba(255,255,255,0.4)' : 'rgba(45,27,110,0.4)' }}>
+                  Plano atual
+                </div>
+              ) : (
+                <button
+                  onClick={() => handleAssinar(plano.id)}
+                  disabled={loading === plano.id}
+                  style={{ width: '100%', padding: '13px', borderRadius: 50, border: 'none', cursor: loading === plano.id ? 'not-allowed' : 'pointer', background: isDestaque ? 'linear-gradient(135deg, #7B4FD8, #5B3BAA)' : isAgencia ? 'rgba(29,158,117,0.1)' : 'rgba(123,79,216,0.08)', color: isDestaque ? '#fff' : isAgencia ? '#1D9E75' : '#7B4FD8', fontSize: 14, fontWeight: 700, fontFamily: 'var(--font-inter), sans-serif', boxShadow: isDestaque ? '0 4px 16px rgba(123,79,216,0.4)' : 'none' }}
+                >
+                  {loading === plano.id ? 'Aguarde...' : `Assinar ${plano.nome} →`}
+                </button>
+              )}
+            </div>
+          )
+        })}
       </div>
 
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '32px', padding: '24px', background: '#fff', borderRadius: '12px', border: '1px solid #E8E0D0', marginBottom: '48px', flexWrap: 'wrap' }}>
+      {/* Trust bar */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 32, padding: '24px 28px', background: 'rgba(255,255,255,0.7)', backdropFilter: 'blur(8px)', borderRadius: 16, border: '1px solid rgba(123,79,216,0.1)', marginBottom: 48, flexWrap: 'wrap' }}>
         {[
           { icon: '🔒', titulo: 'Pagamento seguro', sub: 'Processado pelo Stripe' },
           { icon: '↩️', titulo: 'Cancele quando quiser', sub: 'Sem fidelidade' },
           { icon: '⚡', titulo: 'Acesso imediato', sub: 'Ativo em segundos' },
           { icon: '🇧🇷', titulo: 'Pague em reais', sub: 'Sem IOF ou câmbio' },
         ].map(({ icon, titulo, sub }) => (
-          <div key={titulo} style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <span style={{ fontSize: '20px' }}>{icon}</span>
+          <div key={titulo} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <span style={{ fontSize: 20 }}>{icon}</span>
             <div>
-              <div style={{ fontSize: '13px', fontWeight: 600, color: '#1A1A2E' }}>{titulo}</div>
-              <div style={{ fontSize: '11px', color: '#8A8A9A' }}>{sub}</div>
+              <div style={{ fontSize: 13, fontWeight: 600, color: '#2D1B6E' }}>{titulo}</div>
+              <div style={{ fontSize: 11, color: 'rgba(45,27,110,0.4)' }}>{sub}</div>
             </div>
           </div>
         ))}
       </div>
 
-      <div style={{ marginBottom: '40px' }}>
-        <h2 style={{ fontSize: '20px', fontWeight: 700, color: '#1A1A2E', marginBottom: '16px', textAlign: 'center' }}>Perguntas frequentes</h2>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+      {/* FAQ */}
+      <div style={{ marginBottom: 48 }}>
+        <h2 style={{ fontSize: 22, fontWeight: 800, color: '#2D1B6E', marginBottom: 20, textAlign: 'center', letterSpacing: '-0.01em' }}>Perguntas frequentes</h2>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
           {FAQ.map((item, i) => (
-            <div key={i} style={{ background: '#fff', border: '1px solid #E8E0D0', borderRadius: '10px', overflow: 'hidden' }}>
+            <div key={i} style={{ background: 'rgba(255,255,255,0.7)', backdropFilter: 'blur(8px)', border: '1px solid rgba(123,79,216,0.1)', borderRadius: 12, overflow: 'hidden' }}>
               <button onClick={() => setFaqAberto(faqAberto === i ? null : i)} style={{ width: '100%', padding: '16px 20px', background: 'transparent', border: 'none', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontFamily: 'var(--font-inter), sans-serif' }}>
-                <span style={{ fontSize: '14px', fontWeight: 600, color: '#1A1A2E', textAlign: 'left' }}>{item.q}</span>
-                <span style={{ fontSize: '18px', color: '#8A8A9A', flexShrink: 0, marginLeft: '12px', transform: faqAberto === i ? 'rotate(45deg)' : 'none', transition: 'transform 0.2s' }}>+</span>
+                <span style={{ fontSize: 14, fontWeight: 600, color: '#2D1B6E', textAlign: 'left' }}>{item.q}</span>
+                <span style={{ fontSize: 18, color: '#7B4FD8', flexShrink: 0, marginLeft: 12, transform: faqAberto === i ? 'rotate(45deg)' : 'none', transition: 'transform 0.2s', display: 'inline-block' }}>+</span>
               </button>
               {faqAberto === i && (
-                <div style={{ padding: '0 20px 16px', fontSize: '14px', color: '#4A4A5A', lineHeight: '1.6' }}>{item.r}</div>
+                <div style={{ padding: '0 20px 16px', fontSize: 14, color: 'rgba(45,27,110,0.6)', lineHeight: 1.7 }}>{item.r}</div>
               )}
             </div>
           ))}
         </div>
       </div>
 
-      <div style={{ textAlign: 'center', padding: '40px 24px', background: '#1A1A2E', borderRadius: '16px' }}>
-        <div style={{ fontSize: '22px', fontWeight: 800, color: '#fff', marginBottom: '8px' }}>A janela fecha em outubro de 2026.</div>
-        <p style={{ fontSize: '15px', color: 'rgba(255,255,255,0.6)', margin: '0 0 24px' }}>Cada semana sem estratégia digital é voto que o seu concorrente está conquistando.</p>
-        <button onClick={() => handleAssinar('pro')} style={{ padding: '14px 32px', background: '#C9A84C', color: '#1A1A2E', borderRadius: '10px', border: 'none', fontSize: '15px', fontWeight: 700, cursor: 'pointer', fontFamily: 'var(--font-inter), sans-serif' }}>
-          Começar agora →
-        </button>
+      {/* CTA final */}
+      <div style={{ textAlign: 'center', padding: '48px 28px', background: 'linear-gradient(145deg, #2D1B6E 0%, #4A2FA0 100%)', borderRadius: 20, position: 'relative', overflow: 'hidden' }}>
+        <div style={{ position: 'absolute', top: '-60px', right: '-60px', width: 240, height: 240, borderRadius: '50%', background: 'radial-gradient(circle, rgba(123,79,216,0.4) 0%, transparent 70%)', pointerEvents: 'none' }} />
+        <div style={{ position: 'absolute', bottom: '-40px', left: '-40px', width: 200, height: 200, borderRadius: '50%', background: 'radial-gradient(circle, rgba(80,200,120,0.2) 0%, transparent 70%)', pointerEvents: 'none' }} />
+        <div style={{ position: 'relative', zIndex: 2 }}>
+          <div style={{ fontSize: 24, fontWeight: 800, color: '#fff', marginBottom: 10, letterSpacing: '-0.01em' }}>A janela fecha em outubro de 2026.</div>
+          <p style={{ fontSize: 15, color: 'rgba(255,255,255,0.55)', margin: '0 0 28px' }}>Cada semana sem estratégia digital é voto que o seu concorrente está conquistando.</p>
+          <button onClick={() => handleAssinar('pro')} style={{ padding: '14px 36px', background: 'linear-gradient(135deg, #7B4FD8, #5B3BAA)', color: '#fff', borderRadius: 50, border: 'none', fontSize: 15, fontWeight: 700, cursor: 'pointer', fontFamily: 'var(--font-inter), sans-serif', boxShadow: '0 4px 20px rgba(123,79,216,0.5)' }}>
+            Começar agora →
+          </button>
+        </div>
       </div>
     </div>
   )

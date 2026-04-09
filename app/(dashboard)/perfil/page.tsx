@@ -56,7 +56,6 @@ export default function PerfilPage() {
 
   const set = (key: string, val: string) => setForm(p => ({ ...p, [key]: val }))
 
-  // Calcula completude
   const camposObrigatorios = form.tipo_conta === 'candidato'
     ? ['nome', 'cargo', 'cidade', 'estado', 'partido', 'bio_politica']
     : ['nome', 'agencia', 'especialidade', 'bio_politica']
@@ -64,7 +63,7 @@ export default function PerfilPage() {
   const completude = Math.round((preenchidos / camposObrigatorios.length) * 100)
 
   if (loading) return (
-    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '60vh', color: '#8A8A9A', fontFamily: 'var(--font-inter), sans-serif' }}>
+    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '60vh', color: 'rgba(45,27,110,0.4)', fontFamily: 'var(--font-inter), sans-serif' }}>
       Carregando perfil...
     </div>
   )
@@ -74,67 +73,57 @@ export default function PerfilPage() {
 
       {/* Header */}
       <div style={{ display: 'flex', alignItems: 'flex-start', gap: '20px', marginBottom: '32px', flexWrap: 'wrap' }}>
-        {/* Avatar */}
-        <div style={{ width: '72px', height: '72px', borderRadius: '50%', background: '#1A1A2E', border: '3px solid #C9A84C', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '24px', fontWeight: 700, color: '#C9A84C', flexShrink: 0 }}>
+        <div style={{ width: 72, height: 72, borderRadius: '50%', background: 'rgba(123,79,216,0.12)', border: '3px solid rgba(123,79,216,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 26, fontWeight: 700, color: '#7B4FD8', flexShrink: 0 }}>
           {form.nome?.charAt(0).toUpperCase() || '?'}
         </div>
         <div style={{ flex: 1 }}>
-          <h1 style={{ fontSize: '22px', fontWeight: 700, color: '#1A1A2E', margin: '0 0 4px' }}>
+          <h1 style={{ fontSize: '24px', fontWeight: 800, color: '#2D1B6E', margin: '0 0 3px', letterSpacing: '-0.01em' }}>
             {form.nome || 'Seu nome'}
           </h1>
-          <p style={{ fontSize: '13px', color: '#8A8A9A', margin: '0 0 12px' }}>{email}</p>
-          {/* Completude */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <div style={{ width: '160px', background: '#E8E0D0', borderRadius: '4px', height: '6px', overflow: 'hidden' }}>
-              <div style={{ height: '100%', borderRadius: '4px', background: completude === 100 ? '#1D9E75' : completude > 50 ? '#C9A84C' : '#E24B4A', width: `${completude}%`, transition: 'width 0.3s' }} />
+          <p style={{ fontSize: '13px', color: 'rgba(45,27,110,0.4)', margin: '0 0 14px' }}>{email}</p>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <div style={{ width: 160, background: 'rgba(123,79,216,0.1)', borderRadius: 4, height: 6, overflow: 'hidden' }}>
+              <div style={{ height: '100%', borderRadius: 4, background: completude === 100 ? '#1D9E75' : completude > 50 ? '#7B4FD8' : '#E24B4A', width: `${completude}%`, transition: 'width 0.3s' }} />
             </div>
-            <span style={{ fontSize: '12px', fontWeight: 600, color: completude === 100 ? '#1D9E75' : '#8A8A9A' }}>
+            <span style={{ fontSize: 12, fontWeight: 600, color: completude === 100 ? '#1D9E75' : 'rgba(45,27,110,0.5)' }}>
               {completude}% completo
             </span>
-            {completude === 100 && <span style={{ fontSize: '11px', padding: '2px 8px', background: '#E8F8F2', color: '#1D9E75', borderRadius: '20px', fontWeight: 600 }}>✓ Perfil completo</span>}
+            {completude === 100 && (
+              <span style={{ fontSize: 11, padding: '2px 10px', background: 'rgba(29,158,117,0.1)', color: '#1D9E75', borderRadius: 20, fontWeight: 700 }}>✓ Perfil completo</span>
+            )}
           </div>
         </div>
       </div>
 
       {/* Tipo de conta */}
       <div style={{ marginBottom: '24px' }}>
-        <div style={{ fontSize: '12px', fontWeight: 600, color: '#4A4A5A', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '10px' }}>
+        <div style={{ fontSize: '11px', fontWeight: 700, color: 'rgba(45,27,110,0.4)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '10px' }}>
           Tipo de conta
         </div>
-        <div style={{ display: 'flex', gap: '10px' }}>
+        <div style={{ display: 'flex', gap: 10 }}>
           {[
             { val: 'candidato', label: 'Candidato', icon: '🗳️', desc: 'Estou disputando uma eleição' },
-            { val: 'assessor', label: 'Assessor / Gestor', icon: '📋', desc: 'Gerencio campanhas de candidatos' },
+            { val: 'assessor',  label: 'Assessor / Gestor', icon: '📋', desc: 'Gerencio campanhas de candidatos' },
           ].map(({ val, label, icon, desc }) => (
-            <button
-              key={val}
-              type="button"
-              onClick={() => set('tipo_conta', val)}
-              style={{
-                flex: 1, padding: '14px 16px', borderRadius: '10px', cursor: 'pointer', textAlign: 'left',
-                border: `2px solid ${form.tipo_conta === val ? '#1A1A2E' : '#E8E0D0'}`,
-                background: form.tipo_conta === val ? '#1A1A2E' : '#fff',
-                transition: 'all 0.15s',
-              }}
-            >
-              <div style={{ fontSize: '18px', marginBottom: '4px' }}>{icon}</div>
-              <div style={{ fontSize: '14px', fontWeight: 600, color: form.tipo_conta === val ? '#E8D5A3' : '#1A1A2E', marginBottom: '2px' }}>{label}</div>
-              <div style={{ fontSize: '12px', color: form.tipo_conta === val ? 'rgba(232,213,163,0.7)' : '#8A8A9A' }}>{desc}</div>
+            <button key={val} type="button" onClick={() => set('tipo_conta', val)} style={{ flex: 1, padding: '14px 16px', borderRadius: 14, cursor: 'pointer', textAlign: 'left', border: `2px solid ${form.tipo_conta === val ? '#7B4FD8' : 'rgba(123,79,216,0.12)'}`, background: form.tipo_conta === val ? 'linear-gradient(135deg, #2D1B6E, #4A2FA0)' : 'rgba(255,255,255,0.7)', backdropFilter: 'blur(8px)', transition: 'all 0.15s' }}>
+              <div style={{ fontSize: 18, marginBottom: 4 }}>{icon}</div>
+              <div style={{ fontSize: 14, fontWeight: 700, color: form.tipo_conta === val ? '#fff' : '#2D1B6E', marginBottom: 2 }}>{label}</div>
+              <div style={{ fontSize: 12, color: form.tipo_conta === val ? 'rgba(255,255,255,0.55)' : 'rgba(45,27,110,0.4)' }}>{desc}</div>
             </button>
           ))}
         </div>
       </div>
 
       <form onSubmit={handleSave}>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
 
           {/* Coluna esquerda */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-            <div style={{ background: '#fff', border: '1px solid #E8E0D0', borderRadius: '12px', padding: '20px' }}>
-              <div style={{ fontSize: '12px', fontWeight: 700, color: '#8A8A9A', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '16px' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+            <div style={{ background: 'rgba(255,255,255,0.75)', backdropFilter: 'blur(8px)', border: '1px solid rgba(123,79,216,0.1)', borderRadius: 16, padding: 20 }}>
+              <div style={{ fontSize: 11, fontWeight: 700, color: 'rgba(45,27,110,0.4)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 16 }}>
                 Informações pessoais
               </div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
                 <Field label="Nome completo" required>
                   <input value={form.nome} onChange={e => set('nome', e.target.value)} placeholder="João Silva" required style={inp} />
                 </Field>
@@ -147,7 +136,7 @@ export default function PerfilPage() {
                         {CARGOS.map(c => <option key={c} value={c}>{c}</option>)}
                       </select>
                     </Field>
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 80px', gap: '10px' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 80px', gap: 10 }}>
                       <Field label="Cidade">
                         <input value={form.cidade} onChange={e => set('cidade', e.target.value)} placeholder="Americana" style={inp} />
                       </Field>
@@ -191,52 +180,48 @@ export default function PerfilPage() {
           </div>
 
           {/* Coluna direita */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-            <div style={{ background: '#fff', border: '1px solid #E8E0D0', borderRadius: '12px', padding: '20px' }}>
-              <div style={{ fontSize: '12px', fontWeight: 700, color: '#8A8A9A', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '4px' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+            <div style={{ background: 'rgba(255,255,255,0.75)', backdropFilter: 'blur(8px)', border: '1px solid rgba(123,79,216,0.1)', borderRadius: 16, padding: 20 }}>
+              <div style={{ fontSize: 11, fontWeight: 700, color: 'rgba(45,27,110,0.4)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 4 }}>
                 {form.tipo_conta === 'candidato' ? 'Contexto da campanha' : 'Contexto de trabalho'}
               </div>
-              <p style={{ fontSize: '12px', color: '#8A8A9A', margin: '0 0 14px', lineHeight: '1.5' }}>
+              <p style={{ fontSize: 12, color: 'rgba(45,27,110,0.45)', margin: '0 0 14px', lineHeight: 1.6 }}>
                 {form.tipo_conta === 'candidato'
                   ? 'Este texto alimenta todos os agentes. Quanto mais detalhado, mais preciso o conteúdo gerado.'
-                  : 'Descreva sua experiência, os candidatos que gerencia e como trabalha. Os agentes usarão isso como contexto.'}
+                  : 'Descreva sua experiência, os candidatos que gerencia e como trabalha.'}
               </p>
               <textarea
                 value={form.bio_politica}
                 onChange={e => set('bio_politica', e.target.value)}
                 placeholder={form.tipo_conta === 'candidato'
-                  ? 'Ex: Sou vereador em Americana/SP buscando reeleição. Minhas pautas são segurança pública, saúde e moradia. Fui eleito em 2020 com 3.800 votos. Meu público principal são trabalhadores da periferia...'
-                  : 'Ex: Sou gestor de redes sociais com 3 anos de experiência em campanhas políticas. Atualmente gerencio 2 candidatos a vereador em Campinas/SP. Foco em conteúdo orgânico e tráfego pago no Meta...'}
+                  ? 'Ex: Sou vereador em Americana/SP buscando reeleição. Minhas pautas são segurança pública, saúde e moradia. Fui eleito em 2020 com 3.800 votos...'
+                  : 'Ex: Sou gestor de redes sociais com 3 anos de experiência em campanhas políticas. Atualmente gerencio 2 candidatos a vereador em Campinas/SP...'}
                 rows={10}
                 style={{ ...inp, resize: 'vertical', minHeight: '240px' }}
               />
-              <div style={{ fontSize: '11px', color: '#8A8A9A', marginTop: '8px' }}>
+              <div style={{ fontSize: 11, color: 'rgba(45,27,110,0.35)', marginTop: 8 }}>
                 {form.bio_politica.length} caracteres · Recomendado: 200+
               </div>
             </div>
 
             {/* Dica */}
-            <div style={{ padding: '14px 16px', background: '#FFF8E6', borderRadius: '10px', border: '1px solid #F0D080' }}>
-              <div style={{ fontSize: '12px', fontWeight: 600, color: '#633806', marginBottom: '4px' }}>💡 Dica dos agentes</div>
-              <p style={{ fontSize: '12px', color: '#8A6020', margin: 0, lineHeight: '1.6' }}>
+            <div style={{ padding: '14px 16px', background: 'rgba(123,79,216,0.06)', borderRadius: 12, border: '1px solid rgba(123,79,216,0.15)' }}>
+              <div style={{ fontSize: 12, fontWeight: 700, color: '#7B4FD8', marginBottom: 4 }}>💡 Dica dos agentes</div>
+              <p style={{ fontSize: 12, color: 'rgba(45,27,110,0.55)', margin: 0, lineHeight: 1.6 }}>
                 {form.tipo_conta === 'candidato'
-                  ? 'Inclua: cargo, cidade, pautas principais, histórico eleitoral, público-alvo e tom de comunicação. Isso melhora muito a qualidade dos roteiros e copies gerados.'
-                  : 'Inclua: quantos candidatos gerencia, em quais cidades, quais cargos, quais plataformas usa e qual é seu estilo de comunicação. Os agentes vão gerar conteúdo mais alinhado com sua forma de trabalhar.'}
+                  ? 'Inclua: cargo, cidade, pautas principais, histórico eleitoral, público-alvo e tom de comunicação.'
+                  : 'Inclua: quantos candidatos gerencia, em quais cidades, quais cargos e qual é seu estilo de comunicação.'}
               </p>
             </div>
           </div>
         </div>
 
         {/* Botão salvar */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginTop: '20px' }}>
-          <button
-            type="submit"
-            disabled={saving}
-            style={{ padding: '12px 28px', borderRadius: '8px', border: 'none', background: saving ? '#8A8A9A' : '#1A1A2E', color: '#E8D5A3', fontSize: '14px', fontWeight: 600, cursor: saving ? 'not-allowed' : 'pointer', fontFamily: 'var(--font-inter), sans-serif' }}
-          >
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginTop: 24 }}>
+          <button type="submit" disabled={saving} style={{ padding: '12px 28px', borderRadius: 50, border: 'none', background: saving ? 'rgba(123,79,216,0.4)' : 'linear-gradient(135deg, #7B4FD8, #5B3BAA)', color: '#fff', fontSize: 14, fontWeight: 700, cursor: saving ? 'not-allowed' : 'pointer', fontFamily: 'var(--font-inter), sans-serif', boxShadow: saving ? 'none' : '0 4px 16px rgba(123,79,216,0.3)' }}>
             {saving ? 'Salvando...' : 'Salvar perfil'}
           </button>
-          {ok && <span style={{ fontSize: '13px', color: '#1D9E75', fontWeight: 600 }}>✓ Salvo com sucesso!</span>}
+          {ok && <span style={{ fontSize: 13, color: '#1D9E75', fontWeight: 700 }}>✓ Salvo com sucesso!</span>}
         </div>
       </form>
     </div>
@@ -245,9 +230,9 @@ export default function PerfilPage() {
 
 function Field({ label, required, children }: { label: string; required?: boolean; children: React.ReactNode }) {
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
-      <label style={{ fontSize: '11px', fontWeight: 600, color: '#4A4A5A', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-        {label}{required && <span style={{ color: '#C9A84C', marginLeft: '3px' }}>*</span>}
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
+      <label style={{ fontSize: 11, fontWeight: 700, color: 'rgba(45,27,110,0.45)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+        {label}{required && <span style={{ color: '#7B4FD8', marginLeft: 3 }}>*</span>}
       </label>
       {children}
     </div>
@@ -255,8 +240,8 @@ function Field({ label, required, children }: { label: string; required?: boolea
 }
 
 const inp: React.CSSProperties = {
-  padding: '9px 12px', borderRadius: '8px', border: '1px solid #E8E0D0',
-  fontSize: '13px', color: '#1A1A2E', background: '#fff',
+  padding: '9px 12px', borderRadius: 10, border: '1px solid rgba(123,79,216,0.15)',
+  fontSize: 13, color: '#2D1B6E', background: '#fff',
   width: '100%', boxSizing: 'border-box', outline: 'none',
   fontFamily: 'var(--font-inter), sans-serif',
 }

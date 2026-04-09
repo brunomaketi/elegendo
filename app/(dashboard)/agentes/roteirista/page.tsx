@@ -28,13 +28,15 @@ const FIELDS: FieldConfig[] = [
 
 export default function RoteiristPage() {
   return (
-    <div style={{ maxWidth: '1100px', margin: '0 auto', padding: '32px 24px' }}>
+    <div style={{ maxWidth: '1100px', margin: '0 auto', padding: '32px 24px', fontFamily: 'var(--font-inter), sans-serif' }}>
       <div style={{ marginBottom: '28px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '6px' }}>
-          <span style={{ fontSize: '24px' }}>🎬</span>
-          <h1 style={{ fontSize: '22px', fontWeight: 700, color: '#1A1A2E', margin: 0 }}>Roteirista de Reels</h1>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '6px' }}>
+          <div style={{ width: 44, height: 44, borderRadius: 12, background: 'rgba(123,79,216,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 22 }}>🎬</div>
+          <div>
+            <h1 style={{ fontSize: '22px', fontWeight: 800, color: '#2D1B6E', margin: 0, letterSpacing: '-0.01em' }}>Roteirista de Reels</h1>
+            <p style={{ fontSize: '13px', color: 'rgba(45,27,110,0.45)', margin: 0 }}>Gera 3 roteiros com gancho, desenvolvimento e CTA — prontos para gravar.</p>
+          </div>
         </div>
-        <p style={{ fontSize: '14px', color: '#8A8A9A', margin: 0 }}>Gera 3 roteiros com gancho, desenvolvimento e CTA — prontos para gravar.</p>
       </div>
       <AgentForm agente="roteirista" fields={FIELDS} />
     </div>

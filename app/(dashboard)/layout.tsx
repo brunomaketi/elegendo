@@ -4,17 +4,18 @@ import { redirect } from 'next/navigation'
 import Link from 'next/link'
 
 const NAV = [
-  { href: '/dashboard',            label: 'Início',        icon: '⚡' },
-  { href: '/agentes/roteirista',   label: 'Roteirista',    icon: '🎬' },
-  { href: '/agentes/estrategista', label: 'Estrategista',  icon: '🧠' },
-  { href: '/agentes/copy',         label: 'Copy Político', icon: '✍️' },
-  { href: '/agentes/consciencia',  label: 'Consciência',   icon: '📊' },
-  { href: '/historico',            label: 'Histórico',     icon: '🕐' },
-  { href: '/planos',               label: 'Planos',        icon: '⭐' },
-  { href: '/perfil',               label: 'Configurações', icon: '⚙️' },
+  { href: '/dashboard',            label: 'Início',        icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg> },
+  { href: '/agentes/roteirista',   label: 'Roteirista',    icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg> },
+  { href: '/agentes/estrategista', label: 'Estrategista',  icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg> },
+  { href: '/agentes/copy',         label: 'Copy Político', icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg> },
+  { href: '/agentes/consciencia',  label: 'Consciência',   icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg> },
+  { href: '/historico',            label: 'Histórico',     icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> },
+  { href: '/planos',               label: 'Planos',        icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg> },
+  { href: '/perfil',               label: 'Configurações', icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg> },
 ]
 
-const PLANO_COR: Record<string, string> = { gratuito: '#8A8A9A', essencial: '#C9A84C', pro: '#1D9E75' }
+const PLANO_COR: Record<string, string> = { gratuito: '#8A8A9A', essencial: '#7B4FD8', pro: '#1D9E75' }
+const PLANO_BG: Record<string, string>  = { gratuito: 'rgba(138,138,154,0.12)', essencial: 'rgba(123,79,216,0.12)', pro: 'rgba(29,158,117,0.12)' }
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   const cookieStore = await cookies()
@@ -30,53 +31,75 @@ export default async function DashboardLayout({ children }: { children: React.Re
 
   return (
     <div style={{ display: 'flex', height: '100vh', overflow: 'hidden', fontFamily: 'var(--font-inter), sans-serif' }}>
-
       <style>{`
-        .nav-link { display: flex; align-items: center; gap: 10px; padding: 9px 10px; color: rgba(255,255,255,0.6); font-size: 14px; text-decoration: none; border-radius: 8px; margin-bottom: 2px; font-weight: 500; transition: background 0.15s, color 0.15s; }
-        .nav-link:hover { background: rgba(255,255,255,0.08); color: #fff; }
-        .nav-icon { font-size: 16px; width: 22px; text-align: center; }
-        .logout-btn { width: 100%; padding: 7px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.1); background: transparent; color: rgba(255,255,255,0.4); font-size: 12px; cursor: pointer; font-family: var(--font-inter), sans-serif; transition: background 0.15s; }
-        .logout-btn:hover { background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.7); }
+        .nav-link {
+          display: flex; align-items: center; gap: 12px; padding: 11px 14px;
+          color: rgba(45,27,110,0.45); font-size: 14px; text-decoration: none;
+          border-radius: 10px; margin-bottom: 6px; font-weight: 500;
+          transition: background 0.15s, color 0.15s;
+        }
+        .nav-link:hover { background: rgba(123,79,216,0.08); color: #2D1B6E; }
+        .nav-link svg { flex-shrink: 0; }
+        .logout-btn {
+          width: 100%; padding: 9px; border-radius: 10px;
+          border: 1px solid rgba(123,79,216,0.15); background: transparent;
+          color: rgba(45,27,110,0.4); font-size: 13px; cursor: pointer;
+          font-family: var(--font-inter), sans-serif; transition: background 0.15s, color 0.15s;
+        }
+        .logout-btn:hover { background: rgba(123,79,216,0.06); color: #2D1B6E; }
       `}</style>
 
-      {/* Sidebar */}
-      <aside style={{ width: '240px', minWidth: '240px', background: '#0F1117', display: 'flex', flexDirection: 'column', height: '100vh', position: 'fixed', left: 0, top: 0, zIndex: 100, borderRight: '1px solid rgba(255,255,255,0.06)' }}>
+      <aside style={{
+        width: '230px', minWidth: '230px', background: '#fff',
+        display: 'flex', flexDirection: 'column',
+        height: '100vh', position: 'fixed', left: 0, top: 0, zIndex: 100,
+        borderRight: '1px solid rgba(123,79,216,0.1)',
+        boxShadow: '2px 0 12px rgba(45,27,110,0.04)'
+      }}>
 
         {/* Logo */}
-        <div style={{ padding: '24px 20px 20px', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
-          <div style={{ fontSize: '20px', fontWeight: 800, color: '#FFFFFF', letterSpacing: '0.08em' }}>ELEGENDO</div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '6px' }}>
-            <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: PLANO_COR[plano] }} />
-            <span style={{ fontSize: '11px', color: PLANO_COR[plano], fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+        <div style={{ padding: '24px 20px 18px', borderBottom: '1px solid rgba(123,79,216,0.08)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <div style={{ width: 30, height: 30, borderRadius: 9, background: 'linear-gradient(135deg, #7B4FD8 0%, #2D1B6E 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+              <svg width="15" height="15" viewBox="0 0 14 14" fill="none">
+                <rect x="1" y="3" width="3" height="8" rx="1" fill="white"/>
+                <rect x="5.5" y="1" width="3" height="12" rx="1" fill="white"/>
+                <rect x="10" y="4" width="3" height="6" rx="1" fill="white"/>
+              </svg>
+            </div>
+            <span style={{ fontSize: 17, fontWeight: 800, color: '#2D1B6E', letterSpacing: '0.05em' }}>ELEGENDO</span>
+          </div>
+          <div style={{ marginTop: 10 }}>
+            <span style={{ fontSize: 11, fontWeight: 600, color: PLANO_COR[plano], background: PLANO_BG[plano], padding: '3px 10px', borderRadius: 20, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
               Plano {plano}
             </span>
           </div>
         </div>
 
         {/* Nav */}
-        <nav style={{ flex: 1, padding: '12px 10px', overflowY: 'auto' }}>
-          <div style={{ fontSize: '10px', color: 'rgba(255,255,255,0.3)', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', padding: '8px 10px 8px' }}>
+        <nav style={{ flex: 1, padding: '16px 10px', overflowY: 'auto' }}>
+          <div style={{ fontSize: '10px', color: 'rgba(45,27,110,0.3)', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', padding: '0 14px 12px' }}>
             Menu
           </div>
           {NAV.map(({ href, label, icon }) => (
             <Link key={href} href={href} className="nav-link">
-              <span className="nav-icon">{icon}</span>
+              {icon}
               {label}
             </Link>
           ))}
         </nav>
 
         {/* User */}
-        <div style={{ padding: '16px 20px', borderTop: '1px solid rgba(255,255,255,0.06)' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '12px' }}>
-            <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: '#1A1A2E', border: '2px solid #C9A84C', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '13px', fontWeight: 700, color: '#C9A84C', flexShrink: 0 }}>
+        <div style={{ padding: '14px 16px', borderTop: '1px solid rgba(123,79,216,0.08)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
+            <div style={{ width: 36, height: 36, borderRadius: '50%', background: 'rgba(123,79,216,0.1)', border: '2px solid rgba(123,79,216,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14, fontWeight: 700, color: '#7B4FD8', flexShrink: 0 }}>
               {profile?.nome?.charAt(0).toUpperCase() ?? 'U'}
             </div>
             <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{ fontSize: '13px', fontWeight: 600, color: '#fff', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+              <div style={{ fontSize: 13, fontWeight: 600, color: '#2D1B6E', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                 {profile?.nome ?? user.email}
               </div>
-              <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.35)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+              <div style={{ fontSize: 11, color: 'rgba(45,27,110,0.4)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                 {user.email}
               </div>
             </div>
@@ -87,8 +110,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
         </div>
       </aside>
 
-      {/* Conteúdo */}
-      <main style={{ marginLeft: '240px', flex: 1, overflowY: 'auto', background: '#F7F5F0', minHeight: '100vh' }}>
+      <main style={{ marginLeft: '230px', flex: 1, overflowY: 'auto', background: '#EEEAF6', minHeight: '100vh' }}>
         {children}
       </main>
     </div>
