@@ -3,7 +3,7 @@ import Stripe from 'stripe'
 import { createClient } from '@supabase/supabase-js'
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2026-03-25.dahlia',
+  apiVersion: '2026-03-25.dahlia' as any,
 })
 
 const supabase = createClient(
@@ -23,13 +23,13 @@ export async function POST(request: NextRequest) {
   }
 
   if (event.type === 'checkout.session.completed') {
-    const session = event.data.object as Stripe.CheckoutSession
-    const { user_id, plano } = session.metadata!
+    const session = event.data.object as any
+    const { user_id, plano } = session.metadata
     await supabase.from('profiles').update({ plano }).eq('id', user_id)
     await supabase.from('assinaturas').upsert({
       user_id,
-      stripe_customer_id: session.customer as string,
-      stripe_sub_id: session.subscription as string,
+      stripe_customer_id: session.customer,
+      stripe_sub_id: session.subscription,
       plano,
       status: 'ativo',
       atualizado_em: new Date().toISOString(),
@@ -37,7 +37,7 @@ export async function POST(request: NextRequest) {
   }
 
   if (event.type === 'customer.subscription.deleted') {
-    const sub = event.data.object as Stripe.Subscription
+    const sub = event.data.object as any
     const { data } = await supabase
       .from('assinaturas')
       .select('user_id')
