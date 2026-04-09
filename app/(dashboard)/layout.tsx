@@ -10,6 +10,7 @@ const NAV = [
   { href: '/agentes/copy',         label: 'Copy Político', icon: '✍️' },
   { href: '/agentes/consciencia',  label: 'Consciência',   icon: '📊' },
   { href: '/historico',            label: 'Histórico',     icon: '🕐' },
+  { href: '/planos',               label: 'Planos',        icon: '⭐' },
   { href: '/perfil',               label: 'Configurações', icon: '⚙️' },
 ]
 
