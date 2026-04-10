@@ -16,7 +16,8 @@ const PLANO_COR: Record<string, { bg: string; color: string; label: string }> = 
 }
 
 type Stats = {
-  totais: { usuarios: number; geracoes: number; tokens: number }
+  totais: { usuarios: number; geracoes: number; tokens: number; custoUSD: number; custoBRL: number }
+  mes: { geracoes: number; tokens: number; custoUSD: number; custoBRL: number }
   statsPorPlano: Record<string, number>
   statsPorAgente: Record<string, number>
   geracoesPorDia: Record<string, number>
@@ -34,10 +35,7 @@ export default function AdminPage() {
   useEffect(() => {
     fetch('/api/admin/stats')
       .then(r => r.json())
-      .then(d => {
-        if (d.error) setErro(d.error)
-        else setStats(d)
-      })
+      .then(d => { if (d.error) setErro(d.error); else setStats(d) })
       .catch(() => setErro('Erro ao carregar dados.'))
       .finally(() => setLoading(false))
   }, [])
@@ -60,8 +58,7 @@ export default function AdminPage() {
   if (!stats) return null
 
   const usuariosFiltrados = stats.usuarios.filter(u =>
-    busca === '' ||
-    u.nome?.toLowerCase().includes(busca.toLowerCase()) ||
+    busca === '' || u.nome?.toLowerCase().includes(busca.toLowerCase()) ||
     u.email?.toLowerCase().includes(busca.toLowerCase()) ||
     u.plano?.toLowerCase().includes(busca.toLowerCase())
   )
@@ -88,29 +85,46 @@ export default function AdminPage() {
         <p style={{ fontSize: 13, color: 'rgba(45,27,110,0.45)', margin: 0 }}>Visão completa da plataforma Elegendo.</p>
       </div>
 
-      {/* KPIs principais */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: 12, marginBottom: 28 }}>
+      {/* Alerta custo do mês */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '14px 18px', background: stats.mes.custoUSD > 10 ? 'rgba(224,75,74,0.06)' : 'rgba(29,158,117,0.06)', borderRadius: 14, border: `1px solid ${stats.mes.custoUSD > 10 ? 'rgba(224,75,74,0.2)' : 'rgba(29,158,117,0.2)'}`, marginBottom: 24 }}>
+        <span style={{ fontSize: 20 }}>{stats.mes.custoUSD > 10 ? '⚠️' : '✅'}</span>
+        <div style={{ flex: 1 }}>
+          <div style={{ fontSize: 13, fontWeight: 700, color: '#2D1B6E' }}>
+            Custo este mês: <span style={{ color: stats.mes.custoUSD > 10 ? '#C62828' : '#1D9E75' }}>R$ {stats.mes.custoBRL.toFixed(2)}</span> (US$ {stats.mes.custoUSD.toFixed(2)})
+          </div>
+          <div style={{ fontSize: 12, color: 'rgba(45,27,110,0.45)', marginTop: 2 }}>
+            {stats.mes.geracoes} gerações · {stats.mes.tokens.toLocaleString('pt-BR')} tokens · Modelo: Haiku 4.5
+          </div>
+        </div>
+        <div style={{ fontSize: 11, color: 'rgba(45,27,110,0.4)', textAlign: 'right' }}>
+          <div>Total histórico</div>
+          <div style={{ fontWeight: 700, color: '#2D1B6E' }}>R$ {stats.totais.custoBRL.toFixed(2)}</div>
+        </div>
+      </div>
+
+      {/* KPIs */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: 12, marginBottom: 28 }}>
         {[
-          { label: 'Usuários cadastrados', value: stats.totais.usuarios, cor: '#7B4FD8', icon: '👥' },
-          { label: 'Gerações totais', value: stats.totais.geracoes, cor: '#1D9E75', icon: '✨' },
-          { label: 'Tokens consumidos', value: stats.totais.tokens.toLocaleString('pt-BR'), cor: '#378ADD', icon: '⚡' },
-          { label: 'Planos pagos', value: (stats.statsPorPlano.pro ?? 0) + (stats.statsPorPlano.essencial ?? 0) + (stats.statsPorPlano.agencia ?? 0), cor: '#C9A84C', icon: '💰' },
+          { label: 'Usuários',        value: stats.totais.usuarios,                        cor: '#7B4FD8', icon: '👥' },
+          { label: 'Gerações totais', value: stats.totais.geracoes,                        cor: '#1D9E75', icon: '✨' },
+          { label: 'Tokens totais',   value: stats.totais.tokens.toLocaleString('pt-BR'),  cor: '#378ADD', icon: '⚡' },
+          { label: 'Custo total USD', value: `$${stats.totais.custoUSD.toFixed(2)}`,       cor: '#C9A84C', icon: '💵' },
+          { label: 'Custo total BRL', value: `R$${stats.totais.custoBRL.toFixed(2)}`,      cor: '#C62828', icon: '💰' },
+          { label: 'Planos pagos',    value: (stats.statsPorPlano.pro ?? 0) + (stats.statsPorPlano.essencial ?? 0) + (stats.statsPorPlano.agencia ?? 0), cor: '#1D9E75', icon: '🎯' },
         ].map(({ label, value, cor, icon }) => (
-          <div key={label} style={{ background: 'rgba(255,255,255,0.8)', backdropFilter: 'blur(8px)', border: '1px solid rgba(123,79,216,0.12)', borderRadius: 16, padding: '16px 18px' }}>
+          <div key={label} style={{ background: 'rgba(255,255,255,0.8)', backdropFilter: 'blur(8px)', border: '1px solid rgba(123,79,216,0.12)', borderRadius: 16, padding: '14px 16px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
               <span style={{ fontSize: 11, color: 'rgba(45,27,110,0.5)', fontWeight: 500 }}>{label}</span>
-              <span style={{ fontSize: 16 }}>{icon}</span>
+              <span style={{ fontSize: 15 }}>{icon}</span>
             </div>
-            <div style={{ fontSize: 28, fontWeight: 800, color: cor, lineHeight: 1 }}>{value}</div>
+            <div style={{ fontSize: 22, fontWeight: 800, color: cor, lineHeight: 1 }}>{value}</div>
           </div>
         ))}
       </div>
 
       {/* Distribuição por plano + por agente */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 28 }}>
-
-        {/* Por plano */}
-        <div style={{ background: 'rgba(255,255,255,0.8)', backdropFilter: 'blur(8px)', border: '1px solid rgba(123,79,216,0.1)', borderRadius: 16, padding: '20px' }}>
+        <div style={{ background: 'rgba(255,255,255,0.8)', backdropFilter: 'blur(8px)', border: '1px solid rgba(123,79,216,0.1)', borderRadius: 16, padding: 20 }}>
           <h2 style={{ fontSize: 11, fontWeight: 700, color: 'rgba(45,27,110,0.45)', textTransform: 'uppercase', letterSpacing: '0.08em', margin: '0 0 16px' }}>Usuários por plano</h2>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
             {Object.entries(PLANO_COR).map(([plano, cfg]) => {
@@ -120,10 +134,10 @@ export default function AdminPage() {
                 <div key={plano}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 5 }}>
                     <span style={{ fontSize: 13, fontWeight: 600, color: '#2D1B6E' }}>{cfg.label}</span>
-                    <span style={{ fontSize: 13, fontWeight: 700, color: cfg.color }}>{qtd} usuários <span style={{ fontSize: 11, color: 'rgba(45,27,110,0.4)', fontWeight: 400 }}>({pct}%)</span></span>
+                    <span style={{ fontSize: 13, fontWeight: 700, color: cfg.color }}>{qtd} <span style={{ fontSize: 11, color: 'rgba(45,27,110,0.4)', fontWeight: 400 }}>({pct}%)</span></span>
                   </div>
                   <div style={{ height: 6, background: 'rgba(45,27,110,0.06)', borderRadius: 4, overflow: 'hidden' }}>
-                    <div style={{ height: '100%', width: `${pct}%`, background: cfg.color, borderRadius: 4, transition: 'width 0.5s' }} />
+                    <div style={{ height: '100%', width: `${pct}%`, background: cfg.color, borderRadius: 4 }} />
                   </div>
                 </div>
               )
@@ -131,13 +145,11 @@ export default function AdminPage() {
           </div>
         </div>
 
-        {/* Por agente */}
-        <div style={{ background: 'rgba(255,255,255,0.8)', backdropFilter: 'blur(8px)', border: '1px solid rgba(123,79,216,0.1)', borderRadius: 16, padding: '20px' }}>
+        <div style={{ background: 'rgba(255,255,255,0.8)', backdropFilter: 'blur(8px)', border: '1px solid rgba(123,79,216,0.1)', borderRadius: 16, padding: 20 }}>
           <h2 style={{ fontSize: 11, fontWeight: 700, color: 'rgba(45,27,110,0.45)', textTransform: 'uppercase', letterSpacing: '0.08em', margin: '0 0 16px' }}>Gerações por agente</h2>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
             {Object.entries(stats.statsPorAgente).sort((a, b) => b[1] - a[1]).map(([agente, qtd]) => {
-              const total = stats.totais.geracoes
-              const pct = total > 0 ? Math.round((qtd / total) * 100) : 0
+              const pct = stats.totais.geracoes > 0 ? Math.round((qtd / stats.totais.geracoes) * 100) : 0
               return (
                 <div key={agente}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 5 }}>
@@ -145,7 +157,7 @@ export default function AdminPage() {
                     <span style={{ fontSize: 13, fontWeight: 700, color: '#7B4FD8' }}>{qtd} <span style={{ fontSize: 11, color: 'rgba(45,27,110,0.4)', fontWeight: 400 }}>({pct}%)</span></span>
                   </div>
                   <div style={{ height: 6, background: 'rgba(45,27,110,0.06)', borderRadius: 4, overflow: 'hidden' }}>
-                    <div style={{ height: '100%', width: `${pct}%`, background: 'linear-gradient(90deg, #7B4FD8, #5B3BAA)', borderRadius: 4, transition: 'width 0.5s' }} />
+                    <div style={{ height: '100%', width: `${pct}%`, background: 'linear-gradient(90deg, #7B4FD8, #5B3BAA)', borderRadius: 4 }} />
                   </div>
                 </div>
               )
@@ -157,8 +169,8 @@ export default function AdminPage() {
         </div>
       </div>
 
-      {/* Gráfico gerações últimos 14 dias */}
-      <div style={{ background: 'rgba(255,255,255,0.8)', backdropFilter: 'blur(8px)', border: '1px solid rgba(123,79,216,0.1)', borderRadius: 16, padding: '20px', marginBottom: 28 }}>
+      {/* Gráfico 14 dias */}
+      <div style={{ background: 'rgba(255,255,255,0.8)', backdropFilter: 'blur(8px)', border: '1px solid rgba(123,79,216,0.1)', borderRadius: 16, padding: 20, marginBottom: 28 }}>
         <h2 style={{ fontSize: 11, fontWeight: 700, color: 'rgba(45,27,110,0.45)', textTransform: 'uppercase', letterSpacing: '0.08em', margin: '0 0 20px' }}>Gerações — últimos 14 dias</h2>
         <div style={{ display: 'flex', alignItems: 'flex-end', gap: 6, height: 80 }}>
           {diasLabels.map((dia, i) => {
@@ -166,9 +178,9 @@ export default function AdminPage() {
             const altura = maxVal > 0 ? Math.max((val / maxVal) * 80, val > 0 ? 4 : 2) : 2
             const dataFmt = new Date(dia + 'T12:00:00').toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })
             return (
-              <div key={dia} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }} title={`${dataFmt}: ${val} gerações`}>
+              <div key={dia} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
                 <span style={{ fontSize: 9, color: 'rgba(45,27,110,0.4)', fontWeight: 600 }}>{val > 0 ? val : ''}</span>
-                <div style={{ width: '100%', height: altura, background: val > 0 ? 'linear-gradient(180deg, #7B4FD8, #5B3BAA)' : 'rgba(45,27,110,0.06)', borderRadius: 4, transition: 'height 0.3s' }} />
+                <div style={{ width: '100%', height: altura, background: val > 0 ? 'linear-gradient(180deg, #7B4FD8, #5B3BAA)' : 'rgba(45,27,110,0.06)', borderRadius: 4 }} />
                 <span style={{ fontSize: 8, color: 'rgba(45,27,110,0.3)', whiteSpace: 'nowrap' }}>{dataFmt}</span>
               </div>
             )
@@ -212,13 +224,7 @@ export default function AdminPage() {
       {/* Usuários */}
       {aba === 'usuarios' && (
         <div>
-          <input
-            type="text"
-            placeholder="Buscar por nome, email ou plano..."
-            value={busca}
-            onChange={e => setBusca(e.target.value)}
-            style={{ width: '100%', padding: '11px 16px', borderRadius: 12, border: '1px solid rgba(123,79,216,0.15)', fontSize: 14, color: '#2D1B6E', background: 'rgba(255,255,255,0.8)', outline: 'none', fontFamily: 'var(--font-inter), sans-serif', boxSizing: 'border-box', marginBottom: 16 }}
-          />
+          <input type="text" placeholder="Buscar por nome, email ou plano..." value={busca} onChange={e => setBusca(e.target.value)} style={{ width: '100%', padding: '11px 16px', borderRadius: 12, border: '1px solid rgba(123,79,216,0.15)', fontSize: 14, color: '#2D1B6E', background: 'rgba(255,255,255,0.8)', outline: 'none', fontFamily: 'var(--font-inter), sans-serif', boxSizing: 'border-box', marginBottom: 16 }} />
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
             {usuariosFiltrados.map(u => {
               const cfg = PLANO_COR[u.plano] ?? PLANO_COR.gratuito
@@ -254,6 +260,7 @@ export default function AdminPage() {
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
           {stats.ultimasGeracoes.map(g => {
             const dataFmt = new Date(g.criado_em).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })
+            const custoGeracaoUSD = (g.tokens_usados ?? 0) * (5 / 1_000_000)
             return (
               <div key={g.id} style={{ background: 'rgba(255,255,255,0.8)', border: '1px solid rgba(123,79,216,0.1)', borderRadius: 14, padding: '12px 18px', display: 'flex', alignItems: 'center', gap: 14, flexWrap: 'wrap' }}>
                 <div style={{ width: 36, height: 36, borderRadius: 10, background: 'rgba(123,79,216,0.08)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16, flexShrink: 0 }}>
@@ -267,6 +274,7 @@ export default function AdminPage() {
                   {g.tokens_usados && (
                     <span style={{ fontSize: 11, color: '#7B4FD8', background: 'rgba(123,79,216,0.08)', padding: '2px 8px', borderRadius: 20, fontWeight: 600 }}>{g.tokens_usados} tokens</span>
                   )}
+                  <span style={{ fontSize: 11, color: '#1D9E75', background: 'rgba(29,158,117,0.08)', padding: '2px 8px', borderRadius: 20, fontWeight: 600 }}>~${custoGeracaoUSD.toFixed(4)}</span>
                   <span style={{ fontSize: 11, color: 'rgba(45,27,110,0.4)', whiteSpace: 'nowrap' }}>{dataFmt}</span>
                 </div>
               </div>

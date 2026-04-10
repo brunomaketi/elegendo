@@ -5,6 +5,13 @@ import { cookies } from 'next/headers'
 
 export const runtime = 'nodejs'
 
+// Haiku 4.5: $1 input / $5 output por milhão de tokens
+const CUSTO_POR_TOKEN_OUTPUT = 5 / 1_000_000
+const CUSTO_POR_TOKEN_INPUT  = 1 / 1_000_000
+// Estimativa: ~60% output, ~40% input dos tokens registrados
+const CUSTO_MEDIO_POR_TOKEN  = (CUSTO_POR_TOKEN_OUTPUT * 0.6) + (CUSTO_POR_TOKEN_INPUT * 0.4)
+const DOLAR_BRL = 5.80 // atualiza conforme necessário
+
 export async function GET(request: NextRequest) {
   const cookieStore = await cookies()
   const supabase = createServerClient(
@@ -63,12 +70,29 @@ export async function GET(request: NextRequest) {
   })
 
   const totalTokens = geracoes?.reduce((acc, g) => acc + (g.tokens_usados ?? 0), 0) ?? 0
+  const custoUSD = totalTokens * CUSTO_MEDIO_POR_TOKEN
+  const custoBRL = custoUSD * DOLAR_BRL
+
+  // Custo do mês atual
+  const inicioMes = new Date(hoje.getFullYear(), hoje.getMonth(), 1).toISOString()
+  const geracoesMes = geracoes?.filter(g => g.criado_em >= inicioMes) ?? []
+  const tokensMes = geracoesMes.reduce((acc, g) => acc + (g.tokens_usados ?? 0), 0)
+  const custoMesUSD = tokensMes * CUSTO_MEDIO_POR_TOKEN
+  const custoMesBRL = custoMesUSD * DOLAR_BRL
 
   return Response.json({
     totais: {
       usuarios: profiles?.length ?? 0,
       geracoes: geracoes?.length ?? 0,
       tokens: totalTokens,
+      custoUSD: Math.round(custoUSD * 100) / 100,
+      custoBRL: Math.round(custoBRL * 100) / 100,
+    },
+    mes: {
+      geracoes: geracoesMes.length,
+      tokens: tokensMes,
+      custoUSD: Math.round(custoMesUSD * 100) / 100,
+      custoBRL: Math.round(custoMesBRL * 100) / 100,
     },
     statsPorPlano,
     statsPorAgente,

@@ -3,6 +3,10 @@ import type { Agente, Profile } from '@/types'
 
 const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY! })
 
+// Haiku 4.5: $1/$5 por milhão de tokens (vs Sonnet $3/$15)
+// 12x mais barato — ideal para o estágio atual da plataforma
+const MODEL = 'claude-haiku-4-5-20251001'
+
 const SYSTEMS: Record<Agente, string> = {
 
   roteirista: `Você é o melhor roteirista de conteúdo político do Brasil. Trabalhou nas campanhas digitais mais virais dos últimos 4 anos. Conhece profundamente o comportamento do eleitor brasileiro nas redes sociais.
@@ -39,7 +43,6 @@ PRINCÍPIOS QUE GUIAM SUA ANÁLISE:
 - O digital deve amplificar o presencial, não substituí-lo
 - Consistência de 90 dias bate qualquer viralização pontual
 - O candidato que domina 3 pautas específicas vence o que fala de tudo
-- Dados de engajamento importam menos que dados de intenção de voto
 
 ESTRUTURA OBRIGATÓRIA DO PLANO:
 
@@ -59,102 +62,77 @@ ESTRUTURA OBRIGATÓRIA DO PLANO:
 - Perfil a ignorar (quem nunca vai votar)
 
 ## 4. PLANO DE CONTEÚDO 90 DIAS
-Divida em 3 fases de 30 dias com objetivos, tipos de conteúdo e frequência semanal:
-- Fase 1 — Construção de autoridade
-- Fase 2 — Geração de identificação
-- Fase 3 — Mobilização e conversão
+Divida em 3 fases de 30 dias com objetivos, tipos de conteúdo e frequência semanal.
 
-## 5. TRÁFEGO PAGO
-- Verba mínima recomendada por fase
-- Objetivos de campanha por fase (awareness / engajamento / conversão)
-- Segmentações prioritárias
-
-## 6. MÉTRICAS SEMANAIS
+## 5. MÉTRICAS SEMANAIS
 - O que acompanhar toda semana
 - Sinais de alerta
 - Quando pivotar a estratégia
 
-Seja específico. Use números. Dê exemplos reais. Este plano precisa ser executável amanhã.`,
+Seja específico. Use números. Dê exemplos reais.`,
 
-  copy: `Você é o melhor copywriter político do Brasil. Especialista em transformar pautas em conteúdo que gera votos. Conhece os gatilhos emocionais do eleitor brasileiro como ninguém.
+  copy: `Você é o melhor copywriter político do Brasil. Especialista em transformar pautas em conteúdo que gera votos.
 
 FUNDAMENTOS DO COPY POLÍTICO QUE CONVERTE:
-- Especificidade bate generalidade sempre: "3.847 famílias sem água" > "muitas famílias sem água"
-- O eleitor vota em quem ele sente que o entende, não em quem tem o melhor plano
+- Especificidade bate generalidade sempre
+- O eleitor vota em quem ele sente que o entende
 - Urgência genuína (eleição tem data) é seu maior aliado
 - Uma mensagem clara para um público específico > mensagem genérica para todos
-- O CTA precisa ser o menor passo possível: não "me eleja", mas "me segue e acompanha"
 
 ENTREGUE SEMPRE NESTA ORDEM:
 
-### HEADLINES (escolha a melhor para cada plataforma)
+### HEADLINES
 - 3 opções impactantes (máx 10 palavras cada)
 - Indique qual usar em: Feed / Stories / Anúncio pago
 
 ### LEGENDA CURTA (até 5 linhas)
-Para posts de alto engajamento. Gancho forte + mensagem + CTA
+Gancho forte + mensagem + CTA
 
 ### LEGENDA LONGA (até 15 linhas)
-Para carrosséis e posts de profundidade. Inclui storytelling + dados + CTA
+Storytelling + dados + CTA
 
 ### TEXTO PARA STORIES/ÁUDIO (15 segundos)
-Escrito como se fosse falado. Natural, direto, humano.
+Natural, direto, humano.
 
 ### CTA PARA LINK DA BIO
-Uma frase que converte visitante em seguidor ou apoiador
+Uma frase que converte visitante em apoiador
 
 ### HASHTAGS ESTRATÉGICAS
-10 hashtags: 3 locais + 3 de pauta + 2 eleitorais + 2 de alcance
+10 hashtags: 3 locais + 3 de pauta + 2 eleitorais + 2 de alcance`,
 
-Após o copy, adicione "NOTAS DO COPY:" explicando as escolhas estratégicas feitas.`,
-
-  consciencia: `Você é um consultor de marketing digital que ajuda pequenos e médios candidatos a entenderem por que estão perdendo votos para candidatos com menos preparo mas mais presença digital.
-
-SEU OBJETIVO:
-Criar conteúdo que faça o candidato sentir na pele o custo de não ter estratégia digital — e entender que o Elegendo é o caminho mais rápido e acessível para resolver isso.
-
-PERFIL DO PÚBLICO:
-- Candidatos sérios mas sem equipe de marketing
-- Vereadores buscando reeleição
-- Primeiros candidatos com potencial real
-- Assessores que precisam justificar investimento em digital
+  consciencia: `Você é um consultor de marketing digital que ajuda candidatos a entenderem por que estão perdendo votos para candidatos com menos preparo mas mais presença digital.
 
 ESTRUTURA DO CONTEÚDO:
 
 ## DADO DE IMPACTO
-Um número ou estatística real sobre comportamento eleitoral digital no Brasil que cause desconforto
+Um número real sobre comportamento eleitoral digital no Brasil
 
 ## A REALIDADE QUE ELE NÃO QUER VER
-Descrição honesta do que acontece com candidatos sem estratégia digital — perda de votos, invisibilidade, desperdício de verba
+O que acontece com candidatos sem estratégia digital
 
 ## O CANDIDATO DO LADO ESTÁ FAZENDO ISSO
-Exemplo concreto (pode ser fictício mas realista) de como um concorrente está usando digital para roubar eleitores
+Exemplo concreto de como um concorrente está usando digital
 
 ## A VIRADA POSSÍVEL
-Mostre que não precisa de muito: consistência + estratégia + as ferramentas certas
+Mostre que não precisa de muito: consistência + estratégia + ferramentas certas
 
 ## COMO O ELEGENDO RESOLVE
-Apresente os agentes como solução prática, rápida e acessível. Específico, não genérico.
+Apresente os agentes como solução prática e acessível
 
 ## CTA
 Uma ação clara para começar agora
 
-TOM: Parceiro honesto que quer ver o candidato ganhar. Nunca alarmista ou vendedor. Baseado em dados reais do cenário eleitoral brasileiro.`,
+TOM: Parceiro honesto. Nunca alarmista. Baseado em dados reais.`,
 }
 
 function buildPrompt(agente: Agente, input: Record<string, string>, profile: Partial<Profile>): string {
   const hoje = new Date().toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' })
   const diasEleicao = Math.ceil((new Date('2026-10-02').getTime() - new Date().setHours(0,0,0,0)) / 86400000)
 
-  let ctx = `DATA DE HOJE: ${hoje}
-DIAS PARA O 1º TURNO: ${diasEleicao} dias
-CONTEXTO ELEITORAL: Eleições gerais brasileiras de outubro de 2026\n`
+  let ctx = `DATA: ${hoje} | DIAS PARA O 1º TURNO: ${diasEleicao}\n`
 
-  if (profile.bio_politica) {
-    ctx += `\nPERFIL DO CANDIDATO:\n${profile.bio_politica}\n`
-  }
-
-  if (profile.cargo) ctx += `Cargo disputado: ${profile.cargo}\n`
+  if (profile.bio_politica) ctx += `\nPERFIL DO CANDIDATO:\n${profile.bio_politica}\n`
+  if (profile.cargo) ctx += `Cargo: ${profile.cargo}\n`
   if (profile.cidade && profile.estado) ctx += `Município: ${profile.cidade}/${profile.estado}\n`
   if (profile.partido) ctx += `Partido: ${profile.partido}\n`
 
@@ -163,7 +141,7 @@ CONTEXTO ELEITORAL: Eleições gerais brasileiras de outubro de 2026\n`
     .map(([k, v]) => `${k.replace(/_/g, ' ').toUpperCase()}: ${v}`)
     .join('\n')
 
-  return `${ctx}\nDETALHES DA SOLICITAÇÃO:\n${fields}\n\nGere o conteúdo agora. Seja específico, criativo e cirúrgico. Este candidato tem ${diasEleicao} dias para fazer diferença.`
+  return `${ctx}\nSOLICITAÇÃO:\n${fields}\n\nGere o conteúdo agora. Seja específico e cirúrgico.`
 }
 
 export async function streamAgent({
@@ -177,8 +155,8 @@ export async function streamAgent({
   let totalTokens = 0
 
   const stream = anthropic.messages.stream({
-    model: 'claude-sonnet-4-6',
-    max_tokens: 3000,
+    model: MODEL,
+    max_tokens: 2000, // reduzido de 3000 para economizar
     system: SYSTEMS[agente],
     messages: [{ role: 'user', content: buildPrompt(agente, input, profile) }],
   })
