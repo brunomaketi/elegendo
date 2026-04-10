@@ -18,7 +18,7 @@ const NAV = [
 const PLANO_COR: Record<string, string> = { gratuito: '#8A8A9A', essencial: '#7B4FD8', pro: '#1D9E75' }
 const PLANO_BG: Record<string, string>  = { gratuito: 'rgba(138,138,154,0.12)', essencial: 'rgba(123,79,216,0.12)', pro: 'rgba(29,158,117,0.12)' }
 
-const SIDEBAR_WIDTH = 300 // 230 → 300, ~30% mais largo
+const SIDEBAR_WIDTH = 350 // 230 → 300, ~30% mais largo
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   const cookieStore = await cookies()
