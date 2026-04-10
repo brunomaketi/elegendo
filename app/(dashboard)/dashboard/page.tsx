@@ -13,7 +13,6 @@ const AGENTES = [
 const LIMITES: Record<string, number | null> = { gratuito: 5, essencial: 50, pro: null }
 
 const DATAS_2026 = [
-  { data: '2026-04-10', label: 'Semana Santa',              emoji: '✝️',  relevancia: 'alta' },
   { data: '2026-04-21', label: 'Tiradentes',                emoji: '⚔️',  relevancia: 'alta' },
   { data: '2026-04-22', label: 'Dia da Terra',              emoji: '🌍', relevancia: 'media' },
   { data: '2026-05-01', label: 'Dia do Trabalho',           emoji: '✊', relevancia: 'alta' },
@@ -27,7 +26,6 @@ const DATAS_2026 = [
   { data: '2026-08-11', label: 'Dia do Estudante',          emoji: '🎓', relevancia: 'media' },
   { data: '2026-09-07', label: 'Independência do Brasil',   emoji: '🇧🇷', relevancia: 'alta' },
   { data: '2026-10-02', label: '1º Turno Eleições',         emoji: '🗳️',  relevancia: 'critica' },
-  { data: '2026-10-04', label: 'Dia de São Francisco',      emoji: '🕊️',  relevancia: 'media' },
   { data: '2026-10-12', label: 'Nossa Sra. Aparecida',      emoji: '🙏', relevancia: 'alta' },
   { data: '2026-10-25', label: '2º Turno Eleições',         emoji: '🗳️',  relevancia: 'critica' },
   { data: '2026-11-02', label: 'Finados',                   emoji: '🕯️',  relevancia: 'media' },
@@ -94,71 +92,84 @@ export default async function DashboardPage() {
   const dataHoje = hoje.toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })
 
   return (
-    <div style={{ padding: '32px', fontFamily: 'var(--font-inter), sans-serif', minHeight: '100vh' }}>
+    <div style={{ padding: '24px 16px', fontFamily: 'var(--font-inter), sans-serif', minHeight: '100vh' }}>
+      <style>{`
+        .dash-padding { padding: 24px 16px; }
+        .kpi-grid { grid-template-columns: repeat(2, 1fr) !important; }
+        .agents-cal-grid { grid-template-columns: 1fr !important; }
+        .agents-grid { grid-template-columns: repeat(2, 1fr) !important; }
+        .ultimas-grid { grid-template-columns: 1fr !important; }
+        @media (min-width: 768px) {
+          .dash-padding { padding: 32px; }
+          .kpi-grid { grid-template-columns: repeat(4, 1fr) !important; }
+          .agents-cal-grid { grid-template-columns: 1fr 320px !important; }
+          .ultimas-grid { grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)) !important; }
+        }
+      `}</style>
 
       {/* Header */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 28, flexWrap: 'wrap', gap: 12 }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 20, flexWrap: 'wrap', gap: 12 }}>
         <div>
-          <p style={{ fontSize: 13, color: 'rgba(45,27,110,0.45)', margin: '0 0 4px', textTransform: 'capitalize' }}>{dataHoje}</p>
-          <h1 style={{ fontSize: 26, fontWeight: 800, color: '#2D1B6E', margin: 0, letterSpacing: '-0.01em' }}>
+          <p style={{ fontSize: 12, color: 'rgba(45,27,110,0.45)', margin: '0 0 3px', textTransform: 'capitalize' }}>{dataHoje}</p>
+          <h1 style={{ fontSize: 22, fontWeight: 800, color: '#2D1B6E', margin: 0, letterSpacing: '-0.01em' }}>
             Olá, {profile?.nome?.split(' ')[0] ?? 'candidato'} 👋
           </h1>
           {(profile?.cargo || profile?.cidade) && (
-            <p style={{ color: 'rgba(45,27,110,0.45)', fontSize: 14, margin: '3px 0 0' }}>
+            <p style={{ color: 'rgba(45,27,110,0.45)', fontSize: 13, margin: '2px 0 0' }}>
               {[profile?.cargo, profile?.cidade && profile?.estado ? `${profile.cidade}/${profile.estado}` : profile?.cidade].filter(Boolean).join(' · ')}
             </p>
           )}
         </div>
-        <Link href="/agentes/roteirista" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '11px 22px', background: 'linear-gradient(135deg, #7B4FD8 0%, #5B3BAA 100%)', color: '#fff', borderRadius: 50, fontSize: 14, fontWeight: 600, textDecoration: 'none', boxShadow: '0 4px 16px rgba(123,79,216,0.3)' }}>
+        <Link href="/agentes/roteirista" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '10px 20px', background: 'linear-gradient(135deg, #7B4FD8 0%, #5B3BAA 100%)', color: '#fff', borderRadius: 50, fontSize: 14, fontWeight: 600, textDecoration: 'none', boxShadow: '0 4px 16px rgba(123,79,216,0.3)' }}>
           <span>✨</span> Nova geração
         </Link>
       </div>
 
       {/* KPIs */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 14, marginBottom: 28 }}>
+      <div className="kpi-grid" style={{ display: 'grid', gap: 12, marginBottom: 20 }}>
         {[
           { label: 'Gerações este mês', value: total.toString(), sub: limite ? `de ${limite} disponíveis` : 'ilimitadas', cor: '#7B4FD8', icon: '⚡' },
           { label: 'Total de gerações', value: (totalGeral ?? 0).toString(), sub: 'desde o início', cor: '#378ADD', icon: '📈' },
           { label: 'Agentes ativos', value: '4', sub: 'todos disponíveis', cor: '#1D9E75', icon: '🤖' },
           { label: 'Próxima data', value: proximasDatas[0]?.dias === 0 ? 'Hoje!' : `${proximasDatas[0]?.dias}d`, sub: proximasDatas[0]?.label ?? '—', cor: '#2D1B6E', icon: '📅' },
         ].map(({ label, value, sub, cor, icon }) => (
-          <div key={label} style={{ background: 'rgba(255,255,255,0.7)', backdropFilter: 'blur(8px)', border: '1px solid rgba(123,79,216,0.12)', borderRadius: 16, padding: '18px 20px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 10 }}>
-              <span style={{ fontSize: 12, color: 'rgba(45,27,110,0.5)', fontWeight: 500 }}>{label}</span>
-              <span style={{ fontSize: 18 }}>{icon}</span>
+          <div key={label} style={{ background: 'rgba(255,255,255,0.7)', backdropFilter: 'blur(8px)', border: '1px solid rgba(123,79,216,0.12)', borderRadius: 14, padding: '14px 16px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 8 }}>
+              <span style={{ fontSize: 11, color: 'rgba(45,27,110,0.5)', fontWeight: 500 }}>{label}</span>
+              <span style={{ fontSize: 16 }}>{icon}</span>
             </div>
-            <div style={{ fontSize: 30, fontWeight: 800, color: cor, lineHeight: 1, marginBottom: 4 }}>{value}</div>
-            <div style={{ fontSize: 12, color: 'rgba(45,27,110,0.4)' }}>{sub}</div>
+            <div style={{ fontSize: 26, fontWeight: 800, color: cor, lineHeight: 1, marginBottom: 3 }}>{value}</div>
+            <div style={{ fontSize: 11, color: 'rgba(45,27,110,0.4)' }}>{sub}</div>
           </div>
         ))}
       </div>
 
       {/* Alerta perfil */}
       {!profile?.bio_politica && (
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '14px 18px', background: 'rgba(123,79,216,0.07)', borderRadius: 12, border: '1px solid rgba(123,79,216,0.18)', marginBottom: 28 }}>
-          <span style={{ fontSize: 18 }}>⚡</span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '12px 16px', background: 'rgba(123,79,216,0.07)', borderRadius: 12, border: '1px solid rgba(123,79,216,0.18)', marginBottom: 20 }}>
+          <span style={{ fontSize: 16, flexShrink: 0 }}>⚡</span>
           <div style={{ flex: 1, fontSize: 13, color: '#2D1B6E' }}>
-            <strong>Complete seu perfil</strong> para que os agentes gerem conteúdo mais preciso para sua campanha.
+            <strong>Complete seu perfil</strong> para conteúdo mais preciso.
           </div>
           <Link href="/perfil" style={{ fontSize: 13, fontWeight: 600, color: '#7B4FD8', textDecoration: 'none', whiteSpace: 'nowrap' }}>
-            Completar agora →
+            Completar →
           </Link>
         </div>
       )}
 
       {/* Agentes + Calendário */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 320px', gap: 20, marginBottom: 24, alignItems: 'start' }}>
+      <div className="agents-cal-grid" style={{ display: 'grid', gap: 16, marginBottom: 20, alignItems: 'start' }}>
 
         {/* Agentes */}
         <div>
-          <h2 style={{ fontSize: 11, fontWeight: 700, color: 'rgba(45,27,110,0.45)', letterSpacing: '0.08em', textTransform: 'uppercase', margin: '0 0 14px' }}>Agentes de IA</h2>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 12 }}>
+          <h2 style={{ fontSize: 11, fontWeight: 700, color: 'rgba(45,27,110,0.45)', letterSpacing: '0.08em', textTransform: 'uppercase', margin: '0 0 12px' }}>Agentes de IA</h2>
+          <div className="agents-grid" style={{ display: 'grid', gap: 10 }}>
             {AGENTES.map(({ id, label, icon, cor, bg, desc }) => (
               <Link key={id} href={`/agentes/${id}`} style={{ textDecoration: 'none' }}>
-                <div style={{ background: 'rgba(255,255,255,0.7)', backdropFilter: 'blur(8px)', border: '1px solid rgba(123,79,216,0.1)', borderRadius: 16, padding: 20, boxSizing: 'border-box', cursor: 'pointer' }}>
-                  <div style={{ width: 42, height: 42, borderRadius: 12, background: bg, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20, marginBottom: 12 }}>{icon}</div>
-                  <div style={{ fontSize: 14, fontWeight: 700, color: '#2D1B6E', marginBottom: 4 }}>{label}</div>
-                  <p style={{ fontSize: 12, color: 'rgba(45,27,110,0.5)', lineHeight: 1.5, margin: '0 0 14px' }}>{desc}</p>
+                <div style={{ background: 'rgba(255,255,255,0.7)', backdropFilter: 'blur(8px)', border: '1px solid rgba(123,79,216,0.1)', borderRadius: 14, padding: 16, boxSizing: 'border-box', cursor: 'pointer' }}>
+                  <div style={{ width: 38, height: 38, borderRadius: 10, background: bg, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18, marginBottom: 10 }}>{icon}</div>
+                  <div style={{ fontSize: 13, fontWeight: 700, color: '#2D1B6E', marginBottom: 3 }}>{label}</div>
+                  <p style={{ fontSize: 12, color: 'rgba(45,27,110,0.5)', lineHeight: 1.4, margin: '0 0 10px' }}>{desc}</p>
                   <div style={{ fontSize: 12, fontWeight: 600, color: cor }}>Usar agente →</div>
                 </div>
               </Link>
@@ -167,8 +178,8 @@ export default async function DashboardPage() {
         </div>
 
         {/* Calendário */}
-        <div style={{ background: 'rgba(255,255,255,0.7)', backdropFilter: 'blur(8px)', border: '1px solid rgba(123,79,216,0.1)', borderRadius: 16, padding: 20 }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+        <div style={{ background: 'rgba(255,255,255,0.7)', backdropFilter: 'blur(8px)', border: '1px solid rgba(123,79,216,0.1)', borderRadius: 14, padding: 16 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
             <h2 style={{ fontSize: 11, fontWeight: 700, color: 'rgba(45,27,110,0.45)', letterSpacing: '0.08em', textTransform: 'uppercase', margin: 0 }}>Calendário estratégico</h2>
             <span style={{ fontSize: 11, color: '#7B4FD8', fontWeight: 700 }}>2026</span>
           </div>
@@ -177,7 +188,7 @@ export default async function DashboardPage() {
               const tag = getTagData(dias, relevancia)
               const dataFormatada = new Date(data + 'T00:00:00').toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' })
               return (
-                <div key={data} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px', background: dias <= 7 ? 'rgba(123,79,216,0.06)' : 'rgba(255,255,255,0.5)', borderRadius: 10, border: `1px solid ${dias <= 7 ? 'rgba(123,79,216,0.2)' : 'rgba(123,79,216,0.08)'}` }}>
+                <div key={data} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '9px 12px', background: dias <= 7 ? 'rgba(123,79,216,0.06)' : 'rgba(255,255,255,0.5)', borderRadius: 10, border: `1px solid ${dias <= 7 ? 'rgba(123,79,216,0.2)' : 'rgba(123,79,216,0.08)'}` }}>
                   <span style={{ fontSize: 18, flexShrink: 0 }}>{emoji}</span>
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ fontSize: 13, fontWeight: 600, color: '#2D1B6E', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{label}</div>
@@ -190,7 +201,7 @@ export default async function DashboardPage() {
               )
             })}
           </div>
-          <div style={{ marginTop: 14, paddingTop: 14, borderTop: '1px solid rgba(123,79,216,0.1)' }}>
+          <div style={{ marginTop: 12, paddingTop: 12, borderTop: '1px solid rgba(123,79,216,0.1)' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 12px', background: 'rgba(224,75,74,0.07)', borderRadius: 10, border: '1px solid rgba(224,75,74,0.18)' }}>
               <span style={{ fontSize: 16 }}>🗳️</span>
               <div>
@@ -205,15 +216,15 @@ export default async function DashboardPage() {
       {/* Últimas gerações */}
       {ultimas && ultimas.length > 0 && (
         <div>
-          <h2 style={{ fontSize: 11, fontWeight: 700, color: 'rgba(45,27,110,0.45)', letterSpacing: '0.08em', textTransform: 'uppercase', margin: '0 0 14px' }}>
+          <h2 style={{ fontSize: 11, fontWeight: 700, color: 'rgba(45,27,110,0.45)', letterSpacing: '0.08em', textTransform: 'uppercase', margin: '0 0 12px' }}>
             Últimas gerações
           </h2>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 12 }}>
+          <div className="ultimas-grid" style={{ display: 'grid', gap: 10 }}>
             {ultimas.map((g, i) => {
               const ag = AGENTES.find(a => a.id === g.agente)
               return (
-                <div key={i} style={{ background: 'rgba(255,255,255,0.7)', backdropFilter: 'blur(8px)', border: '1px solid rgba(123,79,216,0.1)', borderRadius: 16, padding: 16 }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+                <div key={i} style={{ background: 'rgba(255,255,255,0.7)', backdropFilter: 'blur(8px)', border: '1px solid rgba(123,79,216,0.1)', borderRadius: 14, padding: 14 }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                       <div style={{ width: 28, height: 28, borderRadius: 8, background: ag?.bg, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14 }}>{ag?.icon}</div>
                       <span style={{ fontSize: 13, fontWeight: 600, color: '#2D1B6E' }}>{ag?.label}</span>
