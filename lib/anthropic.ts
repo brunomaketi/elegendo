@@ -3,9 +3,10 @@ import type { Agente, Profile } from '@/types'
 
 const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY! })
 
-// Haiku 4.5: $1/$5 por milhão de tokens (vs Sonnet $3/$15)
-// 12x mais barato — ideal para o estágio atual da plataforma
-const MODEL = 'claude-haiku-4-5-20251001'
+// Gratuito → Haiku 4.5 ($1/$5 por milhão de tokens)
+// Pago (essencial/pro/agencia) → Sonnet 4.6 ($3/$15 por milhão de tokens)
+const MODEL_FREE = 'claude-haiku-4-5-20251001'
+const MODEL_PAID = 'claude-sonnet-4-6'
 
 const SYSTEMS: Record<Agente, string> = {
 
@@ -145,18 +146,23 @@ function buildPrompt(agente: Agente, input: Record<string, string>, profile: Par
 }
 
 export async function streamAgent({
-  agente, input, profile, onChunk,
+  agente, input, profile, onChunk, plano,
 }: {
   agente: Agente
   input: Record<string, string>
   profile: Partial<Profile>
   onChunk: (text: string) => void
-}): Promise<{ tokens: number }> {
+  plano?: string
+}): Promise<{ tokens: number; modelo: string }> {
   let totalTokens = 0
 
+  const isPago = plano && ['essencial', 'pro', 'agencia'].includes(plano)
+  const model = isPago ? MODEL_PAID : MODEL_FREE
+  const maxTokens = isPago ? 3000 : 2000
+
   const stream = anthropic.messages.stream({
-    model: MODEL,
-    max_tokens: 2000, // reduzido de 3000 para economizar
+    model,
+    max_tokens: maxTokens,
     system: SYSTEMS[agente],
     messages: [{ role: 'user', content: buildPrompt(agente, input, profile) }],
   })
@@ -170,5 +176,5 @@ export async function streamAgent({
     }
   }
 
-  return { tokens: totalTokens }
+  return { tokens: totalTokens, modelo: model }
 }

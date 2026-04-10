@@ -27,7 +27,8 @@ export async function POST(request: NextRequest) {
     return Response.json({ error: 'Perfil não encontrado' }, { status: 404 })
   }
 
-  const limite = LIMITES_PLANO[profile.plano as keyof typeof LIMITES_PLANO]
+  const plano = profile.plano ?? 'gratuito'
+  const limite = LIMITES_PLANO[plano as keyof typeof LIMITES_PLANO]
 
   if (limite !== null) {
     const inicioMes = new Date()
@@ -61,7 +62,10 @@ export async function POST(request: NextRequest) {
     async start(controller) {
       try {
         const result = await streamAgent({
-          agente, input, profile,
+          agente,
+          input,
+          profile,
+          plano, // ← passa o plano para escolher o modelo certo
           onChunk: (text) => {
             fullOutput += text
             controller.enqueue(encoder.encode(text))
@@ -73,6 +77,7 @@ export async function POST(request: NextRequest) {
           input,
           output: fullOutput,
           tokens_usados: result.tokens,
+          modelo: result.modelo, // ← salva qual modelo foi usado
         })
         controller.close()
       } catch (err) {
