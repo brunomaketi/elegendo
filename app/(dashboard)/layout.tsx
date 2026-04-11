@@ -15,10 +15,10 @@ const NAV = [
   { href: '/perfil',               label: 'Configurações', icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg> },
 ]
 
-const PLANO_COR: Record<string, string> = { gratuito: '#8A8A9A', essencial: '#7B4FD8', pro: '#1D9E75' }
-const PLANO_BG: Record<string, string>  = { gratuito: 'rgba(138,138,154,0.12)', essencial: 'rgba(123,79,216,0.12)', pro: 'rgba(29,158,117,0.12)' }
+const PLANO_COR: Record<string, string> = { gratuito: '#8A8A9A', essencial: '#7B4FD8', pro: '#1D9E75', agencia: '#378ADD' }
+const PLANO_BG: Record<string, string>  = { gratuito: 'rgba(138,138,154,0.12)', essencial: 'rgba(123,79,216,0.12)', pro: 'rgba(29,158,117,0.12)', agencia: 'rgba(55,138,221,0.12)' }
 
-const SIDEBAR_WIDTH = 350 // 230 → 300, ~30% mais largo
+const SIDEBAR_WIDTH = 300
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   const cookieStore = await cookies()
@@ -44,14 +44,58 @@ export default async function DashboardLayout({ children }: { children: React.Re
         .main-content { margin-left: ${SIDEBAR_WIDTH}px; background: #EEEAF6; min-height: 100vh; }
         .bottom-nav { display: none; }
         .mobile-header { display: none; }
+        .mobile-menu-overlay { display: none; }
+
         @media (max-width: 768px) {
           .sidebar { display: none; }
           .main-content { margin-left: 0 !important; padding-bottom: 80px; }
-          .bottom-nav { display: flex; position: fixed; bottom: 0; left: 0; right: 0; z-index: 100; background: #fff; border-top: 1px solid rgba(123,79,216,0.1); padding: 8px 4px; justify-content: space-around; box-shadow: 0 -4px 20px rgba(45,27,110,0.08); }
-          .bottom-nav a { display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 6px 8px; color: rgba(45,27,110,0.4); text-decoration: none; font-size: 10px; font-weight: 600; border-radius: 10px; }
+
+          /* Bottom nav com scroll horizontal */
+          .bottom-nav {
+            display: flex;
+            position: fixed;
+            bottom: 0; left: 0; right: 0;
+            z-index: 100;
+            background: #fff;
+            border-top: 1px solid rgba(123,79,216,0.1);
+            padding: 6px 0;
+            overflow-x: auto;
+            overflow-y: hidden;
+            scroll-behavior: smooth;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+            box-shadow: 0 -4px 20px rgba(45,27,110,0.08);
+          }
+          .bottom-nav::-webkit-scrollbar { display: none; }
+          .bottom-nav a {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 3px;
+            padding: 6px 14px;
+            color: rgba(45,27,110,0.4);
+            text-decoration: none;
+            font-size: 10px;
+            font-weight: 600;
+            border-radius: 10px;
+            white-space: nowrap;
+            flex-shrink: 0;
+            min-width: 60px;
+            transition: color 0.15s;
+          }
           .bottom-nav a:hover { color: #7B4FD8; }
-          .bottom-nav svg { width: 20px; height: 20px; }
-          .mobile-header { display: flex; align-items: center; justify-content: space-between; padding: 14px 20px; background: #fff; border-bottom: 1px solid rgba(123,79,216,0.08); position: sticky; top: 0; z-index: 50; }
+          .bottom-nav svg { width: 20px; height: 20px; flex-shrink: 0; }
+          .mobile-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 14px 20px;
+            background: #fff;
+            border-bottom: 1px solid rgba(123,79,216,0.08);
+            position: sticky;
+            top: 0;
+            z-index: 50;
+          }
         }
       `}</style>
 
@@ -65,7 +109,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
             <span style={{ fontSize: 18, fontWeight: 800, color: '#2D1B6E', letterSpacing: '0.05em' }}>ELEGENDO</span>
           </div>
           <div style={{ marginTop: 12 }}>
-            <span style={{ fontSize: 11, fontWeight: 600, color: PLANO_COR[plano], background: PLANO_BG[plano], padding: '4px 12px', borderRadius: 20, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+            <span style={{ fontSize: 11, fontWeight: 600, color: PLANO_COR[plano] ?? '#8A8A9A', background: PLANO_BG[plano] ?? 'rgba(138,138,154,0.12)', padding: '4px 12px', borderRadius: 20, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
               Plano {plano}
             </span>
           </div>
@@ -102,19 +146,23 @@ export default async function DashboardLayout({ children }: { children: React.Re
           </div>
           <span style={{ fontSize: 15, fontWeight: 800, color: '#2D1B6E', letterSpacing: '0.05em' }}>ELEGENDO</span>
         </div>
-        <span style={{ fontSize: 11, fontWeight: 600, color: PLANO_COR[plano], background: PLANO_BG[plano], padding: '3px 10px', borderRadius: 20, textTransform: 'uppercase' }}>{plano}</span>
+        <span style={{ fontSize: 11, fontWeight: 600, color: PLANO_COR[plano] ?? '#8A8A9A', background: PLANO_BG[plano] ?? 'rgba(138,138,154,0.12)', padding: '3px 10px', borderRadius: 20, textTransform: 'uppercase' }}>{plano}</span>
       </div>
 
       <main className="main-content">{children}</main>
 
-      {/* Bottom nav mobile */}
+      {/* Bottom nav mobile — todos os itens com scroll horizontal */}
       <nav className="bottom-nav">
         {[
-          { href: '/dashboard',          label: 'Início',     icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg> },
-          { href: '/agentes/roteirista', label: 'Agentes',    icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg> },
-          { href: '/calendario',         label: 'Calendário', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg> },
-          { href: '/historico',          label: 'Histórico',  icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> },
-          { href: '/perfil',             label: 'Perfil',     icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg> },
+          { href: '/dashboard',            label: 'Início',       icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg> },
+          { href: '/agentes/roteirista',   label: 'Roteirista',   icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg> },
+          { href: '/agentes/estrategista', label: 'Estrategista', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg> },
+          { href: '/agentes/copy',         label: 'Copy',         icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg> },
+          { href: '/agentes/consciencia',  label: 'Consciência',  icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg> },
+          { href: '/calendario',           label: 'Calendário',   icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg> },
+          { href: '/historico',            label: 'Histórico',    icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> },
+          { href: '/planos',               label: 'Planos',       icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg> },
+          { href: '/perfil',               label: 'Perfil',       icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg> },
         ].map(({ href, label, icon }) => (
           <Link key={href} href={href}>{icon}{label}</Link>
         ))}
