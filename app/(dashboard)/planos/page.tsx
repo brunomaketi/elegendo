@@ -83,15 +83,49 @@ export default function PlanosPage() {
   }
 
   return (
-    <div style={{ maxWidth: 1020, margin: '0 auto', padding: '44px 28px', fontFamily: 'var(--font-inter), sans-serif' }}>
+    <div style={{ maxWidth: 1020, margin: '0 auto', padding: '32px 16px', fontFamily: 'var(--font-inter), sans-serif' }}>
+      <style>{`
+        .planos-grid {
+          display: grid;
+          grid-template-columns: repeat(3, 1fr);
+          gap: 16px;
+          margin-bottom: 48px;
+          align-items: start;
+        }
+        .plano-card {
+          border-radius: 20px;
+          padding: 28px 24px;
+          position: relative;
+          box-sizing: border-box;
+        }
+        .trust-row {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 32px;
+          flex-wrap: wrap;
+        }
+        @media (max-width: 768px) {
+          .planos-grid {
+            grid-template-columns: 1fr !important;
+            gap: 20px;
+          }
+          .plano-destaque {
+            transform: none !important;
+          }
+          .trust-row {
+            gap: 16px;
+          }
+        }
+      `}</style>
 
       {/* Header */}
-      <div style={{ textAlign: 'center', marginBottom: 52 }}>
+      <div style={{ textAlign: 'center', marginBottom: 44 }}>
         <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '5px 14px', background: 'rgba(123,79,216,0.08)', border: '1px solid rgba(123,79,216,0.2)', borderRadius: 20, marginBottom: 16 }}>
           <span style={{ fontSize: 12 }}>🗳️</span>
           <span style={{ fontSize: 12, fontWeight: 600, color: '#7B4FD8' }}>Eleições 2026 — Comece agora</span>
         </div>
-        <h1 style={{ fontSize: 34, fontWeight: 800, color: '#2D1B6E', margin: '0 0 14px', lineHeight: 1.2, letterSpacing: '-0.02em' }}>
+        <h1 style={{ fontSize: 30, fontWeight: 800, color: '#2D1B6E', margin: '0 0 14px', lineHeight: 1.2, letterSpacing: '-0.02em' }}>
           Escolha o plano certo<br />para sua campanha
         </h1>
         <p style={{ fontSize: 15, color: 'rgba(45,27,110,0.5)', margin: '0 auto', maxWidth: 460, lineHeight: 1.7 }}>
@@ -101,63 +135,60 @@ export default function PlanosPage() {
       </div>
 
       {/* Cards */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16, marginBottom: 48, alignItems: 'start' }}>
+      <div className="planos-grid">
         {PLANOS.map((plano) => {
           const isDestaque = plano.destaque
           const isAgencia = plano.id === 'agencia'
           return (
-            <div key={plano.id} style={{
-              background: isDestaque ? 'linear-gradient(145deg, #2D1B6E 0%, #4A2FA0 100%)' : 'rgba(255,255,255,0.85)',
-              backdropFilter: 'blur(8px)',
-              border: isDestaque ? '2px solid rgba(123,79,216,0.6)' : '1px solid rgba(123,79,216,0.12)',
-              borderRadius: 20,
-              padding: '28px 24px',
-              position: 'relative',
-              transform: isDestaque ? 'scale(1.04)' : 'none',
-              boxShadow: isDestaque ? '0 12px 48px rgba(123,79,216,0.25)' : '0 2px 12px rgba(45,27,110,0.05)',
-            }}>
+            <div
+              key={plano.id}
+              className={`plano-card ${isDestaque ? 'plano-destaque' : ''}`}
+              style={{
+                background: isDestaque ? 'linear-gradient(145deg, #2D1B6E 0%, #4A2FA0 100%)' : 'rgba(255,255,255,0.85)',
+                backdropFilter: 'blur(8px)',
+                border: isDestaque ? '2px solid rgba(123,79,216,0.6)' : '1px solid rgba(123,79,216,0.12)',
+                transform: isDestaque ? 'scale(1.04)' : 'none',
+                boxShadow: isDestaque ? '0 12px 48px rgba(123,79,216,0.25)' : '0 2px 12px rgba(45,27,110,0.05)',
+              }}
+            >
               {plano.badge && (
-                <div style={{ position: 'absolute', top: -13, left: '50%', transform: 'translateX(-50%)', background: 'linear-gradient(135deg, #7B4FD8, #5B3BAA)', color: '#fff', fontSize: 11, fontWeight: 700, padding: '4px 14px', borderRadius: 20, whiteSpace: 'nowrap', boxShadow: '0 4px 12px rgba(123,79,216,0.4)' }}>
+                <div style={{ position: 'absolute', top: -14, left: '50%', transform: 'translateX(-50%)', background: 'linear-gradient(135deg, #7B4FD8, #5B3BAA)', color: '#fff', fontSize: 12, fontWeight: 700, padding: '5px 16px', borderRadius: 20, whiteSpace: 'nowrap', boxShadow: '0 4px 12px rgba(123,79,216,0.4)' }}>
                   {plano.badge}
                 </div>
               )}
 
-              {/* Nome + desc */}
               <div style={{ marginBottom: 20 }}>
                 <div style={{ fontSize: 12, fontWeight: 700, color: isDestaque ? 'rgba(255,255,255,0.5)' : 'rgba(45,27,110,0.4)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 4 }}>{plano.nome}</div>
                 <div style={{ fontSize: 13, color: isDestaque ? 'rgba(255,255,255,0.65)' : 'rgba(45,27,110,0.5)' }}>{plano.descricao}</div>
               </div>
 
-              {/* Preço */}
-              <div style={{ marginBottom: 28, paddingBottom: 24, borderBottom: `1px solid ${isDestaque ? 'rgba(255,255,255,0.1)' : 'rgba(123,79,216,0.08)'}` }}>
+              <div style={{ marginBottom: 24, paddingBottom: 20, borderBottom: `1px solid ${isDestaque ? 'rgba(255,255,255,0.1)' : 'rgba(123,79,216,0.08)'}` }}>
                 {plano.preco === 0 ? (
                   <div style={{ fontSize: 38, fontWeight: 800, color: isDestaque ? '#fff' : '#2D1B6E', lineHeight: 1 }}>Grátis</div>
                 ) : (
                   <div style={{ display: 'flex', alignItems: 'baseline', gap: 4 }}>
                     <span style={{ fontSize: 14, fontWeight: 600, color: isDestaque ? 'rgba(255,255,255,0.5)' : 'rgba(45,27,110,0.4)' }}>R$</span>
-                    <span style={{ fontSize: 44, fontWeight: 800, color: isDestaque ? '#fff' : '#2D1B6E', lineHeight: 1 }}>{plano.preco}</span>
+                    <span style={{ fontSize: 48, fontWeight: 800, color: isDestaque ? '#fff' : '#2D1B6E', lineHeight: 1 }}>{plano.preco}</span>
                     <span style={{ fontSize: 13, color: isDestaque ? 'rgba(255,255,255,0.4)' : 'rgba(45,27,110,0.4)' }}>/mês</span>
                   </div>
                 )}
               </div>
 
-              {/* Benefícios */}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 11, marginBottom: 28 }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 24 }}>
                 {plano.beneficios.map((b, i) => (
                   <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10, opacity: b.ok ? 1 : 0.3 }}>
-                    <div style={{ width: 18, height: 18, borderRadius: '50%', background: b.ok ? (isDestaque ? 'rgba(255,255,255,0.2)' : 'rgba(123,79,216,0.12)') : 'transparent', border: b.ok ? 'none' : `1.5px solid ${isDestaque ? 'rgba(255,255,255,0.2)' : 'rgba(45,27,110,0.15)'}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                    <div style={{ width: 20, height: 20, borderRadius: '50%', background: b.ok ? (isDestaque ? 'rgba(255,255,255,0.2)' : 'rgba(123,79,216,0.12)') : 'transparent', border: b.ok ? 'none' : `1.5px solid ${isDestaque ? 'rgba(255,255,255,0.2)' : 'rgba(45,27,110,0.15)'}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                       {b.ok && (
                         <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
                           <path d="M2 5l2.5 2.5L8 3" stroke={isDestaque ? '#fff' : '#7B4FD8'} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
                         </svg>
                       )}
                     </div>
-                    <span style={{ fontSize: 13, color: isDestaque ? (b.ok ? '#fff' : 'rgba(255,255,255,0.3)') : (b.ok ? '#2D1B6E' : 'rgba(45,27,110,0.3)') }}>{b.texto}</span>
+                    <span style={{ fontSize: 14, color: isDestaque ? (b.ok ? '#fff' : 'rgba(255,255,255,0.3)') : (b.ok ? '#2D1B6E' : 'rgba(45,27,110,0.3)') }}>{b.texto}</span>
                   </div>
                 ))}
               </div>
 
-              {/* Botão */}
               {planoAtual === plano.id ? (
                 <div style={{ padding: '12px', borderRadius: 12, background: isDestaque ? 'rgba(255,255,255,0.08)' : 'rgba(123,79,216,0.06)', textAlign: 'center', fontSize: 13, fontWeight: 600, color: isDestaque ? 'rgba(255,255,255,0.4)' : 'rgba(45,27,110,0.4)' }}>
                   Plano atual
@@ -166,7 +197,7 @@ export default function PlanosPage() {
                 <button
                   onClick={() => handleAssinar(plano.id)}
                   disabled={loading === plano.id}
-                  style={{ width: '100%', padding: '13px', borderRadius: 50, border: 'none', cursor: loading === plano.id ? 'not-allowed' : 'pointer', background: isDestaque ? 'linear-gradient(135deg, #7B4FD8, #5B3BAA)' : isAgencia ? 'rgba(29,158,117,0.1)' : 'rgba(123,79,216,0.08)', color: isDestaque ? '#fff' : isAgencia ? '#1D9E75' : '#7B4FD8', fontSize: 14, fontWeight: 700, fontFamily: 'var(--font-inter), sans-serif', boxShadow: isDestaque ? '0 4px 16px rgba(123,79,216,0.4)' : 'none' }}
+                  style={{ width: '100%', padding: '14px', borderRadius: 50, border: 'none', cursor: loading === plano.id ? 'not-allowed' : 'pointer', background: isDestaque ? 'linear-gradient(135deg, #7B4FD8, #5B3BAA)' : isAgencia ? 'rgba(29,158,117,0.1)' : 'rgba(123,79,216,0.08)', color: isDestaque ? '#fff' : isAgencia ? '#1D9E75' : '#7B4FD8', fontSize: 14, fontWeight: 700, fontFamily: 'var(--font-inter), sans-serif', boxShadow: isDestaque ? '0 4px 16px rgba(123,79,216,0.4)' : 'none' }}
                 >
                   {loading === plano.id ? 'Aguarde...' : `Assinar ${plano.nome} →`}
                 </button>
@@ -177,7 +208,7 @@ export default function PlanosPage() {
       </div>
 
       {/* Trust bar */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 32, padding: '24px 28px', background: 'rgba(255,255,255,0.7)', backdropFilter: 'blur(8px)', borderRadius: 16, border: '1px solid rgba(123,79,216,0.1)', marginBottom: 48, flexWrap: 'wrap' }}>
+      <div className="trust-row" style={{ padding: '24px 20px', background: 'rgba(255,255,255,0.7)', backdropFilter: 'blur(8px)', borderRadius: 16, border: '1px solid rgba(123,79,216,0.1)', marginBottom: 40 }}>
         {[
           { icon: '🔒', titulo: 'Pagamento seguro', sub: 'Processado pelo Stripe' },
           { icon: '↩️', titulo: 'Cancele quando quiser', sub: 'Sem fidelidade' },
@@ -195,7 +226,7 @@ export default function PlanosPage() {
       </div>
 
       {/* FAQ */}
-      <div style={{ marginBottom: 48 }}>
+      <div style={{ marginBottom: 40 }}>
         <h2 style={{ fontSize: 22, fontWeight: 800, color: '#2D1B6E', marginBottom: 20, textAlign: 'center', letterSpacing: '-0.01em' }}>Perguntas frequentes</h2>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
           {FAQ.map((item, i) => (
@@ -213,11 +244,11 @@ export default function PlanosPage() {
       </div>
 
       {/* CTA final */}
-      <div style={{ textAlign: 'center', padding: '48px 28px', background: 'linear-gradient(145deg, #2D1B6E 0%, #4A2FA0 100%)', borderRadius: 20, position: 'relative', overflow: 'hidden' }}>
+      <div style={{ textAlign: 'center', padding: '40px 24px', background: 'linear-gradient(145deg, #2D1B6E 0%, #4A2FA0 100%)', borderRadius: 20, position: 'relative', overflow: 'hidden' }}>
         <div style={{ position: 'absolute', top: '-60px', right: '-60px', width: 240, height: 240, borderRadius: '50%', background: 'radial-gradient(circle, rgba(123,79,216,0.4) 0%, transparent 70%)', pointerEvents: 'none' }} />
         <div style={{ position: 'absolute', bottom: '-40px', left: '-40px', width: 200, height: 200, borderRadius: '50%', background: 'radial-gradient(circle, rgba(80,200,120,0.2) 0%, transparent 70%)', pointerEvents: 'none' }} />
         <div style={{ position: 'relative', zIndex: 2 }}>
-          <div style={{ fontSize: 24, fontWeight: 800, color: '#fff', marginBottom: 10, letterSpacing: '-0.01em' }}>A janela fecha em outubro de 2026.</div>
+          <div style={{ fontSize: 22, fontWeight: 800, color: '#fff', marginBottom: 10, letterSpacing: '-0.01em' }}>A janela fecha em outubro de 2026.</div>
           <p style={{ fontSize: 15, color: 'rgba(255,255,255,0.55)', margin: '0 0 28px' }}>Cada semana sem estratégia digital é voto que o seu concorrente está conquistando.</p>
           <button onClick={() => handleAssinar('pro')} style={{ padding: '14px 36px', background: 'linear-gradient(135deg, #7B4FD8, #5B3BAA)', color: '#fff', borderRadius: 50, border: 'none', fontSize: 15, fontWeight: 700, cursor: 'pointer', fontFamily: 'var(--font-inter), sans-serif', boxShadow: '0 4px 20px rgba(123,79,216,0.5)' }}>
             Começar agora →
