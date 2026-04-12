@@ -1,4 +1,4 @@
-export type Plano = 'gratuito' | 'essencial' | 'pro'
+export type Plano = 'gratuito' | 'essencial' | 'pro' | 'agencia'
 export type Agente = 'roteirista' | 'estrategista' | 'copy' | 'consciencia'
 
 export interface Profile {
@@ -16,21 +16,22 @@ export interface Profile {
 }
 
 export const LIMITES_PLANO: Record<Plano, number | null> = {
-  gratuito: 5,
+  gratuito:  5,
   essencial: 50,
-  pro: null,
+  pro:       null,
+  agencia:   null,
 }
 
 export const AGENTE_LABELS: Record<Agente, string> = {
-  roteirista: 'Roteirista de Reels',
+  roteirista:  'Roteirista de Reels',
   estrategista: 'Estrategista de Campanha',
-  copy: 'Copy Político',
-  consciencia: 'Consciência do Problema',
+  copy:         'Copy Político',
+  consciencia:  'Consciência do Problema',
 }
 
 export const AGENTE_DESCRICOES: Record<Agente, string> = {
-  roteirista: 'Gera 3 roteiros de Reels com gancho, desenvolvimento e CTA prontos para gravar.',
+  roteirista:   'Gera 3 roteiros de Reels com gancho, desenvolvimento e CTA prontos para gravar.',
   estrategista: 'Diagnóstico completo + plano de comunicação de 90 dias para sua campanha.',
-  copy: 'Headlines, legendas e copies para anúncios em Meta, Google e TikTok.',
-  consciencia: 'Conteúdo que cria urgência sobre o custo de não ter estratégia digital.',
+  copy:         'Headlines, legendas e copies para anúncios em Meta, Google e TikTok.',
+  consciencia:  'Conteúdo que cria urgência sobre o custo de não ter estratégia digital.',
 }

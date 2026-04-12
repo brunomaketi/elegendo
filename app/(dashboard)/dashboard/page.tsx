@@ -2,36 +2,35 @@ import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
+import { LIMITES_PLANO } from '@/types'
 
 const AGENTES = [
-  { id: 'roteirista',   label: 'Roteirista de Reels',     icon: '🎬', cor: '#7B4FD8', bg: 'rgba(123,79,216,0.08)', desc: 'Gera 3 roteiros com gancho e CTA.' },
-  { id: 'estrategista', label: 'Estrategista',            icon: '🧠', cor: '#1D9E75', bg: 'rgba(29,158,117,0.08)', desc: 'Plano de 90 dias para sua campanha.' },
-  { id: 'copy',         label: 'Copy Político',           icon: '✍️', cor: '#378ADD', bg: 'rgba(55,138,221,0.08)', desc: 'Headlines e copies para anúncios.' },
-  { id: 'consciencia',  label: 'Consciência',             icon: '📊', cor: '#2D1B6E', bg: 'rgba(45,27,110,0.08)', desc: 'Conteúdo para o @sejaelegendo.' },
+  { id: 'roteirista',   label: 'Roteirista de Reels',  icon: '🎬', cor: '#7B4FD8', bg: 'rgba(123,79,216,0.08)', desc: 'Gera 3 roteiros com gancho e CTA.' },
+  { id: 'estrategista', label: 'Estrategista',          icon: '🧠', cor: '#1D9E75', bg: 'rgba(29,158,117,0.08)', desc: 'Plano de 90 dias para sua campanha.' },
+  { id: 'copy',         label: 'Copy Político',         icon: '✍️', cor: '#378ADD', bg: 'rgba(55,138,221,0.08)', desc: 'Headlines e copies para anúncios.' },
+  { id: 'consciencia',  label: 'Consciência',           icon: '📊', cor: '#2D1B6E', bg: 'rgba(45,27,110,0.08)', desc: 'Conteúdo para o @sejaelegendo.' },
 ]
 
-const LIMITES: Record<string, number | null> = { gratuito: 5, essencial: 50, pro: null }
-
 const DATAS_2026 = [
-  { data: '2026-04-21', label: 'Tiradentes',                emoji: '⚔️',  relevancia: 'alta' },
-  { data: '2026-04-22', label: 'Dia da Terra',              emoji: '🌍', relevancia: 'media' },
-  { data: '2026-05-01', label: 'Dia do Trabalho',           emoji: '✊', relevancia: 'alta' },
-  { data: '2026-05-10', label: 'Dia das Mães',              emoji: '💐', relevancia: 'alta' },
-  { data: '2026-05-15', label: 'Dia do Municipal',          emoji: '🏛️',  relevancia: 'alta' },
-  { data: '2026-06-05', label: 'Dia do Meio Ambiente',      emoji: '🌿', relevancia: 'media' },
-  { data: '2026-06-12', label: 'Dia dos Namorados',         emoji: '❤️',  relevancia: 'media' },
-  { data: '2026-06-13', label: 'Corpus Christi',            emoji: '⛪', relevancia: 'media' },
-  { data: '2026-06-24', label: 'São João',                  emoji: '🎆', relevancia: 'alta' },
-  { data: '2026-07-09', label: 'Revolução Constitucional',  emoji: '📜', relevancia: 'alta' },
-  { data: '2026-08-11', label: 'Dia do Estudante',          emoji: '🎓', relevancia: 'media' },
-  { data: '2026-09-07', label: 'Independência do Brasil',   emoji: '🇧🇷', relevancia: 'alta' },
-  { data: '2026-10-02', label: '1º Turno Eleições',         emoji: '🗳️',  relevancia: 'critica' },
-  { data: '2026-10-12', label: 'Nossa Sra. Aparecida',      emoji: '🙏', relevancia: 'alta' },
-  { data: '2026-10-25', label: '2º Turno Eleições',         emoji: '🗳️',  relevancia: 'critica' },
-  { data: '2026-11-02', label: 'Finados',                   emoji: '🕯️',  relevancia: 'media' },
-  { data: '2026-11-15', label: 'Proclamação da República',  emoji: '🏛️',  relevancia: 'alta' },
-  { data: '2026-11-20', label: 'Consciência Negra',         emoji: '✊🏿', relevancia: 'alta' },
-  { data: '2026-12-25', label: 'Natal',                     emoji: '🎄', relevancia: 'alta' },
+  { data: '2026-04-21', label: 'Tiradentes',               emoji: '⚔️',  relevancia: 'alta' },
+  { data: '2026-04-22', label: 'Dia da Terra',             emoji: '🌍', relevancia: 'media' },
+  { data: '2026-05-01', label: 'Dia do Trabalho',          emoji: '✊', relevancia: 'alta' },
+  { data: '2026-05-10', label: 'Dia das Mães',             emoji: '💐', relevancia: 'alta' },
+  { data: '2026-05-15', label: 'Dia do Municipal',         emoji: '🏛️',  relevancia: 'alta' },
+  { data: '2026-06-05', label: 'Dia do Meio Ambiente',     emoji: '🌿', relevancia: 'media' },
+  { data: '2026-06-12', label: 'Dia dos Namorados',        emoji: '❤️',  relevancia: 'media' },
+  { data: '2026-06-13', label: 'Corpus Christi',           emoji: '⛪', relevancia: 'media' },
+  { data: '2026-06-24', label: 'São João',                 emoji: '🎆', relevancia: 'alta' },
+  { data: '2026-07-09', label: 'Revolução Constitucional', emoji: '📜', relevancia: 'alta' },
+  { data: '2026-08-11', label: 'Dia do Estudante',         emoji: '🎓', relevancia: 'media' },
+  { data: '2026-09-07', label: 'Independência do Brasil',  emoji: '🇧🇷', relevancia: 'alta' },
+  { data: '2026-10-02', label: '1º Turno Eleições',        emoji: '🗳️',  relevancia: 'critica' },
+  { data: '2026-10-12', label: 'Nossa Sra. Aparecida',     emoji: '🙏', relevancia: 'alta' },
+  { data: '2026-10-25', label: '2º Turno Eleições',        emoji: '🗳️',  relevancia: 'critica' },
+  { data: '2026-11-02', label: 'Finados',                  emoji: '🕯️',  relevancia: 'media' },
+  { data: '2026-11-15', label: 'Proclamação da República', emoji: '🏛️',  relevancia: 'alta' },
+  { data: '2026-11-20', label: 'Consciência Negra',        emoji: '✊🏿', relevancia: 'alta' },
+  { data: '2026-12-25', label: 'Natal',                    emoji: '🎄', relevancia: 'alta' },
 ]
 
 function getDiasRestantes(dataStr: string): number {
@@ -81,8 +80,8 @@ export default async function DashboardPage() {
     .from('geracoes').select('agente, output, criado_em')
     .eq('user_id', user.id).order('criado_em', { ascending: false }).limit(3)
 
-  const plano = profile?.plano ?? 'gratuito'
-  const limite = LIMITES[plano]
+  const plano = (profile?.plano ?? 'gratuito') as keyof typeof LIMITES_PLANO
+  const limite = LIMITES_PLANO[plano]
   const total = totalMes ?? 0
   const isGratuito = plano === 'gratuito'
 
@@ -108,7 +107,6 @@ export default async function DashboardPage() {
         }
       `}</style>
 
-      {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 20, flexWrap: 'wrap', gap: 12 }}>
         <div>
           <p style={{ fontSize: 12, color: 'rgba(45,27,110,0.45)', margin: '0 0 3px', textTransform: 'capitalize' }}>{dataHoje}</p>
@@ -126,12 +124,10 @@ export default async function DashboardPage() {
         </Link>
       </div>
 
-      {/* Banner upgrade — só para plano gratuito, sem animação */}
       {isGratuito && (
         <div style={{ borderRadius: 16, marginBottom: 20, background: 'linear-gradient(135deg, #2D1B6E 0%, #4A2FA0 100%)', padding: '20px 24px', position: 'relative', overflow: 'hidden' }}>
           <div style={{ position: 'absolute', top: -40, right: -40, width: 160, height: 160, borderRadius: '50%', background: 'rgba(255,255,255,0.05)', pointerEvents: 'none' }} />
           <div style={{ position: 'absolute', bottom: -30, right: 120, width: 100, height: 100, borderRadius: '50%', background: 'rgba(255,255,255,0.03)', pointerEvents: 'none' }} />
-
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap', position: 'relative', zIndex: 2 }}>
             <div style={{ flex: 1, minWidth: 200 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
@@ -146,11 +142,9 @@ export default async function DashboardPage() {
               </p>
             </div>
             <Link href="/planos" style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '11px 22px', background: '#fff', color: '#2D1B6E', borderRadius: 50, fontSize: 13, fontWeight: 800, textDecoration: 'none', whiteSpace: 'nowrap', flexShrink: 0 }}>
-              Ver planos →
+              Ver planos
             </Link>
           </div>
-
-          {/* Barra de uso */}
           <div style={{ marginTop: 16, position: 'relative', zIndex: 2 }}>
             <div style={{ height: 4, background: 'rgba(255,255,255,0.12)', borderRadius: 4, overflow: 'hidden' }}>
               <div style={{ height: '100%', width: `${Math.min((total / 5) * 100, 100)}%`, background: total >= 4 ? '#FFD166' : 'rgba(255,255,255,0.6)', borderRadius: 4 }} />
@@ -159,7 +153,6 @@ export default async function DashboardPage() {
         </div>
       )}
 
-      {/* KPIs */}
       <div className="kpi-grid" style={{ marginBottom: 20 }}>
         {[
           { label: 'Gerações este mês', value: total.toString(), sub: limite ? `de ${limite} disponíveis` : 'ilimitadas', cor: '#7B4FD8', icon: '⚡' },
@@ -178,7 +171,6 @@ export default async function DashboardPage() {
         ))}
       </div>
 
-      {/* Alerta perfil incompleto */}
       {!profile?.bio_politica && (
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '12px 16px', background: 'rgba(123,79,216,0.07)', borderRadius: 12, border: '1px solid rgba(123,79,216,0.18)', marginBottom: 20 }}>
           <span style={{ fontSize: 16, flexShrink: 0 }}>⚡</span>
@@ -186,12 +178,11 @@ export default async function DashboardPage() {
             <strong>Complete seu perfil</strong> para que os agentes gerem conteúdo mais preciso.
           </div>
           <Link href="/perfil" style={{ fontSize: 13, fontWeight: 600, color: '#7B4FD8', textDecoration: 'none', whiteSpace: 'nowrap' }}>
-            Completar →
+            Completar
           </Link>
         </div>
       )}
 
-      {/* Agentes + Calendário */}
       <div className="agents-cal-grid" style={{ marginBottom: 20, alignItems: 'start' }}>
         <div>
           <h2 style={{ fontSize: 11, fontWeight: 700, color: 'rgba(45,27,110,0.45)', letterSpacing: '0.08em', textTransform: 'uppercase', margin: '0 0 12px' }}>Agentes de IA</h2>
@@ -202,14 +193,13 @@ export default async function DashboardPage() {
                   <div style={{ width: 38, height: 38, borderRadius: 10, background: bg, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18, marginBottom: 10 }}>{icon}</div>
                   <div style={{ fontSize: 13, fontWeight: 700, color: '#2D1B6E', marginBottom: 3 }}>{label}</div>
                   <p style={{ fontSize: 12, color: 'rgba(45,27,110,0.5)', lineHeight: 1.4, margin: '0 0 10px' }}>{desc}</p>
-                  <div style={{ fontSize: 12, fontWeight: 600, color: cor }}>Usar agente →</div>
+                  <div style={{ fontSize: 12, fontWeight: 600, color: cor }}>Usar agente</div>
                 </div>
               </Link>
             ))}
           </div>
         </div>
 
-        {/* Calendário */}
         <div style={{ background: 'rgba(255,255,255,0.7)', backdropFilter: 'blur(8px)', border: '1px solid rgba(123,79,216,0.1)', borderRadius: 14, padding: 16 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
             <h2 style={{ fontSize: 11, fontWeight: 700, color: 'rgba(45,27,110,0.45)', letterSpacing: '0.08em', textTransform: 'uppercase', margin: 0 }}>Calendário estratégico</h2>
@@ -245,7 +235,6 @@ export default async function DashboardPage() {
         </div>
       </div>
 
-      {/* Últimas gerações */}
       {ultimas && ultimas.length > 0 && (
         <div>
           <h2 style={{ fontSize: 11, fontWeight: 700, color: 'rgba(45,27,110,0.45)', letterSpacing: '0.08em', textTransform: 'uppercase', margin: '0 0 12px' }}>
