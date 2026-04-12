@@ -1,5 +1,6 @@
 'use client'
 import { useEffect, useState } from 'react'
+import { useSearchParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase'
 
 const CARGOS = ['Vereador(a)', 'Deputado(a) Estadual', 'Deputado(a) Federal', 'Senador(a)', 'Governador(a)', 'Presidente']
@@ -9,6 +10,9 @@ type TipoConta = 'candidato' | 'assessor'
 
 export default function PerfilPage() {
   const supabase = createClient()
+  const searchParams = useSearchParams()
+  const primeiroAcesso = searchParams.get('primeiro_acesso') === 'true'
+
   const [form, setForm] = useState({
     nome: '', tipo_conta: 'candidato' as TipoConta,
     cargo: '', cidade: '', estado: '', partido: '',
@@ -70,6 +74,21 @@ export default function PerfilPage() {
 
   return (
     <div style={{ maxWidth: '900px', margin: '0 auto', padding: '32px 28px', fontFamily: 'var(--font-inter), sans-serif' }}>
+
+      {/* Banner primeiro acesso */}
+      {primeiroAcesso && (
+        <div style={{ background: 'linear-gradient(135deg, #2D1B6E, #4A2FA0)', borderRadius: 16, padding: '20px 24px', marginBottom: 28, display: 'flex', alignItems: 'flex-start', gap: 16 }}>
+          <span style={{ fontSize: 28, flexShrink: 0 }}>👋</span>
+          <div>
+            <div style={{ fontSize: 16, fontWeight: 800, color: '#fff', marginBottom: 4 }}>
+              Bem-vindo ao Elegendo! Vamos configurar seu perfil.
+            </div>
+            <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.6)', margin: 0, lineHeight: 1.6 }}>
+              Preencha seus dados abaixo para que os agentes de IA gerem conteúdo personalizado para sua campanha. Quanto mais detalhado, melhor o resultado.
+            </p>
+          </div>
+        </div>
+      )}
 
       {/* Header */}
       <div style={{ display: 'flex', alignItems: 'flex-start', gap: '20px', marginBottom: '32px', flexWrap: 'wrap' }}>
@@ -219,9 +238,11 @@ export default function PerfilPage() {
         {/* Botão salvar */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginTop: 24 }}>
           <button type="submit" disabled={saving} style={{ padding: '12px 28px', borderRadius: 50, border: 'none', background: saving ? 'rgba(123,79,216,0.4)' : 'linear-gradient(135deg, #7B4FD8, #5B3BAA)', color: '#fff', fontSize: 14, fontWeight: 700, cursor: saving ? 'not-allowed' : 'pointer', fontFamily: 'var(--font-inter), sans-serif', boxShadow: saving ? 'none' : '0 4px 16px rgba(123,79,216,0.3)' }}>
-            {saving ? 'Salvando...' : 'Salvar perfil'}
+            {saving ? 'Salvando...' : primeiroAcesso ? 'Salvar e ir para o dashboard →' : 'Salvar perfil'}
           </button>
-          {ok && <span style={{ fontSize: 13, color: '#1D9E75', fontWeight: 700 }}>✓ Salvo com sucesso!</span>}
+          {ok && (
+            <span style={{ fontSize: 13, color: '#1D9E75', fontWeight: 700 }}>✓ Salvo com sucesso!</span>
+          )}
         </div>
       </form>
     </div>

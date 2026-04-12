@@ -63,6 +63,11 @@ export default async function DashboardPage() {
 
   const { data: profile } = await supabase.from('profiles').select('*').eq('id', user.id).single()
 
+  // Primeiro login: se não tem nome, redireciona para completar perfil
+  if (!profile?.nome) {
+    redirect('/perfil?primeiro_acesso=true')
+  }
+
   const inicioMes = new Date()
   inicioMes.setDate(1)
   inicioMes.setHours(0, 0, 0, 0)
@@ -82,6 +87,7 @@ export default async function DashboardPage() {
   const plano = profile?.plano ?? 'gratuito'
   const limite = LIMITES[plano]
   const total = totalMes ?? 0
+  const isGratuito = plano === 'gratuito'
 
   const hoje = new Date()
   const proximasDatas = DATAS_2026
@@ -94,16 +100,21 @@ export default async function DashboardPage() {
   return (
     <div style={{ padding: '24px 16px', fontFamily: 'var(--font-inter), sans-serif', minHeight: '100vh' }}>
       <style>{`
-        .dash-padding { padding: 24px 16px; }
-        .kpi-grid { grid-template-columns: repeat(2, 1fr) !important; }
-        .agents-cal-grid { grid-template-columns: 1fr !important; }
-        .agents-grid { grid-template-columns: repeat(2, 1fr) !important; }
-        .ultimas-grid { grid-template-columns: 1fr !important; }
+        .kpi-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+        .agents-cal-grid { display: grid; grid-template-columns: 1fr; gap: 16px; }
+        .agents-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+        .ultimas-grid { display: grid; grid-template-columns: 1fr; gap: 10px; }
         @media (min-width: 768px) {
-          .dash-padding { padding: 32px; }
           .kpi-grid { grid-template-columns: repeat(4, 1fr) !important; }
           .agents-cal-grid { grid-template-columns: 1fr 320px !important; }
           .ultimas-grid { grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)) !important; }
+        }
+        @keyframes shimmer {
+          0% { background-position: -200% center; }
+          100% { background-position: 200% center; }
+        }
+        .banner-upgrade {
+          animation: shimmer 3s linear infinite;
         }
       `}</style>
 
@@ -125,8 +136,46 @@ export default async function DashboardPage() {
         </Link>
       </div>
 
+      {/* Banner upgrade — só para plano gratuito */}
+      {isGratuito && (
+        <div style={{ position: 'relative', overflow: 'hidden', borderRadius: 16, marginBottom: 20, background: 'linear-gradient(135deg, #2D1B6E 0%, #4A2FA0 50%, #7B4FD8 100%)', backgroundSize: '200% auto', padding: '20px 24px' }} className="banner-upgrade">
+          {/* Elementos decorativos */}
+          <div style={{ position: 'absolute', top: -30, right: -30, width: 120, height: 120, borderRadius: '50%', background: 'rgba(255,255,255,0.06)', pointerEvents: 'none' }} />
+          <div style={{ position: 'absolute', bottom: -20, right: 80, width: 80, height: 80, borderRadius: '50%', background: 'rgba(255,255,255,0.04)', pointerEvents: 'none' }} />
+
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap', position: 'relative', zIndex: 2 }}>
+            <div style={{ flex: 1, minWidth: 200 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
+                <span style={{ fontSize: 18 }}>🚀</span>
+                <span style={{ fontSize: 13, fontWeight: 700, color: 'rgba(255,255,255,0.6)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Você está no plano gratuito</span>
+              </div>
+              <p style={{ fontSize: 15, fontWeight: 700, color: '#fff', margin: '0 0 4px', lineHeight: 1.4 }}>
+                Desbloqueie gerações ilimitadas e ganhe a eleição.
+              </p>
+              <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.55)', margin: 0 }}>
+                Plano Pro por <strong style={{ color: '#FFD166' }}>R$ 47/mês</strong> · Plano Agência por <strong style={{ color: '#FFD166' }}>R$ 97/mês</strong>
+              </p>
+            </div>
+            <Link href="/planos" style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '11px 22px', background: '#fff', color: '#2D1B6E', borderRadius: 50, fontSize: 13, fontWeight: 800, textDecoration: 'none', whiteSpace: 'nowrap', flexShrink: 0 }}>
+              Ver planos →
+            </Link>
+          </div>
+
+          {/* Barra de uso */}
+          <div style={{ marginTop: 14, position: 'relative', zIndex: 2 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
+              <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.5)' }}>Gerações este mês</span>
+              <span style={{ fontSize: 11, fontWeight: 700, color: total >= 4 ? '#FFD166' : 'rgba(255,255,255,0.7)' }}>{total} de 5 usadas</span>
+            </div>
+            <div style={{ height: 6, background: 'rgba(255,255,255,0.15)', borderRadius: 4, overflow: 'hidden' }}>
+              <div style={{ height: '100%', width: `${Math.min((total / 5) * 100, 100)}%`, background: total >= 4 ? '#FFD166' : 'rgba(255,255,255,0.8)', borderRadius: 4, transition: 'width 0.5s' }} />
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* KPIs */}
-      <div className="kpi-grid" style={{ display: 'grid', gap: 12, marginBottom: 20 }}>
+      <div className="kpi-grid" style={{ marginBottom: 20 }}>
         {[
           { label: 'Gerações este mês', value: total.toString(), sub: limite ? `de ${limite} disponíveis` : 'ilimitadas', cor: '#7B4FD8', icon: '⚡' },
           { label: 'Total de gerações', value: (totalGeral ?? 0).toString(), sub: 'desde o início', cor: '#378ADD', icon: '📈' },
@@ -144,12 +193,12 @@ export default async function DashboardPage() {
         ))}
       </div>
 
-      {/* Alerta perfil */}
+      {/* Alerta perfil incompleto */}
       {!profile?.bio_politica && (
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '12px 16px', background: 'rgba(123,79,216,0.07)', borderRadius: 12, border: '1px solid rgba(123,79,216,0.18)', marginBottom: 20 }}>
           <span style={{ fontSize: 16, flexShrink: 0 }}>⚡</span>
           <div style={{ flex: 1, fontSize: 13, color: '#2D1B6E' }}>
-            <strong>Complete seu perfil</strong> para conteúdo mais preciso.
+            <strong>Complete seu perfil</strong> para que os agentes gerem conteúdo mais preciso.
           </div>
           <Link href="/perfil" style={{ fontSize: 13, fontWeight: 600, color: '#7B4FD8', textDecoration: 'none', whiteSpace: 'nowrap' }}>
             Completar →
@@ -158,15 +207,13 @@ export default async function DashboardPage() {
       )}
 
       {/* Agentes + Calendário */}
-      <div className="agents-cal-grid" style={{ display: 'grid', gap: 16, marginBottom: 20, alignItems: 'start' }}>
-
-        {/* Agentes */}
+      <div className="agents-cal-grid" style={{ marginBottom: 20, alignItems: 'start' }}>
         <div>
           <h2 style={{ fontSize: 11, fontWeight: 700, color: 'rgba(45,27,110,0.45)', letterSpacing: '0.08em', textTransform: 'uppercase', margin: '0 0 12px' }}>Agentes de IA</h2>
-          <div className="agents-grid" style={{ display: 'grid', gap: 10 }}>
+          <div className="agents-grid">
             {AGENTES.map(({ id, label, icon, cor, bg, desc }) => (
               <Link key={id} href={`/agentes/${id}`} style={{ textDecoration: 'none' }}>
-                <div style={{ background: 'rgba(255,255,255,0.7)', backdropFilter: 'blur(8px)', border: '1px solid rgba(123,79,216,0.1)', borderRadius: 14, padding: 16, boxSizing: 'border-box', cursor: 'pointer' }}>
+                <div style={{ background: 'rgba(255,255,255,0.7)', backdropFilter: 'blur(8px)', border: '1px solid rgba(123,79,216,0.1)', borderRadius: 14, padding: 16, cursor: 'pointer' }}>
                   <div style={{ width: 38, height: 38, borderRadius: 10, background: bg, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18, marginBottom: 10 }}>{icon}</div>
                   <div style={{ fontSize: 13, fontWeight: 700, color: '#2D1B6E', marginBottom: 3 }}>{label}</div>
                   <p style={{ fontSize: 12, color: 'rgba(45,27,110,0.5)', lineHeight: 1.4, margin: '0 0 10px' }}>{desc}</p>
@@ -219,7 +266,7 @@ export default async function DashboardPage() {
           <h2 style={{ fontSize: 11, fontWeight: 700, color: 'rgba(45,27,110,0.45)', letterSpacing: '0.08em', textTransform: 'uppercase', margin: '0 0 12px' }}>
             Últimas gerações
           </h2>
-          <div className="ultimas-grid" style={{ display: 'grid', gap: 10 }}>
+          <div className="ultimas-grid">
             {ultimas.map((g, i) => {
               const ag = AGENTES.find(a => a.id === g.agente)
               return (
