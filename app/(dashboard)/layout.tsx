@@ -2,6 +2,7 @@ import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
+import { LogoutButton } from '@/components/LogoutButton'
 
 const NAV = [
   { href: '/dashboard',            label: 'Início',        icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg> },
@@ -38,64 +39,19 @@ export default async function DashboardLayout({ children }: { children: React.Re
         .nav-link { display: flex; align-items: center; gap: 12px; padding: 11px 16px; color: rgba(45,27,110,0.45); font-size: 14px; text-decoration: none; border-radius: 10px; margin-bottom: 6px; font-weight: 500; transition: background 0.15s, color 0.15s; }
         .nav-link:hover { background: rgba(123,79,216,0.08); color: #2D1B6E; }
         .nav-link svg { flex-shrink: 0; }
-        .logout-btn { width: 100%; padding: 10px; border-radius: 10px; border: 1px solid rgba(123,79,216,0.15); background: transparent; color: rgba(45,27,110,0.4); font-size: 13px; cursor: pointer; font-family: var(--font-inter), sans-serif; transition: background 0.15s; }
-        .logout-btn:hover { background: rgba(123,79,216,0.06); color: #2D1B6E; }
         .sidebar { width: ${SIDEBAR_WIDTH}px; min-width: ${SIDEBAR_WIDTH}px; background: #fff; display: flex; flex-direction: column; height: 100vh; position: fixed; left: 0; top: 0; z-index: 100; border-right: 1px solid rgba(123,79,216,0.1); box-shadow: 2px 0 12px rgba(45,27,110,0.04); }
         .main-content { margin-left: ${SIDEBAR_WIDTH}px; background: #EEEAF6; min-height: 100vh; }
         .bottom-nav { display: none; }
         .mobile-header { display: none; }
-        .mobile-menu-overlay { display: none; }
-
         @media (max-width: 768px) {
           .sidebar { display: none; }
           .main-content { margin-left: 0 !important; padding-bottom: 80px; }
-
-          /* Bottom nav com scroll horizontal */
-          .bottom-nav {
-            display: flex;
-            position: fixed;
-            bottom: 0; left: 0; right: 0;
-            z-index: 100;
-            background: #fff;
-            border-top: 1px solid rgba(123,79,216,0.1);
-            padding: 6px 0;
-            overflow-x: auto;
-            overflow-y: hidden;
-            scroll-behavior: smooth;
-            -webkit-overflow-scrolling: touch;
-            scrollbar-width: none;
-            box-shadow: 0 -4px 20px rgba(45,27,110,0.08);
-          }
+          .bottom-nav { display: flex; position: fixed; bottom: 0; left: 0; right: 0; z-index: 100; background: #fff; border-top: 1px solid rgba(123,79,216,0.1); padding: 6px 0; overflow-x: auto; overflow-y: hidden; scroll-behavior: smooth; -webkit-overflow-scrolling: touch; scrollbar-width: none; box-shadow: 0 -4px 20px rgba(45,27,110,0.08); }
           .bottom-nav::-webkit-scrollbar { display: none; }
-          .bottom-nav a {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 3px;
-            padding: 6px 14px;
-            color: rgba(45,27,110,0.4);
-            text-decoration: none;
-            font-size: 10px;
-            font-weight: 600;
-            border-radius: 10px;
-            white-space: nowrap;
-            flex-shrink: 0;
-            min-width: 60px;
-            transition: color 0.15s;
-          }
+          .bottom-nav a { display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 6px 14px; color: rgba(45,27,110,0.4); text-decoration: none; font-size: 10px; font-weight: 600; border-radius: 10px; white-space: nowrap; flex-shrink: 0; min-width: 60px; }
           .bottom-nav a:hover { color: #7B4FD8; }
           .bottom-nav svg { width: 20px; height: 20px; flex-shrink: 0; }
-          .mobile-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 14px 20px;
-            background: #fff;
-            border-bottom: 1px solid rgba(123,79,216,0.08);
-            position: sticky;
-            top: 0;
-            z-index: 50;
-          }
+          .mobile-header { display: flex; align-items: center; justify-content: space-between; padding: 14px 20px; background: #fff; border-bottom: 1px solid rgba(123,79,216,0.08); position: sticky; top: 0; z-index: 50; }
         }
       `}</style>
 
@@ -132,9 +88,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
               <div style={{ fontSize: 11, color: 'rgba(45,27,110,0.4)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{user.email}</div>
             </div>
           </div>
-          <form action="/api/logout" method="POST">
-            <button type="submit" className="logout-btn">Sair da conta</button>
-          </form>
+          <LogoutButton />
         </div>
       </aside>
 
@@ -151,7 +105,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
 
       <main className="main-content">{children}</main>
 
-      {/* Bottom nav mobile — todos os itens com scroll horizontal */}
+      {/* Bottom nav mobile */}
       <nav className="bottom-nav">
         {[
           { href: '/dashboard',            label: 'Início',       icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg> },
