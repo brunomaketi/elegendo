@@ -120,6 +120,8 @@ export function AgentForm({ agente, fields }: AgentFormProps) {
   const totalRequired = fields.filter(f => f.required).length
   const progress = totalRequired > 0 ? Math.round((Math.min(filledFields, totalRequired) / totalRequired) * 100) : 0
 
+  const arrowRight = '\u2192'
+
   return (
     <>
       <style>{`
@@ -161,7 +163,7 @@ export function AgentForm({ agente, fields }: AgentFormProps) {
           boxShadow: '0 2px 20px rgba(123,79,216,0.5)',
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, flex: 1, minWidth: 0 }}>
-            <span style={{ fontSize: 18 }}>⚡</span>
+            <span style={{ fontSize: 18 }}>&#9889;</span>
             <div>
               <p style={{ margin: 0, color: '#fff', fontSize: 13, fontWeight: 700, lineHeight: 1.3 }}>
                 Última geração gratuita usada!
@@ -182,7 +184,7 @@ export function AgentForm({ agente, fields }: AgentFormProps) {
                 display: 'inline-block',
               }}
             >
-              Ver planos →
+              {`Ver planos ${arrowRight}`}
             </a>
             <button
               onClick={() => setShowUpgradeBanner(false)}
@@ -191,7 +193,7 @@ export function AgentForm({ agente, fields }: AgentFormProps) {
                 fontSize: 18, cursor: 'pointer', padding: '0 4px', lineHeight: 1,
               }}
             >
-              ×
+              &#215;
             </button>
           </div>
         </div>
@@ -222,7 +224,7 @@ export function AgentForm({ agente, fields }: AgentFormProps) {
               textAlign: 'center',
               position: 'relative',
             }}>
-              <div style={{ fontSize: 48, marginBottom: 12, filter: 'drop-shadow(0 4px 12px rgba(0,0,0,0.3))' }}>⚡</div>
+              <div style={{ fontSize: 48, marginBottom: 12, filter: 'drop-shadow(0 4px 12px rgba(0,0,0,0.3))' }}>&#9889;</div>
               <h2 style={{
                 margin: '0 0 6px', color: '#fff', fontSize: 22, fontWeight: 800,
                 fontFamily: 'var(--font-inter), sans-serif', lineHeight: 1.2,
@@ -245,7 +247,7 @@ export function AgentForm({ agente, fields }: AgentFormProps) {
                   alignItems: 'center', justifyContent: 'center',
                 }}
               >
-                ×
+                &#215;
               </button>
             </div>
 
@@ -289,7 +291,7 @@ export function AgentForm({ agente, fields }: AgentFormProps) {
                     marginBottom: 6, fontSize: 13, color: '#2D1B6E',
                     fontFamily: 'var(--font-inter), sans-serif',
                   }}>
-                    <span style={{ color: '#1D9E75', fontWeight: 700 }}>✓</span>
+                    <span style={{ color: '#1D9E75', fontWeight: 700 }}>&#10003;</span>
                     {b}
                   </div>
                 ))}
@@ -308,7 +310,7 @@ export function AgentForm({ agente, fields }: AgentFormProps) {
                   animation: 'pulse 2s ease infinite',
                 }}
               >
-                ✨ Fazer upgrade agora
+                {`\u2728 Fazer upgrade agora`}
               </a>
               <button
                 onClick={handleCloseModal}
@@ -367,7 +369,7 @@ export function AgentForm({ agente, fields }: AgentFormProps) {
             {error && (
               <div style={{ padding: '12px 14px', background: upgrade ? 'rgba(123,79,216,0.06)' : 'rgba(224,75,74,0.06)', borderRadius: 10, fontSize: 13, color: upgrade ? '#7B4FD8' : '#C62828', border: `1px solid ${upgrade ? 'rgba(123,79,216,0.2)' : 'rgba(224,75,74,0.2)'}` }}>
                 {error}
-                {upgrade && <a href="/planos" style={{ display: 'block', marginTop: 6, fontWeight: 700, color: '#7B4FD8' }}>Ver planos →</a>}
+                {upgrade && <a href="/planos" style={{ display: 'block', marginTop: 6, fontWeight: 700, color: '#7B4FD8' }}>Ver planos</a>}
               </div>
             )}
 
