@@ -1,5 +1,5 @@
 'use client'
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import type { Agente } from '@/types'
 
 export interface FieldConfig {
@@ -25,7 +25,23 @@ export function AgentForm({ agente, fields }: AgentFormProps) {
   const [upgrade, setUpgrade] = useState(false)
   const [copied, setCopied] = useState(false)
   const [done, setDone] = useState(false)
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false)
+  const [showUpgradeBanner, setShowUpgradeBanner] = useState(false)
   const outputRef = useRef<HTMLDivElement>(null)
+
+  const handleCloseModal = () => {
+    setShowUpgradeModal(false)
+    setShowUpgradeBanner(true)
+  }
+
+  useEffect(() => {
+    if (showUpgradeModal) {
+      document.body.style.overflow = 'hidden'
+    } else {
+      document.body.style.overflow = ''
+    }
+    return () => { document.body.style.overflow = '' }
+  }, [showUpgradeModal])
 
   const handleChange = (name: string, value: string) => {
     setValues((prev) => ({ ...prev, [name]: value }))
@@ -54,6 +70,8 @@ export function AgentForm({ agente, fields }: AgentFormProps) {
         return
       }
 
+      const alerteUpgrade = res.headers.get('X-Alerte-Upgrade') === '1'
+
       const reader = res.body!.getReader()
       const decoder = new TextDecoder()
 
@@ -71,7 +89,10 @@ export function AgentForm({ agente, fields }: AgentFormProps) {
       }
       setDone(true)
 
-      // Mobile: scroll até o output
+      if (alerteUpgrade) {
+        setTimeout(() => setShowUpgradeModal(true), 600)
+      }
+
       setTimeout(() => {
         outputRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
       }, 100)
@@ -107,13 +128,208 @@ export function AgentForm({ agente, fields }: AgentFormProps) {
           .agent-grid { grid-template-columns: 400px 1fr; }
         }
         @keyframes spin { to { transform: rotate(360deg); } }
+        @keyframes modalIn {
+          from { opacity: 0; transform: scale(0.92) translateY(20px); }
+          to   { opacity: 1; transform: scale(1) translateY(0); }
+        }
+        @keyframes overlayIn {
+          from { opacity: 0; }
+          to   { opacity: 1; }
+        }
+        @keyframes bannerIn {
+          from { opacity: 0; transform: translateY(-100%); }
+          to   { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes pulse {
+          0%, 100% { transform: scale(1); }
+          50% { transform: scale(1.04); }
+        }
+        @keyframes shimmer {
+          0% { background-position: -200% center; }
+          100% { background-position: 200% center; }
+        }
       `}</style>
+
+      {showUpgradeBanner && (
+        <div style={{
+          position: 'fixed', top: 0, left: 0, right: 0, zIndex: 999,
+          background: 'linear-gradient(90deg, #2D1B6E 0%, #7B4FD8 50%, #2D1B6E 100%)',
+          backgroundSize: '200% auto',
+          animation: 'bannerIn 0.4s ease, shimmer 4s linear infinite',
+          padding: '10px 16px',
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12,
+          boxShadow: '0 2px 20px rgba(123,79,216,0.5)',
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, flex: 1, minWidth: 0 }}>
+            <span style={{ fontSize: 18 }}>⚡</span>
+            <div>
+              <p style={{ margin: 0, color: '#fff', fontSize: 13, fontWeight: 700, lineHeight: 1.3 }}>
+                Última geração gratuita usada!
+              </p>
+              <p style={{ margin: 0, color: 'rgba(255,255,255,0.75)', fontSize: 12, lineHeight: 1.3 }}>
+                Faça upgrade e continue gerando conteúdo ilimitado para sua campanha
+              </p>
+            </div>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
+            
+              href="/planos?highlight=essencial"
+              style={{
+                padding: '7px 16px', borderRadius: 50,
+                background: '#C9A84C', color: '#2D1B6E',
+                fontSize: 12, fontWeight: 800, textDecoration: 'none',
+                whiteSpace: 'nowrap', animation: 'pulse 2s ease infinite',
+                display: 'inline-block',
+              }}
+            >
+              Ver planos →
+            </a>
+            <button
+              onClick={() => setShowUpgradeBanner(false)}
+              style={{
+                background: 'transparent', border: 'none', color: 'rgba(255,255,255,0.6)',
+                fontSize: 18, cursor: 'pointer', padding: '0 4px', lineHeight: 1,
+              }}
+            >
+              ×
+            </button>
+          </div>
+        </div>
+      )}
+
+      {showUpgradeModal && (
+        <div
+          onClick={handleCloseModal}
+          style={{
+            position: 'fixed', inset: 0, zIndex: 1000,
+            background: 'rgba(20,10,50,0.75)', backdropFilter: 'blur(6px)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            padding: 20,
+            animation: 'overlayIn 0.25s ease',
+          }}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              background: '#fff', borderRadius: 24, maxWidth: 460, width: '100%',
+              overflow: 'hidden', boxShadow: '0 24px 80px rgba(45,27,110,0.35)',
+              animation: 'modalIn 0.35s cubic-bezier(0.34,1.56,0.64,1)',
+            }}
+          >
+            <div style={{
+              background: 'linear-gradient(135deg, #2D1B6E 0%, #7B4FD8 100%)',
+              padding: '28px 28px 24px',
+              textAlign: 'center',
+              position: 'relative',
+            }}>
+              <div style={{ fontSize: 48, marginBottom: 12, filter: 'drop-shadow(0 4px 12px rgba(0,0,0,0.3))' }}>⚡</div>
+              <h2 style={{
+                margin: '0 0 6px', color: '#fff', fontSize: 22, fontWeight: 800,
+                fontFamily: 'var(--font-inter), sans-serif', lineHeight: 1.2,
+              }}>
+                Você usou sua última<br />geração gratuita!
+              </h2>
+              <p style={{
+                margin: 0, color: 'rgba(255,255,255,0.75)', fontSize: 14,
+                fontFamily: 'var(--font-inter), sans-serif', lineHeight: 1.5,
+              }}>
+                O conteúdo já foi gerado e está disponível abaixo.
+              </p>
+              <button
+                onClick={handleCloseModal}
+                style={{
+                  position: 'absolute', top: 14, right: 14,
+                  background: 'rgba(255,255,255,0.15)', border: 'none',
+                  color: '#fff', width: 30, height: 30, borderRadius: '50%',
+                  fontSize: 16, cursor: 'pointer', display: 'flex',
+                  alignItems: 'center', justifyContent: 'center',
+                }}
+              >
+                ×
+              </button>
+            </div>
+
+            <div style={{ padding: '24px 28px 28px' }}>
+              <div style={{ marginBottom: 20 }}>
+                <div style={{
+                  display: 'flex', justifyContent: 'space-between',
+                  marginBottom: 6, fontSize: 12, fontWeight: 600,
+                  color: 'rgba(45,27,110,0.5)', fontFamily: 'var(--font-inter), sans-serif',
+                }}>
+                  <span>Gerações utilizadas</span>
+                  <span style={{ color: '#7B4FD8' }}>5 de 5</span>
+                </div>
+                <div style={{ height: 8, background: 'rgba(123,79,216,0.1)', borderRadius: 4, overflow: 'hidden' }}>
+                  <div style={{
+                    height: '100%', width: '100%', borderRadius: 4,
+                    background: 'linear-gradient(90deg, #7B4FD8, #C9A84C)',
+                  }} />
+                </div>
+              </div>
+
+              <div style={{
+                background: 'rgba(123,79,216,0.05)', borderRadius: 14,
+                padding: '16px 18px', marginBottom: 20,
+                border: '1px solid rgba(123,79,216,0.12)',
+              }}>
+                <p style={{
+                  margin: '0 0 10px', fontSize: 13, fontWeight: 700,
+                  color: '#2D1B6E', fontFamily: 'var(--font-inter), sans-serif',
+                }}>
+                  Com o plano Essencial você tem:
+                </p>
+                {[
+                  '50 gerações por mês',
+                  'Modelo de IA superior (Sonnet)',
+                  'Conteúdo de maior qualidade',
+                  'Suporte prioritário',
+                ].map((b) => (
+                  <div key={b} style={{
+                    display: 'flex', alignItems: 'center', gap: 8,
+                    marginBottom: 6, fontSize: 13, color: '#2D1B6E',
+                    fontFamily: 'var(--font-inter), sans-serif',
+                  }}>
+                    <span style={{ color: '#1D9E75', fontWeight: 700 }}>✓</span>
+                    {b}
+                  </div>
+                ))}
+              </div>
+
+              
+                href="/planos?highlight=essencial"
+                style={{
+                  display: 'block', textAlign: 'center',
+                  padding: '14px', borderRadius: 50,
+                  background: 'linear-gradient(135deg, #7B4FD8 0%, #5B3BAA 100%)',
+                  color: '#fff', fontSize: 15, fontWeight: 800,
+                  textDecoration: 'none', marginBottom: 10,
+                  boxShadow: '0 6px 20px rgba(123,79,216,0.4)',
+                  fontFamily: 'var(--font-inter), sans-serif',
+                  animation: 'pulse 2s ease infinite',
+                }}
+              >
+                ✨ Fazer upgrade agora
+              </a>
+              <button
+                onClick={handleCloseModal}
+                style={{
+                  display: 'block', width: '100%', textAlign: 'center',
+                  padding: '11px', borderRadius: 50, cursor: 'pointer',
+                  background: 'transparent', border: '1px solid rgba(123,79,216,0.2)',
+                  color: 'rgba(45,27,110,0.5)', fontSize: 13, fontWeight: 500,
+                  fontFamily: 'var(--font-inter), sans-serif',
+                }}
+              >
+                Ver meu conteúdo gerado
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className="agent-grid" style={{ fontFamily: 'var(--font-inter), sans-serif' }}>
 
-        {/* Formulário */}
         <div style={{ background: 'rgba(255,255,255,0.85)', backdropFilter: 'blur(8px)', border: '1px solid rgba(123,79,216,0.12)', borderRadius: 18, overflow: 'hidden' }}>
-
           <div style={{ padding: '16px 20px', borderBottom: '1px solid rgba(123,79,216,0.08)', background: 'rgba(123,79,216,0.03)' }}>
             <div style={{ fontSize: '11px', color: 'rgba(45,27,110,0.4)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 10 }}>
               Preencha os dados
@@ -166,7 +382,6 @@ export function AgentForm({ agente, fields }: AgentFormProps) {
           </form>
         </div>
 
-        {/* Output */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -207,7 +422,7 @@ export function AgentForm({ agente, fields }: AgentFormProps) {
               <button onClick={handleCopy} style={{ padding: '11px 22px', background: 'linear-gradient(135deg, #7B4FD8, #5B3BAA)', color: '#fff', borderRadius: 50, border: 'none', fontSize: 13, fontWeight: 700, cursor: 'pointer', boxShadow: '0 4px 14px rgba(123,79,216,0.3)', fontFamily: 'var(--font-inter), sans-serif' }}>
                 {copied ? '✓ Copiado!' : 'Copiar conteúdo'}
               </button>
-              <button onClick={handleClear} style={{ padding: '11px 22px', background: 'transparent', color: 'rgba(45,27,110,0.6)', borderRadius: 50, border: '1px solid rgba(123,79,216,0.2)', fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'var(--font-inter), sans-serif' }}>
+              <button onClick={handleClear} style={{ padding: '11px 22px', background: 'transparent', color: 'rgba(45,27,110,0.5)', borderRadius: 50, border: '1px solid rgba(123,79,216,0.2)', fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'var(--font-inter), sans-serif' }}>
                 Gerar novamente
               </button>
             </div>

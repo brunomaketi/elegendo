@@ -7,29 +7,23 @@ import type { Agente } from '@/types'
 
 export const runtime = 'nodejs'
 
-// Agentes válidos — whitelist explícita
 const AGENTES_VALIDOS: Agente[] = ['roteirista', 'estrategista', 'copy', 'consciencia']
 
-// Limite de tamanho de input por campo (caracteres)
 const MAX_CAMPO = 1000
 const MAX_CAMPOS = 10
 
-// Rate limit simples em memória (por IP)
 const rateLimit = new Map<string, { count: number; reset: number }>()
-const RATE_LIMIT_MAX = 10      // máx 10 requests
-const RATE_LIMIT_WINDOW = 60_000 // por minuto
+const RATE_LIMIT_MAX = 10
+const RATE_LIMIT_WINDOW = 60_000
 
 function checkRateLimit(ip: string): boolean {
   const now = Date.now()
   const entry = rateLimit.get(ip)
-
   if (!entry || now > entry.reset) {
     rateLimit.set(ip, { count: 1, reset: now + RATE_LIMIT_WINDOW })
     return true
   }
-
   if (entry.count >= RATE_LIMIT_MAX) return false
-
   entry.count++
   return true
 }
@@ -37,23 +31,15 @@ function checkRateLimit(ip: string): boolean {
 function sanitizeInput(input: Record<string, string>): Record<string, string> {
   const sanitized: Record<string, string> = {}
   const entries = Object.entries(input).slice(0, MAX_CAMPOS)
-
   for (const [key, value] of entries) {
     if (typeof key !== 'string' || typeof value !== 'string') continue
-    // Remove tags HTML e limita tamanho
-    const clean = value
-      .replace(/<[^>]*>/g, '')
-      .replace(/[<>{}]/g, '')
-      .trim()
-      .slice(0, MAX_CAMPO)
+    const clean = value.replace(/<[^>]*>/g, '').replace(/[<>{}]/g, '').trim().slice(0, MAX_CAMPO)
     sanitized[key.slice(0, 50)] = clean
   }
-
   return sanitized
 }
 
 export async function POST(request: NextRequest) {
-  // Rate limiting por IP
   const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ?? 'unknown'
   if (!checkRateLimit(ip)) {
     return Response.json({ error: 'Muitas requisições. Aguarde um momento.' }, { status: 429 })
@@ -81,6 +67,9 @@ export async function POST(request: NextRequest) {
   const plano = profile.plano ?? 'gratuito'
   const limite = LIMITES_PLANO[plano as keyof typeof LIMITES_PLANO]
 
+  let geracoesUsadas = 0
+  let alerteUpgrade = false
+
   if (limite !== null) {
     const inicioMes = new Date()
     inicioMes.setDate(1)
@@ -91,11 +80,18 @@ export async function POST(request: NextRequest) {
       .eq('user_id', user.id)
       .gte('criado_em', inicioMes.toISOString())
 
-    if ((count ?? 0) >= limite) {
+    geracoesUsadas = count ?? 0
+
+    if (geracoesUsadas >= limite) {
       return Response.json(
         { error: `Limite de ${limite} gerações/mês atingido. Faça upgrade para continuar.`, upgrade: true },
         { status: 429 }
       )
+    }
+
+    const restantes = limite - geracoesUsadas
+    if (restantes === 1) {
+      alerteUpgrade = true
     }
   }
 
@@ -108,18 +104,15 @@ export async function POST(request: NextRequest) {
 
   const { agente, input } = body
 
-  // Valida agente contra whitelist
   if (!agente || !AGENTES_VALIDOS.includes(agente)) {
     return Response.json({ error: 'Agente inválido' }, { status: 400 })
   }
 
-  // Valida e sanitiza input
   if (!input || typeof input !== 'object' || Array.isArray(input)) {
     return Response.json({ error: 'Input inválido' }, { status: 400 })
   }
 
   const inputSanitizado = sanitizeInput(input)
-
   const encoder = new TextEncoder()
   let fullOutput = ''
 
@@ -156,6 +149,9 @@ export async function POST(request: NextRequest) {
     headers: {
       'Content-Type': 'text/plain; charset=utf-8',
       'Transfer-Encoding': 'chunked',
+      'X-Alerte-Upgrade': alerteUpgrade ? '1' : '0',
+      'X-Limite-Plano': String(limite ?? 0),
+      'Access-Control-Expose-Headers': 'X-Alerte-Upgrade, X-Limite-Plano',
     },
   })
 }

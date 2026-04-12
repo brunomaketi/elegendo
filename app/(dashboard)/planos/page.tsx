@@ -1,5 +1,6 @@
 'use client'
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
+import { useSearchParams } from 'next/navigation'
 
 const PLANOS = [
   {
@@ -63,7 +64,18 @@ const FAQ = [
 export default function PlanosPage() {
   const [faqAberto, setFaqAberto] = useState<number | null>(null)
   const [loading, setLoading] = useState<string | null>(null)
+  const searchParams = useSearchParams()
+  const highlight = searchParams.get('highlight')
+  const proRef = useRef<HTMLDivElement>(null)
   const planoAtual = 'gratuito'
+
+  useEffect(() => {
+    if (highlight === 'essencial' && proRef.current) {
+      setTimeout(() => {
+        proRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+      }, 400)
+    }
+  }, [highlight])
 
   const handleAssinar = async (planoId: string) => {
     setLoading(planoId)
@@ -105,6 +117,10 @@ export default function PlanosPage() {
           gap: 32px;
           flex-wrap: wrap;
         }
+        @keyframes highlightPulse {
+          0%, 100% { box-shadow: 0 12px 48px rgba(123,79,216,0.25); }
+          50% { box-shadow: 0 12px 60px rgba(123,79,216,0.6), 0 0 0 4px rgba(201,168,76,0.4); }
+        }
         @media (max-width: 768px) {
           .planos-grid {
             grid-template-columns: 1fr !important;
@@ -119,7 +135,6 @@ export default function PlanosPage() {
         }
       `}</style>
 
-      {/* Header */}
       <div style={{ textAlign: 'center', marginBottom: 44 }}>
         <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '5px 14px', background: 'rgba(123,79,216,0.08)', border: '1px solid rgba(123,79,216,0.2)', borderRadius: 20, marginBottom: 16 }}>
           <span style={{ fontSize: 12 }}>🗳️</span>
@@ -134,26 +149,29 @@ export default function PlanosPage() {
         </p>
       </div>
 
-      {/* Cards */}
       <div className="planos-grid">
         {PLANOS.map((plano) => {
           const isDestaque = plano.destaque
           const isAgencia = plano.id === 'agencia'
+          const isPro = plano.id === 'pro'
+          const isHighlighted = highlight === 'essencial' && isPro
           return (
             <div
               key={plano.id}
+              ref={isPro ? proRef : undefined}
               className={`plano-card ${isDestaque ? 'plano-destaque' : ''}`}
               style={{
                 background: isDestaque ? 'linear-gradient(145deg, #2D1B6E 0%, #4A2FA0 100%)' : 'rgba(255,255,255,0.85)',
                 backdropFilter: 'blur(8px)',
-                border: isDestaque ? '2px solid rgba(123,79,216,0.6)' : '1px solid rgba(123,79,216,0.12)',
+                border: isHighlighted ? '2px solid #C9A84C' : isDestaque ? '2px solid rgba(123,79,216,0.6)' : '1px solid rgba(123,79,216,0.12)',
                 transform: isDestaque ? 'scale(1.04)' : 'none',
                 boxShadow: isDestaque ? '0 12px 48px rgba(123,79,216,0.25)' : '0 2px 12px rgba(45,27,110,0.05)',
+                animation: isHighlighted ? 'highlightPulse 1.8s ease-in-out 3' : 'none',
               }}
             >
               {plano.badge && (
                 <div style={{ position: 'absolute', top: -14, left: '50%', transform: 'translateX(-50%)', background: 'linear-gradient(135deg, #7B4FD8, #5B3BAA)', color: '#fff', fontSize: 12, fontWeight: 700, padding: '5px 16px', borderRadius: 20, whiteSpace: 'nowrap', boxShadow: '0 4px 12px rgba(123,79,216,0.4)' }}>
-                  {plano.badge}
+                  {isHighlighted ? '⭐ Recomendado para você' : plano.badge}
                 </div>
               )}
 
@@ -207,7 +225,6 @@ export default function PlanosPage() {
         })}
       </div>
 
-      {/* Trust bar */}
       <div className="trust-row" style={{ padding: '24px 20px', background: 'rgba(255,255,255,0.7)', backdropFilter: 'blur(8px)', borderRadius: 16, border: '1px solid rgba(123,79,216,0.1)', marginBottom: 40 }}>
         {[
           { icon: '🔒', titulo: 'Pagamento seguro', sub: 'Processado pelo Stripe' },
@@ -225,7 +242,6 @@ export default function PlanosPage() {
         ))}
       </div>
 
-      {/* FAQ */}
       <div style={{ marginBottom: 40 }}>
         <h2 style={{ fontSize: 22, fontWeight: 800, color: '#2D1B6E', marginBottom: 20, textAlign: 'center', letterSpacing: '-0.01em' }}>Perguntas frequentes</h2>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
@@ -243,7 +259,6 @@ export default function PlanosPage() {
         </div>
       </div>
 
-      {/* CTA final */}
       <div style={{ textAlign: 'center', padding: '40px 24px', background: 'linear-gradient(145deg, #2D1B6E 0%, #4A2FA0 100%)', borderRadius: 20, position: 'relative', overflow: 'hidden' }}>
         <div style={{ position: 'absolute', top: '-60px', right: '-60px', width: 240, height: 240, borderRadius: '50%', background: 'radial-gradient(circle, rgba(123,79,216,0.4) 0%, transparent 70%)', pointerEvents: 'none' }} />
         <div style={{ position: 'absolute', bottom: '-40px', left: '-40px', width: 200, height: 200, borderRadius: '50%', background: 'radial-gradient(circle, rgba(80,200,120,0.2) 0%, transparent 70%)', pointerEvents: 'none' }} />
