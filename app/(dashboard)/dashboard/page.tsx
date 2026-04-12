@@ -63,10 +63,7 @@ export default async function DashboardPage() {
 
   const { data: profile } = await supabase.from('profiles').select('*').eq('id', user.id).single()
 
-  // Primeiro login: se não tem nome, redireciona para completar perfil
-  if (!profile?.nome) {
-    redirect('/perfil?primeiro_acesso=true')
-  }
+  if (!profile?.nome) redirect('/perfil?primeiro_acesso=true')
 
   const inicioMes = new Date()
   inicioMes.setDate(1)
@@ -109,13 +106,6 @@ export default async function DashboardPage() {
           .agents-cal-grid { grid-template-columns: 1fr 320px !important; }
           .ultimas-grid { grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)) !important; }
         }
-        @keyframes shimmer {
-          0% { background-position: -200% center; }
-          100% { background-position: 200% center; }
-        }
-        .banner-upgrade {
-          animation: shimmer 3s linear infinite;
-        }
       `}</style>
 
       {/* Header */}
@@ -136,24 +126,23 @@ export default async function DashboardPage() {
         </Link>
       </div>
 
-      {/* Banner upgrade — só para plano gratuito */}
+      {/* Banner upgrade — só para plano gratuito, sem animação */}
       {isGratuito && (
-        <div style={{ position: 'relative', overflow: 'hidden', borderRadius: 16, marginBottom: 20, background: 'linear-gradient(135deg, #2D1B6E 0%, #4A2FA0 50%, #7B4FD8 100%)', backgroundSize: '200% auto', padding: '20px 24px' }} className="banner-upgrade">
-          {/* Elementos decorativos */}
-          <div style={{ position: 'absolute', top: -30, right: -30, width: 120, height: 120, borderRadius: '50%', background: 'rgba(255,255,255,0.06)', pointerEvents: 'none' }} />
-          <div style={{ position: 'absolute', bottom: -20, right: 80, width: 80, height: 80, borderRadius: '50%', background: 'rgba(255,255,255,0.04)', pointerEvents: 'none' }} />
+        <div style={{ borderRadius: 16, marginBottom: 20, background: 'linear-gradient(135deg, #2D1B6E 0%, #4A2FA0 100%)', padding: '20px 24px', position: 'relative', overflow: 'hidden' }}>
+          <div style={{ position: 'absolute', top: -40, right: -40, width: 160, height: 160, borderRadius: '50%', background: 'rgba(255,255,255,0.05)', pointerEvents: 'none' }} />
+          <div style={{ position: 'absolute', bottom: -30, right: 120, width: 100, height: 100, borderRadius: '50%', background: 'rgba(255,255,255,0.03)', pointerEvents: 'none' }} />
 
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap', position: 'relative', zIndex: 2 }}>
             <div style={{ flex: 1, minWidth: 200 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
-                <span style={{ fontSize: 18 }}>🚀</span>
-                <span style={{ fontSize: 13, fontWeight: 700, color: 'rgba(255,255,255,0.6)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Você está no plano gratuito</span>
+                <span style={{ fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,0.45)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Plano gratuito</span>
+                <span style={{ fontSize: 11, fontWeight: 700, color: '#FFD166', background: 'rgba(255,209,102,0.15)', padding: '2px 8px', borderRadius: 20 }}>{total}/5 gerações usadas</span>
               </div>
               <p style={{ fontSize: 15, fontWeight: 700, color: '#fff', margin: '0 0 4px', lineHeight: 1.4 }}>
-                Desbloqueie gerações ilimitadas e ganhe a eleição.
+                Desbloqueie gerações ilimitadas.
               </p>
-              <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.55)', margin: 0 }}>
-                Plano Pro por <strong style={{ color: '#FFD166' }}>R$ 47/mês</strong> · Plano Agência por <strong style={{ color: '#FFD166' }}>R$ 97/mês</strong>
+              <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.5)', margin: 0 }}>
+                Pro <strong style={{ color: 'rgba(255,255,255,0.8)' }}>R$ 47/mês</strong> · Agência <strong style={{ color: 'rgba(255,255,255,0.8)' }}>R$ 97/mês</strong>
               </p>
             </div>
             <Link href="/planos" style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '11px 22px', background: '#fff', color: '#2D1B6E', borderRadius: 50, fontSize: 13, fontWeight: 800, textDecoration: 'none', whiteSpace: 'nowrap', flexShrink: 0 }}>
@@ -162,13 +151,9 @@ export default async function DashboardPage() {
           </div>
 
           {/* Barra de uso */}
-          <div style={{ marginTop: 14, position: 'relative', zIndex: 2 }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
-              <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.5)' }}>Gerações este mês</span>
-              <span style={{ fontSize: 11, fontWeight: 700, color: total >= 4 ? '#FFD166' : 'rgba(255,255,255,0.7)' }}>{total} de 5 usadas</span>
-            </div>
-            <div style={{ height: 6, background: 'rgba(255,255,255,0.15)', borderRadius: 4, overflow: 'hidden' }}>
-              <div style={{ height: '100%', width: `${Math.min((total / 5) * 100, 100)}%`, background: total >= 4 ? '#FFD166' : 'rgba(255,255,255,0.8)', borderRadius: 4, transition: 'width 0.5s' }} />
+          <div style={{ marginTop: 16, position: 'relative', zIndex: 2 }}>
+            <div style={{ height: 4, background: 'rgba(255,255,255,0.12)', borderRadius: 4, overflow: 'hidden' }}>
+              <div style={{ height: '100%', width: `${Math.min((total / 5) * 100, 100)}%`, background: total >= 4 ? '#FFD166' : 'rgba(255,255,255,0.6)', borderRadius: 4 }} />
             </div>
           </div>
         </div>
