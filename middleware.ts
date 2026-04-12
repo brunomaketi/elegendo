@@ -8,6 +8,9 @@ const ROTAS_PUBLICAS = ['/login', '/cadastro']
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
 
+  // Nunca intercepta rotas de API
+  if (pathname.startsWith('/api/')) return NextResponse.next()
+
   const isProtegida = ROTAS_PROTEGIDAS.some(r => pathname.startsWith(r))
   const isPublica = ROTAS_PUBLICAS.some(r => pathname.startsWith(r))
 
@@ -21,29 +24,22 @@ export async function middleware(request: NextRequest) {
     {
       cookies: {
         get: (name) => request.cookies.get(name)?.value,
-        set: (name, value, options) => {
-          response.cookies.set({ name, value, ...options })
-        },
-        remove: (name, options) => {
-          response.cookies.set({ name, value: '', ...options })
-        },
+        set: (name, value, options) => { response.cookies.set({ name, value, ...options }) },
+        remove: (name, options) => { response.cookies.set({ name, value: '', ...options }) },
       },
     }
   )
 
   const { data: { user } } = await supabase.auth.getUser()
 
-  // Rota protegida sem usuário → redireciona para login
   if (isProtegida && !user) {
     return NextResponse.redirect(new URL('/login', request.url))
   }
 
-  // Já logado tentando acessar login/cadastro → redireciona para dashboard
   if (isPublica && user) {
     return NextResponse.redirect(new URL('/dashboard', request.url))
   }
 
-  // Rota /admin — só seu email
   if (pathname.startsWith('/admin') && user?.email !== process.env.ADMIN_EMAIL) {
     return NextResponse.redirect(new URL('/dashboard', request.url))
   }
@@ -52,7 +48,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: [
-    '/((?!_next/static|_next/image|favicon.ico|api/).*)',
-  ],
+  matcher: ['/((?!_next/static|_next/image|favicon.ico|api/).*)'],
 }
