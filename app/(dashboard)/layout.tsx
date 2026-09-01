@@ -110,7 +110,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
           <div className="e-nav-section">
             <span className="e-nav-label">Eleições 2026</span>
             <NavLink href="/calendario" icon={icons.vote} badge={`${diasEleicao}d`}>1º Turno</NavLink>
-            <NavLink href="/planos" icon={icons.chart}>Pesquisas TSE</NavLink>
+            <NavLink href="/pesquisas" icon={icons.chart}>Pesquisas TSE</NavLink>
           </div>
 
           <div className="e-nav-section">

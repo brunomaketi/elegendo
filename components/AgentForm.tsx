@@ -1,6 +1,7 @@
 'use client'
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef } from 'react'
 import type { Agente } from '@/types'
+import Link from 'next/link'
 
 export interface FieldConfig {
   name: string; label: string; type: 'text'|'select'|'textarea'
@@ -9,11 +10,85 @@ export interface FieldConfig {
 
 interface AgentFormProps {
   agente: Agente; fields: FieldConfig[]
-  agentColor?: string; agentBg?: string
+  agentColor?: string
 }
 
-export function AgentForm({ agente, fields, agentColor='#0EA472', agentBg='rgba(14,164,114,0.08)' }: AgentFormProps) {
-  const [values, setValues] = useState<Record<string,string>>({})
+// ── Markdown renderer ─────────────────────────────────────────────────
+function renderInline(str: string, color: string): React.ReactNode {
+  const parts = str.split(/(\*\*(?:[^*]|\*(?!\*))+\*\*|\*[^*]+\*|`[^`]+`)/g)
+  return parts.map((p, i) => {
+    if (p.startsWith('**') && p.endsWith('**') && p.length > 4)
+      return <strong key={i} style={{ fontWeight: 700, color: '#091710' }}>{p.slice(2, -2)}</strong>
+    if (p.startsWith('*') && p.endsWith('*') && p.length > 2)
+      return <em key={i} style={{ fontStyle: 'italic' }}>{p.slice(1, -1)}</em>
+    if (p.startsWith('`') && p.endsWith('`') && p.length > 2)
+      return <code key={i} style={{ background: `${color}14`, color, padding: '1px 6px', borderRadius: 4, fontSize: '0.88em', fontWeight: 600 }}>{p.slice(1, -1)}</code>
+    return p
+  })
+}
+
+function MarkdownOutput({ text, color }: { text: string; color: string }) {
+  const lines = text.split('\n')
+  const blocks: React.ReactNode[] = []
+  let i = 0
+  let listItems: { text: string; indent: number }[] = []
+  let listType: 'ul' | 'ol' | null = null
+
+  const flushList = () => {
+    if (!listItems.length) return
+    const Tag = listType === 'ol' ? 'ol' : 'ul'
+    blocks.push(
+      <Tag key={`list-${i}`} style={{ margin: '8px 0 10px', paddingLeft: 18, display: 'flex', flexDirection: 'column', gap: 3 }}>
+        {listItems.map((item, k) => (
+          <li key={k} style={{ fontSize: 14, color: '#3A5F4E', lineHeight: 1.75 }}>
+            {renderInline(item.text, color)}
+          </li>
+        ))}
+      </Tag>
+    )
+    listItems = []; listType = null
+  }
+
+  while (i < lines.length) {
+    const raw = lines[i]
+    const t = raw.trim()
+    if (t.startsWith('# ')) {
+      flushList()
+      blocks.push(<h1 key={i} style={{ fontSize: 20, fontWeight: 800, color: '#091710', margin: '20px 0 10px', letterSpacing: '-0.02em', paddingBottom: 8, borderBottom: `2px solid ${color}30` }}>{renderInline(t.slice(2), color)}</h1>)
+    } else if (t.startsWith('## ')) {
+      flushList()
+      blocks.push(
+        <h2 key={i} style={{ fontSize: 16, fontWeight: 700, color: '#091710', margin: '16px 0 6px', letterSpacing: '-0.01em', display: 'flex', alignItems: 'center', gap: 8 }}>
+          <span style={{ width: 3, height: 16, background: color, borderRadius: 2, display: 'inline-block', flexShrink: 0 }}/>
+          {renderInline(t.slice(3), color)}
+        </h2>
+      )
+    } else if (t.startsWith('### ')) {
+      flushList()
+      blocks.push(<h3 key={i} style={{ fontSize: 14.5, fontWeight: 700, color: '#3A5F4E', margin: '12px 0 4px' }}>{renderInline(t.slice(4), color)}</h3>)
+    } else if (t === '---' || t === '___') {
+      flushList()
+      blocks.push(<hr key={i} style={{ border: 'none', borderTop: `1px solid ${color}20`, margin: '16px 0' }}/>)
+    } else if (/^[-*]\s/.test(t)) {
+      if (listType !== 'ul') { flushList(); listType = 'ul' }
+      listItems.push({ text: t.slice(2), indent: 0 })
+    } else if (/^\d+\.\s/.test(t)) {
+      if (listType !== 'ol') { flushList(); listType = 'ol' }
+      listItems.push({ text: t.replace(/^\d+\.\s/, ''), indent: 0 })
+    } else if (t === '') {
+      flushList()
+    } else {
+      flushList()
+      blocks.push(<p key={i} style={{ fontSize: 14, color: '#3A5F4E', lineHeight: 1.85, margin: '4px 0' }}>{renderInline(t, color)}</p>)
+    }
+    i++
+  }
+  flushList()
+  return <div style={{ fontFamily: "var(--font-inter),'Inter',sans-serif" }}>{blocks}</div>
+}
+
+export function AgentForm({ agente, fields, agentColor = '#0EA472' }: AgentFormProps) {
+  const [values, setValues] = useState<Record<string, string>>({})
   const [output, setOutput] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
@@ -21,190 +96,166 @@ export function AgentForm({ agente, fields, agentColor='#0EA472', agentBg='rgba(
   const [copied, setCopied] = useState(false)
   const [done, setDone] = useState(false)
   const [showModal, setShowModal] = useState(false)
-  const [showBanner, setShowBanner] = useState(false)
   const outputRef = useRef<HTMLDivElement>(null)
-
-  useEffect(() => {
-    document.body.style.overflow = showModal ? 'hidden' : ''
-    return () => { document.body.style.overflow = '' }
-  }, [showModal])
 
   const filled = fields.filter(f => f.required && values[f.name]).length
   const total  = fields.filter(f => f.required).length
-  const pct    = total > 0 ? Math.round((Math.min(filled,total)/total)*100) : 0
+  const pct    = total > 0 ? Math.round((Math.min(filled, total) / total) * 100) : 0
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault(); setOutput(''); setError(''); setUpgrade(false); setDone(false); setLoading(true)
     try {
-      const res = await fetch('/api/agents', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({agente,input:values}) })
+      const res = await fetch('/api/agents', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ agente, input: values }),
+      })
       if (!res.ok) {
-        const d = await res.json(); if(d.upgrade) setUpgrade(true); setError(d.error??'Erro ao gerar.'); setLoading(false); return
+        const d = await res.json()
+        if (d.upgrade) setUpgrade(true)
+        setError(d.error ?? 'Erro ao gerar.'); setLoading(false); return
       }
-      const alertUpgrade = res.headers.get('X-Alerte-Upgrade')==='1'
+      const alertUpgrade = res.headers.get('X-Alerte-Upgrade') === '1'
       const reader = res.body!.getReader(); const dec = new TextDecoder()
-      while(true) {
-        const {done:sd,value} = await reader.read(); if(sd) break
-        setOutput(p => { const n=p+dec.decode(value); setTimeout(()=>outputRef.current?.scrollTo({top:outputRef.current.scrollHeight,behavior:'smooth'}),10); return n })
+      while (true) {
+        const { done: sd, value } = await reader.read(); if (sd) break
+        setOutput(p => {
+          const n = p + dec.decode(value)
+          setTimeout(() => outputRef.current?.scrollTo({ top: outputRef.current.scrollHeight, behavior: 'smooth' }), 10)
+          return n
+        })
       }
       setDone(true)
-      if(alertUpgrade) setTimeout(()=>setShowModal(true),600)
+      if (alertUpgrade) setTimeout(() => setShowModal(true), 600)
     } catch { setError('Erro de conexão. Tente novamente.') }
     finally { setLoading(false) }
   }
 
-  const handleCopy = () => { navigator.clipboard.writeText(output); setCopied(true); setTimeout(()=>setCopied(false),2000) }
+  const handleCopy = () => { navigator.clipboard.writeText(output); setCopied(true); setTimeout(() => setCopied(false), 2000) }
 
   return (
     <>
       <style>{`
         @keyframes spin{to{transform:rotate(360deg)}}
         @keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
-        @keyframes modalIn{from{opacity:0;transform:scale(.94) translateY(16px)}to{opacity:1;transform:scale(1) translateY(0)}}
-        @keyframes fadeOverlay{from{opacity:0}to{opacity:1}}
-        @keyframes bannerIn{from{opacity:0;transform:translateY(-100%)}to{opacity:1;transform:translateY(0)}}
+        @keyframes modalIn{from{opacity:0;transform:scale(.95) translateY(12px)}to{opacity:1;transform:scale(1) translateY(0)}}
         .agent-grid{display:grid;grid-template-columns:1fr;gap:16px}
-        @media(min-width:900px){.agent-grid{grid-template-columns:380px 1fr}}
-        .field-inp{padding:11px 14px;border-radius:10px;border:1.5px solid #D4E8DC;font-size:14px;color:#091710;background:#fff;width:100%;box-sizing:border-box;outline:none;font-family:inherit;transition:border-color .15s,box-shadow .15s}
-        .field-inp:focus{border-color:#0EA472;box-shadow:0 0 0 3px rgba(14,164,114,0.12)}
-        .output-area{min-height:320px;max-height:66vh;overflow-y:auto;background:#0A1A14;border-radius:14px;border:1px solid rgba(14,164,114,0.2);padding:22px;font-size:14px;line-height:1.9;color:#D4F0E4;white-space:pre-wrap;font-family:inherit;scrollbar-width:thin;scrollbar-color:rgba(14,164,114,0.3) transparent}
-        .output-area::-webkit-scrollbar{width:4px}.output-area::-webkit-scrollbar-thumb{background:rgba(14,164,114,0.3);border-radius:4px}
+        @media(min-width:900px){.agent-grid{grid-template-columns:360px 1fr}}
+        .finp{padding:11px 14px;border-radius:10px;border:1.5px solid #D4E8DC;font-size:14px;color:#091710;background:#fff;width:100%;box-sizing:border-box;outline:none;font-family:inherit;transition:border-color .15s,box-shadow .15s}
+        .finp:focus{border-color:${agentColor};box-shadow:0 0 0 3px ${agentColor}20}
+        .output-scroll{max-height:68vh;overflow-y:auto;scrollbar-width:thin;scrollbar-color:${agentColor}30 transparent}
+        .output-scroll::-webkit-scrollbar{width:4px}.output-scroll::-webkit-scrollbar-thumb{background:${agentColor}30;border-radius:4px}
       `}</style>
-
-      {/* Banner upgrade */}
-      {showBanner && (
-        <div style={{ position:'fixed',top:0,left:0,right:0,zIndex:999,background:'linear-gradient(90deg,#054E39,#0EA472)',padding:'10px 20px',display:'flex',alignItems:'center',justifyContent:'space-between',gap:12,boxShadow:'0 4px 20px rgba(14,164,114,0.4)',animation:'bannerIn .4s ease' }}>
-          <div style={{ display:'flex',alignItems:'center',gap:10,flex:1 }}>
-            <div style={{ width:7,height:7,borderRadius:'50%',background:'#5DFFC0',boxShadow:'0 0 8px rgba(93,255,192,0.8)' }}/>
-            <p style={{ margin:0,color:'#fff',fontSize:13,fontWeight:600 }}>Última geração gratuita usada — faça upgrade para continuar.</p>
-          </div>
-          <div style={{ display:'flex',gap:8,flexShrink:0 }}>
-            <a href="/planos?highlight=essencial" style={{ padding:'7px 16px',borderRadius:50,background:'#5DFFC0',color:'#054E39',fontSize:12,fontWeight:800,textDecoration:'none' }}>Ver planos</a>
-            <button onClick={()=>setShowBanner(false)} style={{ background:'rgba(255,255,255,0.15)',border:'none',color:'#fff',width:28,height:28,borderRadius:'50%',fontSize:14,cursor:'pointer' }}>×</button>
-          </div>
-        </div>
-      )}
 
       {/* Modal upgrade */}
       {showModal && (
-        <div onClick={()=>{setShowModal(false);setShowBanner(true)}} style={{ position:'fixed',inset:0,zIndex:1000,background:'rgba(5,25,15,0.8)',backdropFilter:'blur(6px)',display:'flex',alignItems:'center',justifyContent:'center',padding:20,animation:'fadeOverlay .25s ease' }}>
-          <div onClick={e=>e.stopPropagation()} style={{ background:'#fff',borderRadius:20,maxWidth:440,width:'100%',overflow:'hidden',boxShadow:'0 24px 80px rgba(5,78,57,0.3)',animation:'modalIn .35s cubic-bezier(.34,1.56,.64,1)' }}>
-            <div style={{ background:'linear-gradient(135deg,#054E39,#0EA472)',padding:'28px 28px 24px',textAlign:'center' }}>
-              <div style={{ fontSize:44,marginBottom:12 }}>⚡</div>
-              <h2 style={{ margin:'0 0 6px',color:'#fff',fontSize:20,fontWeight:800 }}>Última geração usada!</h2>
-              <p style={{ margin:0,color:'rgba(255,255,255,0.7)',fontSize:13 }}>O conteúdo foi gerado e está disponível abaixo.</p>
-            </div>
-            <div style={{ padding:'24px 28px 28px' }}>
-              <div style={{ background:'rgba(14,164,114,0.06)',borderRadius:12,padding:'14px 16px',marginBottom:20,border:'1px solid rgba(14,164,114,0.15)' }}>
-                <p style={{ margin:'0 0 10px',fontSize:13,fontWeight:700,color:'#091710' }}>Com o Pro você tem:</p>
-                {['Gerações ilimitadas','Modelo Claude Sonnet (superior)','Suporte prioritário','Novos agentes em primeira mão'].map(b=>(
-                  <div key={b} style={{ display:'flex',alignItems:'center',gap:8,marginBottom:6,fontSize:13,color:'#091710' }}>
-                    <div style={{ width:18,height:18,borderRadius:'50%',background:'rgba(14,164,114,0.15)',display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0 }}>
-                      <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2 5l2.5 2.5L8 3" stroke="#0EA472" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
-                    </div>
-                    {b}
-                  </div>
-                ))}
+        <div onClick={() => setShowModal(false)} style={{ position:'fixed',inset:0,zIndex:1000,background:'rgba(5,25,15,0.7)',backdropFilter:'blur(6px)',display:'flex',alignItems:'center',justifyContent:'center',padding:20 }}>
+          <div onClick={e => e.stopPropagation()} style={{ background:'#fff',borderRadius:20,maxWidth:420,width:'100%',overflow:'hidden',boxShadow:'0 24px 80px rgba(5,78,57,0.3)',animation:'modalIn .3s ease' }}>
+            <div style={{ background:`linear-gradient(135deg,#054E39,${agentColor})`,padding:'28px 28px 22px',textAlign:'center' }}>
+              <div style={{ width:48,height:48,borderRadius:14,background:'rgba(255,255,255,0.15)',display:'flex',alignItems:'center',justifyContent:'center',margin:'0 auto 12px' }}>
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
               </div>
-              <a href="/planos?highlight=essencial" style={{ display:'block',textAlign:'center',padding:'13px',borderRadius:50,background:'linear-gradient(135deg,#0EA472,#054E39)',color:'#fff',fontSize:14,fontWeight:700,textDecoration:'none',marginBottom:10,boxShadow:'0 6px 20px rgba(14,164,114,0.35)' }}>Fazer upgrade agora</a>
-              <button onClick={()=>{setShowModal(false);setShowBanner(true)}} style={{ display:'block',width:'100%',padding:'11px',borderRadius:50,cursor:'pointer',background:'transparent',border:'1px solid #D4E8DC',color:'#7BA090',fontSize:13,fontWeight:500 }}>Ver o conteúdo gerado</button>
+              <h2 style={{ margin:'0 0 4px',color:'#fff',fontSize:18,fontWeight:800 }}>Última geração gratuita!</h2>
+              <p style={{ margin:0,color:'rgba(255,255,255,0.65)',fontSize:13 }}>Faça upgrade para continuar gerando.</p>
+            </div>
+            <div style={{ padding:'22px 26px 26px' }}>
+              {['Gerações ilimitadas','Modelo Claude superior','Suporte prioritário','Novos agentes em primeira mão'].map(b => (
+                <div key={b} style={{ display:'flex',alignItems:'center',gap:10,marginBottom:8,fontSize:13.5,color:'#091710' }}>
+                  <div style={{ width:18,height:18,borderRadius:'50%',background:`${agentColor}15`,display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0 }}>
+                    <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2 5l2.5 2.5L8 3" stroke={agentColor} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                  </div>{b}
+                </div>
+              ))}
+              <a href="/planos" style={{ display:'block',textAlign:'center',padding:'12px',borderRadius:50,background:`linear-gradient(135deg,${agentColor},#054E39)`,color:'#fff',fontSize:14,fontWeight:700,textDecoration:'none',marginTop:16,boxShadow:`0 6px 20px ${agentColor}35` }}>Fazer upgrade agora</a>
+              <button onClick={() => setShowModal(false)} style={{ display:'block',width:'100%',padding:'10px',marginTop:8,background:'transparent',border:'1px solid #D4E8DC',borderRadius:50,color:'#7BA090',fontSize:13,cursor:'pointer' }}>Ver o conteúdo gerado</button>
             </div>
           </div>
         </div>
       )}
 
       <div className="agent-grid">
-        {/* ── PAINEL DE INPUT ── */}
-        <div style={{ background:'#fff',border:'1px solid #D4E8DC',borderRadius:16,overflow:'hidden' }}>
-          {/* Progress header */}
-          <div style={{ padding:'14px 18px',borderBottom:'1px solid #E6F3EB',background:'#FAFCFB' }}>
-            <div style={{ display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:8 }}>
-              <span style={{ fontSize:11.5,color:'#3A5F4E',fontWeight:600 }}>Preencha os dados</span>
-              <span style={{ fontSize:11.5,fontWeight:700,color: pct===100?'#0EA472':'#7BA090' }}>{pct}%</span>
+        {/* ── INPUT ── */}
+        <div style={{ background:'#fff',border:'1px solid #D4E8DC',borderRadius:16,overflow:'hidden',display:'flex',flexDirection:'column' }}>
+          <div style={{ padding:'12px 16px',borderBottom:'1px solid #E6F3EB',background:'#FAFCFB' }}>
+            <div style={{ display:'flex',justifyContent:'space-between',marginBottom:6 }}>
+              <span style={{ fontSize:11,color:'#3A5F4E',fontWeight:600 }}>Preencha os dados</span>
+              <span style={{ fontSize:11,fontWeight:700,color:pct===100?agentColor:'#7BA090' }}>{pct}%</span>
             </div>
             <div style={{ height:3,background:'#E6F3EB',borderRadius:4,overflow:'hidden' }}>
-              <div style={{ height:'100%',width:`${pct}%`,background:pct===100?'#0EA472':'linear-gradient(90deg,#0EA472,#12C080)',borderRadius:4,transition:'width .3s' }}/>
+              <div style={{ height:'100%',width:`${pct}%`,background:pct===100?agentColor:`linear-gradient(90deg,${agentColor},#5DFFC0)`,borderRadius:4,transition:'width .3s' }}/>
             </div>
           </div>
-
-          <form onSubmit={handleSubmit} style={{ padding:'18px',display:'flex',flexDirection:'column',gap:14 }}>
+          <form onSubmit={handleSubmit} style={{ padding:'16px',display:'flex',flexDirection:'column',gap:12,flex:1 }}>
             {fields.map(field => (
               <div key={field.name}>
-                <label style={{ fontSize:11,fontWeight:700,color:'#3A5F4E',display:'block',marginBottom:6,textTransform:'uppercase',letterSpacing:'0.06em' }}>
-                  {field.label}{field.required && <span style={{ color:'#0EA472',marginLeft:3 }}>*</span>}
+                <label style={{ fontSize:10.5,fontWeight:700,color:'#3A5F4E',display:'block',marginBottom:5,textTransform:'uppercase',letterSpacing:'0.06em' }}>
+                  {field.label}{field.required && <span style={{ color:agentColor,marginLeft:2 }}>*</span>}
                 </label>
                 {field.type==='select' ? (
-                  <select value={values[field.name]??''} onChange={e=>setValues(p=>({...p,[field.name]:e.target.value}))} required={field.required} className="field-inp" style={{ appearance:'auto' as const }}>
+                  <select value={values[field.name]??''} onChange={e => setValues(p => ({ ...p,[field.name]:e.target.value }))} required={field.required} className="finp" style={{ appearance:'auto' as const }}>
                     <option value="">Selecione...</option>
-                    {field.options?.map(o=><option key={o.value} value={o.value}>{o.label}</option>)}
+                    {field.options?.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
                   </select>
                 ) : field.type==='textarea' ? (
-                  <textarea value={values[field.name]??''} onChange={e=>setValues(p=>({...p,[field.name]:e.target.value}))} placeholder={field.placeholder} required={field.required} rows={3} className="field-inp" style={{ resize:'vertical',minHeight:80 }}/>
+                  <textarea value={values[field.name]??''} onChange={e => setValues(p => ({ ...p,[field.name]:e.target.value }))} placeholder={field.placeholder} required={field.required} rows={3} className="finp" style={{ resize:'vertical',minHeight:72 }}/>
                 ) : (
-                  <input type="text" value={values[field.name]??''} onChange={e=>setValues(p=>({...p,[field.name]:e.target.value}))} placeholder={field.placeholder} required={field.required} className="field-inp"/>
+                  <input type="text" value={values[field.name]??''} onChange={e => setValues(p => ({ ...p,[field.name]:e.target.value }))} placeholder={field.placeholder} required={field.required} className="finp"/>
                 )}
               </div>
             ))}
-
             {error && (
-              <div style={{ padding:'11px 14px',background:upgrade?'rgba(14,164,114,0.06)':'rgba(220,53,69,0.06)',borderRadius:10,fontSize:13,color:upgrade?'#0EA472':'#DC3545',border:`1px solid ${upgrade?'rgba(14,164,114,0.2)':'rgba(220,53,69,0.2)'}`}}>
-                {error}{upgrade&&<a href="/planos" style={{ display:'block',marginTop:6,fontWeight:700,color:'#0EA472' }}>Ver planos →</a>}
+              <div style={{ padding:'10px 14px',background:upgrade?`${agentColor}08`:'rgba(220,53,69,0.06)',borderRadius:10,fontSize:13,color:upgrade?agentColor:'#DC3545',border:`1px solid ${upgrade?agentColor+'30':'rgba(220,53,69,0.2)'}` }}>
+                {error}{upgrade && <a href="/planos" style={{ display:'block',marginTop:5,fontWeight:700,color:agentColor }}>Ver planos →</a>}
               </div>
             )}
-
-            <button type="submit" disabled={loading} style={{ padding:'13px',borderRadius:50,border:'none',background:loading?'rgba(14,164,114,0.45)':'linear-gradient(135deg,#0EA472 0%,#054E39 100%)',color:'#fff',fontSize:14,fontWeight:700,cursor:loading?'not-allowed':'pointer',display:'flex',alignItems:'center',justifyContent:'center',gap:8,boxShadow:loading?'none':'0 4px 16px rgba(14,164,114,0.35)' }}>
-              {loading ? (
-                <><span style={{ width:14,height:14,border:'2px solid rgba(255,255,255,0.3)',borderTop:'2px solid #fff',borderRadius:'50%',display:'inline-block',animation:'spin .8s linear infinite' }}/> Gerando...</>
-              ) : 'Gerar conteúdo'}
+            <button type="submit" disabled={loading} style={{ padding:'13px',borderRadius:50,border:'none',background:loading?`${agentColor}60`:`linear-gradient(135deg,${agentColor},#054E39)`,color:'#fff',fontSize:14,fontWeight:700,cursor:loading?'not-allowed':'pointer',display:'flex',alignItems:'center',justifyContent:'center',gap:8,boxShadow:loading?'none':`0 4px 16px ${agentColor}35` }}>
+              {loading ? <><span style={{ width:14,height:14,border:'2px solid rgba(255,255,255,0.3)',borderTop:'2px solid #fff',borderRadius:'50%',display:'inline-block',animation:'spin .8s linear infinite' }}/> Gerando...</> : 'Gerar conteúdo'}
             </button>
           </form>
         </div>
 
-        {/* ── PAINEL DE OUTPUT ── */}
-        <div style={{ display:'flex',flexDirection:'column',gap:12 }}>
-          {/* Header do output */}
-          <div style={{ display:'flex',justifyContent:'space-between',alignItems:'center' }}>
+        {/* ── OUTPUT ── */}
+        <div style={{ display:'flex',flexDirection:'column',gap:10 }}>
+          {/* Status bar */}
+          <div style={{ display:'flex',justifyContent:'space-between',alignItems:'center',padding:'10px 14px',background:'#fff',border:'1px solid #D4E8DC',borderRadius:12 }}>
             <div style={{ display:'flex',alignItems:'center',gap:8 }}>
-              <div style={{ width:8,height:8,borderRadius:'50%',background:loading?'#F59E0B':done?'#0EA472':'rgba(14,164,114,0.3)',boxShadow:loading?'0 0 6px rgba(245,158,11,0.6)':done?'0 0 6px rgba(14,164,114,0.6)':'none' }}/>
-              <span style={{ fontSize:13,fontWeight:600,color:'#091710' }}>
-                {loading?'Gerando...':done?'Concluído':'Aguardando'}
-              </span>
+              <div style={{ width:8,height:8,borderRadius:'50%',background:loading?'#F59E0B':done?agentColor:'#D4E8DC',boxShadow:loading?'0 0 8px rgba(245,158,11,0.6)':done?`0 0 8px ${agentColor}60`:'none',transition:'all .3s' }}/>
+              <span style={{ fontSize:13,fontWeight:600,color:'#091710' }}>{loading?'Claude está gerando...':done?'Geração concluída':'Aguardando'}</span>
             </div>
             {output && (
-              <div style={{ display:'flex',gap:8 }}>
-                <button onClick={handleCopy} style={{ padding:'6px 14px',borderRadius:8,border:'1px solid #D4E8DC',background:'transparent',fontSize:12,color:'#3A5F4E',cursor:'pointer',fontWeight:500 }}>{copied?'Copiado ✓':'Copiar'}</button>
-                <button onClick={()=>{setOutput('');setDone(false);setError('')}} style={{ padding:'6px 14px',borderRadius:8,border:'1px solid #D4E8DC',background:'transparent',fontSize:12,color:'#7BA090',cursor:'pointer' }}>Limpar</button>
+              <div style={{ display:'flex',gap:6 }}>
+                <button onClick={handleCopy} style={{ padding:'5px 12px',borderRadius:8,border:`1px solid ${agentColor}40`,background:copied?`${agentColor}10`:'transparent',fontSize:11.5,color:agentColor,cursor:'pointer',fontWeight:600 }}>{copied?'Copiado ✓':'Copiar'}</button>
+                <button onClick={() => { setOutput(''); setDone(false); setError('') }} style={{ padding:'5px 12px',borderRadius:8,border:'1px solid #D4E8DC',background:'transparent',fontSize:11.5,color:'#7BA090',cursor:'pointer' }}>Limpar</button>
               </div>
             )}
           </div>
 
-          {/* Terminal output */}
-          <div ref={outputRef} className="output-area">
+          {/* Content area */}
+          <div ref={outputRef} className="output-scroll" style={{ background:'#fff',border:`1px solid ${output?agentColor+'30':'#D4E8DC'}`,borderRadius:14,padding:'20px 22px',minHeight:340,transition:'border-color .3s' }}>
             {!loading && !output && (
-              <div style={{ display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',height:'100%',minHeight:260,gap:12,opacity:0.5 }}>
-                <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#0EA472" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                  <circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/>
-                </svg>
-                <p style={{ fontSize:13.5,fontWeight:600,color:'rgba(212,240,228,0.7)',margin:0 }}>O conteúdo gerado aparecerá aqui</p>
-                <p style={{ fontSize:12,color:'rgba(212,240,228,0.35)',margin:0,textAlign:'center',maxWidth:260,lineHeight:1.6 }}>Preencha os campos e clique em Gerar conteúdo</p>
+              <div style={{ display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',height:300,gap:14,opacity:.5 }}>
+                <div style={{ width:44,height:44,borderRadius:13,background:`${agentColor}10`,display:'flex',alignItems:'center',justifyContent:'center' }}>
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={agentColor} strokeWidth="1.5" strokeLinecap="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                </div>
+                <p style={{ fontSize:14,fontWeight:600,color:'#7BA090',margin:0 }}>O conteúdo gerado aparecerá aqui</p>
+                <p style={{ fontSize:12.5,color:'#A8C4B8',margin:0,textAlign:'center',lineHeight:1.6,maxWidth:260 }}>Preencha os campos ao lado e clique em Gerar conteúdo</p>
               </div>
             )}
             {loading && !output && (
-              <div style={{ display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',height:'100%',minHeight:260,gap:14 }}>
-                <div style={{ width:40,height:40,border:'2px solid rgba(14,164,114,0.2)',borderTop:'2px solid #0EA472',borderRadius:'50%',animation:'spin .8s linear infinite' }}/>
-                <p style={{ fontSize:14,color:'rgba(212,240,228,0.7)',margin:0,fontWeight:600 }}>Claude está processando...</p>
-                <p style={{ fontSize:12,color:'rgba(212,240,228,0.35)',margin:0 }}>Gerando conteúdo estratégico</p>
+              <div style={{ display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',height:300,gap:14 }}>
+                <div style={{ width:40,height:40,border:`2px solid ${agentColor}20`,borderTop:`2px solid ${agentColor}`,borderRadius:'50%',animation:'spin .8s linear infinite' }}/>
+                <p style={{ fontSize:14,color:'#7BA090',margin:0,fontWeight:600 }}>Claude está processando...</p>
               </div>
             )}
-            {output}
-            {loading && output && <span style={{ display:'inline-block',width:8,height:14,background:'#0EA472',marginLeft:2,animation:'blink 1s step-end infinite',borderRadius:1 }}/>}
+            {output && <MarkdownOutput text={output} color={agentColor}/>}
+            {loading && output && <span style={{ display:'inline-block',width:2,height:16,background:agentColor,marginLeft:2,verticalAlign:'middle',animation:'blink .9s step-end infinite',borderRadius:1 }}/>}
           </div>
 
           {done && (
-            <div style={{ display:'flex',gap:10,flexWrap:'wrap' }}>
-              <button onClick={handleCopy} style={{ padding:'11px 22px',background:'linear-gradient(135deg,#0EA472,#054E39)',color:'#fff',borderRadius:50,border:'none',fontSize:13,fontWeight:700,cursor:'pointer',boxShadow:'0 4px 14px rgba(14,164,114,0.3)' }}>
+            <div style={{ display:'flex',gap:8,flexWrap:'wrap' }}>
+              <button onClick={handleCopy} style={{ padding:'11px 22px',background:`linear-gradient(135deg,${agentColor},#054E39)`,color:'#fff',borderRadius:50,border:'none',fontSize:13,fontWeight:700,cursor:'pointer',boxShadow:`0 4px 14px ${agentColor}30` }}>
                 {copied?'Copiado!':'Copiar conteúdo'}
               </button>
-              <button onClick={()=>{setOutput('');setDone(false);setError('')}} style={{ padding:'11px 22px',background:'transparent',color:'#3A5F4E',borderRadius:50,border:'1px solid #D4E8DC',fontSize:13,fontWeight:600,cursor:'pointer' }}>
+              <button onClick={() => { setOutput(''); setDone(false); setError('') }} style={{ padding:'11px 22px',background:'transparent',color:'#3A5F4E',borderRadius:50,border:'1px solid #D4E8DC',fontSize:13,fontWeight:600,cursor:'pointer' }}>
                 Gerar novamente
               </button>
             </div>
