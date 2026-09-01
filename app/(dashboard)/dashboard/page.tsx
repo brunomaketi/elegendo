@@ -368,7 +368,7 @@ export default async function DashboardPage() {
               <span style={{ fontSize: 11, color: '#6B648C' }}>Campanha vencedora</span>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-              <div style={{ width: 24, height: 2, background: '#C4BFD8', borderRadius: 2, borderTop: '1px dashed #C4BFD8', background: 'transparent', borderBottom: '1px dashed #C4BFD8' }} />
+              <div style={{ width: 24, height: 2, borderRadius: 2, borderTop: '1px dashed #C4BFD8', borderBottom: '1px dashed #C4BFD8' }} />
               <span style={{ fontSize: 11, color: '#6B648C' }}>Média</span>
             </div>
           </div>
