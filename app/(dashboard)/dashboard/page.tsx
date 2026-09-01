@@ -4,345 +4,262 @@ import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { LIMITES_PLANO } from '@/types'
 
-// ── Agentes ──────────────────────────────────────────────────────
 const AGENTES = [
-  {
-    id: 'roteirista',
-    label: 'Roteirista de Reels',
-    desc: 'Gera 3 roteiros com gancho e CTA prontos para gravar.',
-    cor: '#7B4FD8',
-    bg: 'rgba(123,79,216,0.08)',
-    dot: '#7B4FD8',
-  },
-  {
-    id: 'estrategista',
-    label: 'Estrategista',
-    desc: 'Plano de 90 dias, metas e posicionamento de campanha.',
-    cor: '#1D9E75',
-    bg: 'rgba(29,158,117,0.07)',
-    dot: '#1D9E75',
-  },
-  {
-    id: 'copy',
-    label: 'Copy Político',
-    desc: 'Headlines e copies de alto impacto para anúncios.',
-    cor: '#378ADD',
-    bg: 'rgba(55,138,221,0.07)',
-    dot: '#378ADD',
-  },
-  {
-    id: 'consciencia',
-    label: 'Consciência',
-    desc: 'Conteúdo educativo para crescer seu alcance orgânico.',
-    cor: '#4A3098',
-    bg: 'rgba(74,48,152,0.07)',
-    dot: '#4A3098',
-  },
+  { id: 'roteirista',   label: 'Roteirista de Reels',  desc: '3 roteiros com gancho e CTA prontos para gravar.',        cor: '#7B4FD8', bgAccent: 'rgba(123,79,216,0.08)' },
+  { id: 'estrategista', label: 'Estrategista',          desc: 'Plano de 90 dias, metas e posicionamento de campanha.',   cor: '#1D9E75', bgAccent: 'rgba(29,158,117,0.07)' },
+  { id: 'copy',         label: 'Copy Político',         desc: 'Headlines e copies de alto impacto para anúncios.',       cor: '#2D7DD2', bgAccent: 'rgba(45,125,210,0.07)' },
+  { id: 'consciencia',  label: 'Consciência',           desc: 'Conteúdo educativo para crescer seu alcance orgânico.',   cor: '#9B4DCA', bgAccent: 'rgba(155,77,202,0.07)' },
 ]
 
-// ── Datas eleitorais 2026 ─────────────────────────────────────────
 const DATAS_2026 = [
-  { data: '2026-04-21', label: 'Tiradentes',               relevancia: 'alta' },
-  { data: '2026-05-01', label: 'Dia do Trabalho',          relevancia: 'alta' },
-  { data: '2026-05-10', label: 'Dia das Mães',             relevancia: 'alta' },
-  { data: '2026-06-12', label: 'Dia dos Namorados',        relevancia: 'media' },
-  { data: '2026-06-24', label: 'São João',                 relevancia: 'alta' },
-  { data: '2026-07-09', label: 'Revolução Constitucional', relevancia: 'alta' },
-  { data: '2026-09-07', label: 'Independência do Brasil',  relevancia: 'alta' },
-  { data: '2026-10-02', label: '1º Turno Eleições',        relevancia: 'critica' },
-  { data: '2026-10-25', label: '2º Turno Eleições',        relevancia: 'critica' },
-  { data: '2026-11-15', label: 'Proclamação da República', relevancia: 'alta' },
+  { data: '2026-05-01', label: 'Dia do Trabalho',          rel: 'alta' },
+  { data: '2026-06-24', label: 'São João',                 rel: 'alta' },
+  { data: '2026-09-07', label: 'Independência do Brasil',  rel: 'alta' },
+  { data: '2026-10-02', label: '1º Turno',                 rel: 'critica' },
+  { data: '2026-10-25', label: '2º Turno',                 rel: 'critica' },
 ]
 
-// ── Pesquisas TSE (institutos registrados) ─────────────────────────
-const INSTITUTOS_TSE = [
-  { nome: 'Datafolha',   tipo: 'Nacional',    freq: 'Mensal' },
-  { nome: 'Quaest',      tipo: 'Nacional',    freq: 'Quinzenal' },
-  { nome: 'AtlasIntel',  tipo: 'Nacional',    freq: 'Semanal' },
-  { nome: 'PoderData',   tipo: 'Nacional',    freq: 'Mensal' },
-  { nome: 'IPEC/Ipsos',  tipo: 'Nacional',    freq: 'Mensal' },
-]
-
-function getDiasRestantes(dataStr: string): number {
-  const hoje = new Date()
-  hoje.setHours(0, 0, 0, 0)
-  const data = new Date(dataStr + 'T00:00:00')
-  return Math.ceil((data.getTime() - hoje.getTime()) / (1000 * 60 * 60 * 24))
+function getDias(dataStr: string) {
+  const hoje = new Date(); hoje.setHours(0,0,0,0)
+  return Math.ceil((new Date(dataStr + 'T00:00:00').getTime() - hoje.getTime()) / 86400000)
 }
 
-function getRelevanciaStyle(relevancia: string, dias: number) {
-  if (relevancia === 'critica') return { color: '#C62828', bg: 'rgba(198,40,40,0.08)', label: 'Eleitoral' }
-  if (relevancia === 'alta' && dias <= 14) return { color: '#7B4FD8', bg: 'rgba(123,79,216,0.08)', label: `${dias}d` }
-  if (relevancia === 'alta') return { color: '#4A3098', bg: 'rgba(74,48,152,0.07)', label: 'Alta' }
-  return { color: '#A09CBD', bg: 'rgba(160,156,189,0.1)', label: 'Radar' }
-}
-
-// ── Radar de Campanha (SVG puro) ───────────────────────────────────
-function RadarCampanha() {
-  const cx = 130, cy = 120, r = 85
-  const dims = [
-    'Presença Digital',
-    'Mobilização',
-    'Proposta',
-    'Território',
-    'Engajamento',
-    'Alianças',
-  ]
-  // Benchmark: campanha vencedora
+function RadarSVG() {
+  const cx = 150, cy = 140, r = 100
+  const dims = ['Digital','Mobilização','Proposta','Território','Engajamento','Alianças']
   const bench = [88, 75, 92, 68, 82, 62]
-  // Média: campanha comum
-  const media = [42, 48, 60, 36, 44, 30]
-
-  const angle = (i: number) => (i * 2 * Math.PI) / dims.length - Math.PI / 2
-
-  const pt = (val: number, i: number) => ({
-    x: cx + (r * val / 100) * Math.cos(angle(i)),
-    y: cy + (r * val / 100) * Math.sin(angle(i)),
-  })
-
-  const gp = (scale: number, i: number) => ({
-    x: cx + r * scale * Math.cos(angle(i)),
-    y: cy + r * scale * Math.sin(angle(i)),
-  })
-
-  const poly = (pts: { x: number; y: number }[]) =>
-    pts.map((p, i) => `${i === 0 ? 'M' : 'L'}${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(' ') + 'Z'
-
-  const labelDist = r + 22
-  const labelPts = dims.map((_, i) => ({
-    x: cx + labelDist * Math.cos(angle(i)),
-    y: cy + labelDist * Math.sin(angle(i)),
-  }))
-
+  const avg   = [40, 46, 58, 34, 42, 28]
+  const ang = (i: number) => (i * 2 * Math.PI) / 6 - Math.PI / 2
+  const pt = (v: number, i: number) => ({ x: cx + r*(v/100)*Math.cos(ang(i)), y: cy + r*(v/100)*Math.sin(ang(i)) })
+  const gp = (s: number, i: number) => ({ x: cx + r*s*Math.cos(ang(i)), y: cy + r*s*Math.sin(ang(i)) })
+  const poly = (pts: {x:number;y:number}[]) => pts.map((p,i) => `${i?'L':'M'}${p.x.toFixed(1)},${p.y.toFixed(1)}`).join('') + 'Z'
+  const labelR = r + 24
   return (
-    <svg viewBox="0 0 260 240" style={{ width: '100%', maxHeight: 200 }}>
-      {/* Grid rings */}
-      {[0.25, 0.5, 0.75, 1].map((s) => (
-        <polygon
-          key={s}
-          points={dims.map((_, i) => { const p = gp(s, i); return `${p.x.toFixed(1)},${p.y.toFixed(1)}` }).join(' ')}
-          fill="none"
-          stroke={s === 1 ? 'rgba(123,79,216,0.18)' : 'rgba(123,79,216,0.08)'}
-          strokeWidth={s === 1 ? 1 : 0.7}
-        />
+    <svg viewBox="0 0 300 280" style={{ width: '100%', maxHeight: 220 }}>
+      {[0.25,0.5,0.75,1].map(s => (
+        <polygon key={s} points={dims.map((_,i)=>{const p=gp(s,i);return`${p.x.toFixed(1)},${p.y.toFixed(1)}`}).join(' ')}
+          fill="none" stroke={s===1?'rgba(123,79,216,0.2)':'rgba(123,79,216,0.07)'} strokeWidth={s===1?1:0.75}/>
       ))}
-      {/* Axis lines */}
-      {dims.map((_, i) => {
-        const p = gp(1, i)
-        return <line key={i} x1={cx} y1={cy} x2={p.x.toFixed(1)} y2={p.y.toFixed(1)} stroke="rgba(123,79,216,0.1)" strokeWidth="0.7" />
-      })}
-      {/* Média polygon */}
-      <path d={poly(media.map((v, i) => pt(v, i)))} fill="rgba(160,156,189,0.12)" stroke="rgba(160,156,189,0.4)" strokeWidth="1" strokeDasharray="3,2" />
-      {/* Benchmark polygon */}
-      <path d={poly(bench.map((v, i) => pt(v, i)))} fill="rgba(123,79,216,0.14)" stroke="#7B4FD8" strokeWidth="1.5" />
-      {/* Benchmark dots */}
-      {bench.map((v, i) => {
-        const p = pt(v, i)
-        return <circle key={i} cx={p.x.toFixed(1)} cy={p.y.toFixed(1)} r="2.5" fill="#7B4FD8" />
-      })}
-      {/* Labels */}
-      {dims.map((d, i) => {
-        const p = labelPts[i]
-        const anchor = p.x < cx - 4 ? 'end' : p.x > cx + 4 ? 'start' : 'middle'
-        return (
-          <text key={i} x={p.x.toFixed(1)} y={p.y.toFixed(1)} textAnchor={anchor} dominantBaseline="central" fontSize="9" fill="#6B648C" fontWeight="500" fontFamily="Inter, sans-serif">
-            {d}
-          </text>
-        )
-      })}
+      {dims.map((_,i)=>{const p=gp(1,i);return<line key={i} x1={cx} y1={cy} x2={p.x.toFixed(1)} y2={p.y.toFixed(1)} stroke="rgba(123,79,216,0.1)" strokeWidth="0.75"/>})}
+      <path d={poly(avg.map((v,i)=>pt(v,i)))} fill="rgba(180,170,210,0.12)" stroke="rgba(150,140,190,0.4)" strokeWidth="1" strokeDasharray="3,2"/>
+      <path d={poly(bench.map((v,i)=>pt(v,i)))} fill="rgba(123,79,216,0.15)" stroke="#7B4FD8" strokeWidth="1.5"/>
+      {bench.map((v,i)=>{const p=pt(v,i);return<circle key={i} cx={p.x.toFixed(1)} cy={p.y.toFixed(1)} r="3" fill="#7B4FD8"/>})}
+      {dims.map((d,i)=>{const lx=cx+labelR*Math.cos(ang(i)), ly=cy+labelR*Math.sin(ang(i)); const a=lx<cx-4?'end':lx>cx+4?'start':'middle'; return(
+        <text key={i} x={lx.toFixed(1)} y={ly.toFixed(1)} textAnchor={a} dominantBaseline="central" fontSize="9.5" fill="#4A3880" fontWeight="600" fontFamily="Inter,sans-serif">{d}</text>
+      )})}
     </svg>
   )
 }
 
-// ── Página principal ───────────────────────────────────────────────
 export default async function DashboardPage() {
   const cookieStore = await cookies()
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    { cookies: { get: (name) => cookieStore.get(name)?.value } }
+    { cookies: { get: (n) => cookieStore.get(n)?.value } }
   )
-
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
   const { data: profile } = await supabase.from('profiles').select('*').eq('id', user.id).single()
   if (!profile?.nome) redirect('/perfil?primeiro_acesso=true')
 
-  const inicioMes = new Date(); inicioMes.setDate(1); inicioMes.setHours(0, 0, 0, 0)
-  const { count: totalMes }   = await supabase.from('geracoes').select('*', { count: 'exact', head: true }).eq('user_id', user.id).gte('criado_em', inicioMes.toISOString())
-  const { count: totalGeral } = await supabase.from('geracoes').select('*', { count: 'exact', head: true }).eq('user_id', user.id)
-  const { data: ultimas }     = await supabase.from('geracoes').select('agente, output, criado_em').eq('user_id', user.id).order('criado_em', { ascending: false }).limit(3)
+  const inicioMes = new Date(); inicioMes.setDate(1); inicioMes.setHours(0,0,0,0)
+  const { count: totalMes }   = await supabase.from('geracoes').select('*',{count:'exact',head:true}).eq('user_id',user.id).gte('criado_em',inicioMes.toISOString())
+  const { count: totalGeral } = await supabase.from('geracoes').select('*',{count:'exact',head:true}).eq('user_id',user.id)
+  const { data: ultimas }     = await supabase.from('geracoes').select('agente,output,criado_em').eq('user_id',user.id).order('criado_em',{ascending:false}).limit(4)
+
+  // 7-day activity
+  const sete = new Date(); sete.setDate(sete.getDate()-6); sete.setHours(0,0,0,0)
+  const { data: activity } = await supabase.from('geracoes').select('criado_em').eq('user_id',user.id).gte('criado_em',sete.toISOString())
+  const actMap: Record<string,number> = {}
+  for (let i=6;i>=0;i--) { const d=new Date(); d.setDate(d.getDate()-i); actMap[d.toISOString().slice(0,10)]=0 }
+  activity?.forEach(g => { const k=g.criado_em.slice(0,10); if(actMap[k]!==undefined) actMap[k]++ })
+  const actDays = Object.entries(actMap)
+  const actMax = Math.max(...actDays.map(([,v])=>v), 1)
 
   const plano   = (profile?.plano ?? 'gratuito') as keyof typeof LIMITES_PLANO
   const limite  = LIMITES_PLANO[plano]
   const total   = totalMes ?? 0
   const isGratis = plano === 'gratuito'
+  const pct = limite ? Math.min((total/limite)*100,100) : 0
 
-  const proximasDatas = DATAS_2026
-    .map(d => ({ ...d, dias: getDiasRestantes(d.data) }))
-    .filter(d => d.dias >= 0)
-    .slice(0, 6)
-
-  const diasPrimTurno = getDiasRestantes('2026-10-02')
-
-  const dataHoje = new Date().toLocaleDateString('pt-BR', {
-    weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'
-  })
-
+  const diasTurno = getDias('2026-10-02')
+  const proximasDatas = DATAS_2026.map(d=>({...d,dias:getDias(d.data)})).filter(d=>d.dias>=0)
+  const dataHoje = new Date().toLocaleDateString('pt-BR',{weekday:'long',day:'numeric',month:'long'})
   const primeiroNome = profile?.nome?.split(' ')[0] ?? 'Candidato'
-  const subInfo = [profile?.cargo, profile?.cidade && profile?.estado ? `${profile.cidade}/${profile.estado}` : profile?.cidade].filter(Boolean).join(' · ')
+  const subInfo = [profile?.cargo, profile?.cidade&&profile?.estado?`${profile.cidade}/${profile.estado}`:profile?.cidade].filter(Boolean).join(' · ')
 
   return (
-    <div style={{ padding: '28px 24px', fontFamily: "var(--font-inter), 'Inter', sans-serif", minHeight: '100vh' }}>
+    <div style={{ padding:'24px 20px', minHeight:'100vh', background:'#ECEAF6', fontFamily:"var(--font-inter),'Inter',sans-serif" }}>
       <style>{`
-        .d-kpi { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
-        .d-main { display: grid; grid-template-columns: 1fr; gap: 16px; }
-        .d-agents { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
-        .d-lower { display: grid; grid-template-columns: 1fr; gap: 16px; }
-        .d-gens { display: grid; grid-template-columns: 1fr; gap: 10px; }
-        @media (min-width: 900px) {
-          .d-kpi { grid-template-columns: repeat(4, 1fr); }
-          .d-main { grid-template-columns: 1fr 300px; }
-          .d-lower { grid-template-columns: 1fr 1fr; }
-          .d-gens { grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); }
+        .d-agents { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .d-mid    { display: grid; grid-template-columns: 1fr; gap: 14px; margin-top:14px; }
+        .d-bot    { display: grid; grid-template-columns: 1fr; gap: 14px; margin-top:14px; }
+        .d-gens   { display: grid; grid-template-columns: 1fr; gap: 8px; }
+        @media(min-width:860px) {
+          .d-agents { grid-template-columns: repeat(4,1fr); }
+          .d-mid    { grid-template-columns: 1fr 320px; }
+          .d-bot    { grid-template-columns: 1fr 1fr; }
+          .d-gens   { grid-template-columns: repeat(2,1fr); }
         }
-        .agent-card {
-          display: block;
-          background: #fff;
-          border-radius: 12px;
-          border: 1px solid #EDEAF5;
-          padding: 16px;
-          text-decoration: none;
-          transition: box-shadow 0.15s, transform 0.15s;
-        }
-        .agent-card:hover {
-          box-shadow: 0 4px 18px rgba(123,79,216,0.12);
-          transform: translateY(-1px);
-        }
-        .kpi-card {
-          background: #fff;
-          border-radius: 12px;
-          border: 1px solid #EDEAF5;
-          padding: 16px 18px;
-        }
+        .agent-card { background:#fff; border-radius:12px; padding:18px 16px; border:1px solid #DDD8EE; cursor:pointer; text-decoration:none; display:block; transition:box-shadow .14s,transform .14s; }
+        .agent-card:hover { box-shadow:0 6px 24px rgba(30,10,80,0.12); transform:translateY(-2px); }
+        .surf { background:#fff; border-radius:14px; border:1px solid #DDD8EE; padding:18px 16px; }
       `}</style>
 
       {/* ── Header ── */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 24, flexWrap: 'wrap', gap: 12 }}>
+      <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', marginBottom:20, flexWrap:'wrap', gap:12 }}>
         <div>
-          <p style={{ fontSize: 12, color: '#A09CBD', margin: '0 0 4px', textTransform: 'capitalize' }}>{dataHoje}</p>
-          <h1 style={{ fontSize: 24, fontWeight: 700, color: '#1A1333', margin: 0, letterSpacing: '-0.03em' }}>
-            Olá, {primeiroNome}
-          </h1>
-          {subInfo && (
-            <p style={{ color: '#A09CBD', fontSize: 13, margin: '3px 0 0' }}>{subInfo}</p>
-          )}
+          <p style={{ fontSize:11.5, color:'#6B5FA0', margin:'0 0 3px', textTransform:'capitalize', fontWeight:500 }}>{dataHoje}</p>
+          <h1 style={{ fontSize:26, fontWeight:700, color:'#180D3C', margin:'0 0 2px', letterSpacing:'-0.03em' }}>Olá, {primeiroNome}</h1>
+          {subInfo && <p style={{ fontSize:12.5, color:'#6B5FA0', margin:0 }}>{subInfo}</p>}
         </div>
-        <Link
-          href="/agentes/roteirista"
-          style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '10px 22px', background: '#7B4FD8', color: '#fff', borderRadius: 50, fontSize: 13.5, fontWeight: 600, textDecoration: 'none', boxShadow: '0 4px 14px rgba(123,79,216,0.28)', letterSpacing: '-0.01em' }}
-        >
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-            <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
-          </svg>
+        <Link href="/agentes/roteirista" style={{ display:'inline-flex', alignItems:'center', gap:8, padding:'11px 24px', background:'#7B4FD8', color:'#fff', borderRadius:50, fontSize:14, fontWeight:600, textDecoration:'none', boxShadow:'0 4px 16px rgba(123,79,216,0.35)', letterSpacing:'-0.01em' }}>
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
           Criar conteúdo
         </Link>
       </div>
 
-      {/* ── Banner upgrade (gratuito) ── */}
-      {isGratis && (
-        <div style={{ borderRadius: 14, marginBottom: 24, background: 'linear-gradient(135deg, #2D1B6E 0%, #4A3098 100%)', padding: '18px 22px', position: 'relative', overflow: 'hidden' }}>
-          <div style={{ position: 'absolute', top: -50, right: -30, width: 160, height: 160, borderRadius: '50%', background: 'rgba(255,255,255,0.04)', pointerEvents: 'none' }} />
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap', position: 'relative', zIndex: 1 }}>
-            <div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 5 }}>
-                <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', fontWeight: 500 }}>Plano gratuito</span>
-                <span style={{ fontSize: 11, fontWeight: 600, color: '#FFD166', background: 'rgba(255,209,102,0.15)', padding: '2px 8px', borderRadius: 20 }}>{total}/5 gerações</span>
+      {/* ── Painel de métricas (dark) ── */}
+      <div style={{ borderRadius:16, background:'linear-gradient(135deg,#1E0F52 0%,#3A2080 100%)', padding:'22px 24px', marginBottom:14, position:'relative', overflow:'hidden' }}>
+        <div style={{ position:'absolute', top:-60, right:-40, width:220, height:220, borderRadius:'50%', background:'rgba(123,79,216,0.2)', pointerEvents:'none' }}/>
+        <div style={{ position:'absolute', bottom:-50, left:80, width:160, height:160, borderRadius:'50%', background:'rgba(80,200,160,0.06)', pointerEvents:'none' }}/>
+
+        <div style={{ display:'grid', gridTemplateColumns:'1fr auto', gap:20, alignItems:'center', position:'relative', zIndex:1, flexWrap:'wrap' }}>
+          {/* Gerações */}
+          <div>
+            <div style={{ display:'flex', alignItems:'center', gap:10, marginBottom:10, flexWrap:'wrap' }}>
+              <div>
+                <p style={{ fontSize:11, color:'rgba(255,255,255,0.45)', margin:'0 0 2px', fontWeight:500 }}>Gerações este mês</p>
+                <div style={{ display:'flex', alignItems:'baseline', gap:6 }}>
+                  <span style={{ fontSize:36, fontWeight:700, color:'#fff', letterSpacing:'-0.04em', lineHeight:1 }}>{total}</span>
+                  <span style={{ fontSize:14, color:'rgba(255,255,255,0.4)' }}>{limite ? `/ ${limite}` : '/ ∞'}</span>
+                </div>
               </div>
-              <p style={{ fontSize: 15, fontWeight: 600, color: '#fff', margin: 0, letterSpacing: '-0.02em' }}>
-                Desbloqueie gerações ilimitadas — a partir de R$ 47/mês
-              </p>
+              <div style={{ width:1, height:40, background:'rgba(255,255,255,0.1)', margin:'0 6px' }}/>
+              <div>
+                <p style={{ fontSize:11, color:'rgba(255,255,255,0.45)', margin:'0 0 2px', fontWeight:500 }}>Total histórico</p>
+                <span style={{ fontSize:28, fontWeight:700, color:'rgba(255,255,255,0.8)', letterSpacing:'-0.03em', lineHeight:1 }}>{totalGeral ?? 0}</span>
+              </div>
+              <div style={{ width:1, height:40, background:'rgba(255,255,255,0.1)', margin:'0 6px' }}/>
+              <div>
+                <p style={{ fontSize:11, color:'rgba(255,255,255,0.45)', margin:'0 0 2px', fontWeight:500 }}>Plano</p>
+                <span style={{ fontSize:14, fontWeight:600, color:'rgba(255,255,255,0.85)', textTransform:'capitalize' }}>{plano}</span>
+              </div>
             </div>
-            <Link href="/planos" style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '10px 20px', background: '#fff', color: '#2D1B6E', borderRadius: 50, fontSize: 13, fontWeight: 700, textDecoration: 'none', flexShrink: 0, letterSpacing: '-0.01em' }}>
-              Ver planos
-            </Link>
+            {isGratis && (
+              <>
+                <div style={{ height:5, background:'rgba(255,255,255,0.1)', borderRadius:4, overflow:'hidden', maxWidth:320, marginBottom:8 }}>
+                  <div style={{ height:'100%', width:`${pct}%`, background: pct>=80?'#FFD166':'rgba(255,255,255,0.6)', borderRadius:4, transition:'width .5s' }}/>
+                </div>
+                <Link href="/planos" style={{ display:'inline-flex', alignItems:'center', gap:6, padding:'7px 16px', background:'rgba(255,255,255,0.12)', color:'rgba(255,255,255,0.85)', borderRadius:50, fontSize:12, fontWeight:600, textDecoration:'none', border:'1px solid rgba(255,255,255,0.2)' }}>
+                  Fazer upgrade para ilimitado
+                </Link>
+              </>
+            )}
           </div>
-          <div style={{ marginTop: 14, position: 'relative', zIndex: 1 }}>
-            <div style={{ height: 3, background: 'rgba(255,255,255,0.1)', borderRadius: 4, overflow: 'hidden' }}>
-              <div style={{ height: '100%', width: `${Math.min((total / 5) * 100, 100)}%`, background: total >= 4 ? '#FFD166' : 'rgba(255,255,255,0.55)', borderRadius: 4, transition: 'width 0.4s' }} />
-            </div>
+
+          {/* Contagem regressiva */}
+          <div style={{ textAlign:'center', padding:'14px 20px', background:'rgba(255,255,255,0.07)', borderRadius:12, border:'1px solid rgba(255,255,255,0.1)', flexShrink:0 }}>
+            <div style={{ fontSize:42, fontWeight:800, color:'#FFD166', lineHeight:1, letterSpacing:'-0.04em' }}>{diasTurno}</div>
+            <div style={{ fontSize:10.5, color:'rgba(255,255,255,0.5)', marginTop:4, fontWeight:500 }}>dias para o 1º turno</div>
+            <div style={{ fontSize:11, color:'rgba(255,255,255,0.7)', fontWeight:600, marginTop:2 }}>2 out 2026</div>
           </div>
         </div>
-      )}
 
-      {/* ── KPIs ── */}
-      <div className="d-kpi" style={{ marginBottom: 24 }}>
-        {[
-          { label: 'Gerações este mês', value: total.toString(), sub: limite ? `de ${limite} disponíveis` : 'ilimitadas', accent: '#7B4FD8' },
-          { label: 'Total gerado',      value: (totalGeral ?? 0).toString(), sub: 'desde o início',       accent: '#378ADD' },
-          { label: 'Agentes ativos',    value: '4',                sub: 'todos disponíveis',              accent: '#1D9E75' },
-          { label: 'Dias para 1º turno',value: diasPrimTurno.toString(), sub: '2 out 2026',              accent: '#C62828' },
-        ].map(({ label, value, sub, accent }) => (
-          <div key={label} className="kpi-card">
-            <p style={{ fontSize: 11, color: '#A09CBD', fontWeight: 500, marginBottom: 8 }}>{label}</p>
-            <div style={{ fontSize: 28, fontWeight: 700, color: accent, letterSpacing: '-0.04em', lineHeight: 1 }}>{value}</div>
-            <p style={{ fontSize: 11, color: '#B4B0CC', marginTop: 4 }}>{sub}</p>
+        {/* Atividade 7 dias */}
+        <div style={{ marginTop:18, paddingTop:16, borderTop:'1px solid rgba(255,255,255,0.08)', position:'relative', zIndex:1 }}>
+          <p style={{ fontSize:10.5, color:'rgba(255,255,255,0.35)', margin:'0 0 10px', fontWeight:500 }}>Atividade — últimos 7 dias</p>
+          <div style={{ display:'flex', alignItems:'flex-end', gap:5, height:36 }}>
+            {actDays.map(([dia, qtd]) => {
+              const d = new Date(dia+'T12:00:00')
+              const label = d.toLocaleDateString('pt-BR',{weekday:'short'}).replace('.','')
+              const h = actMax > 0 ? Math.max((qtd/actMax)*36, qtd>0?4:2) : 2
+              const isToday = dia === new Date().toISOString().slice(0,10)
+              return (
+                <div key={dia} style={{ flex:1, display:'flex', flexDirection:'column', alignItems:'center', gap:4 }}>
+                  {qtd > 0 && <span style={{ fontSize:9, color:'rgba(255,255,255,0.5)', fontWeight:600 }}>{qtd}</span>}
+                  <div style={{ width:'100%', height:h, background: isToday ? '#FFD166' : qtd>0 ? 'rgba(255,255,255,0.5)' : 'rgba(255,255,255,0.1)', borderRadius:3 }}/>
+                  <span style={{ fontSize:9, color: isToday ? 'rgba(255,255,255,0.7)' : 'rgba(255,255,255,0.25)', fontWeight: isToday ? 700 : 400 }}>{label}</span>
+                </div>
+              )
+            })}
           </div>
-        ))}
+        </div>
       </div>
 
       {/* ── Aviso perfil incompleto ── */}
       {!profile?.bio_politica && (
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 16px', background: '#fff', borderRadius: 10, border: '1px solid #EDEAF5', marginBottom: 24, borderLeft: '3px solid #7B4FD8' }}>
-          <div style={{ flex: 1, fontSize: 13, color: '#1A1333' }}>
-            <strong style={{ fontWeight: 600 }}>Perfil incompleto.</strong> Complete sua bio política para que os agentes gerem conteúdo mais preciso.
+        <div style={{ display:'flex', alignItems:'center', gap:12, padding:'11px 16px', background:'#fff', borderRadius:10, border:'1px solid #DDD8EE', marginBottom:14, borderLeft:'3px solid #7B4FD8' }}>
+          <div style={{ flex:1, fontSize:13, color:'#180D3C', fontWeight:500 }}>
+            Perfil incompleto — adicione sua bio política para os agentes gerarem conteúdo preciso.
           </div>
-          <Link href="/perfil" style={{ fontSize: 13, fontWeight: 600, color: '#7B4FD8', textDecoration: 'none', whiteSpace: 'nowrap' }}>
-            Completar perfil
-          </Link>
+          <Link href="/perfil" style={{ fontSize:13, fontWeight:700, color:'#7B4FD8', textDecoration:'none', whiteSpace:'nowrap' }}>Completar →</Link>
         </div>
       )}
 
-      {/* ── Grid principal: Agentes + Radar ── */}
-      <div className="d-main" style={{ marginBottom: 20, alignItems: 'start' }}>
-        {/* Agentes */}
-        <div>
-          <h2 style={{ fontSize: 13, fontWeight: 600, color: '#1A1333', margin: '0 0 12px', letterSpacing: '-0.01em' }}>Agentes de IA</h2>
-          <div className="d-agents">
-            {AGENTES.map(({ id, label, desc, cor, bg, dot }) => (
-              <Link key={id} href={`/agentes/${id}`} className="agent-card">
-                <div style={{ width: 8, height: 8, borderRadius: '50%', background: dot, marginBottom: 12 }} />
-                <div style={{ fontSize: 13.5, fontWeight: 600, color: '#1A1333', marginBottom: 4, letterSpacing: '-0.01em' }}>{label}</div>
-                <p style={{ fontSize: 12, color: '#A09CBD', lineHeight: 1.5, margin: '0 0 12px' }}>{desc}</p>
-                <div style={{ fontSize: 12, fontWeight: 600, color: cor }}>Usar agente →</div>
-              </Link>
-            ))}
+      {/* ── Agentes ── */}
+      <p style={{ fontSize:11.5, fontWeight:600, color:'#6B5FA0', margin:'0 0 10px', letterSpacing:'0.01em' }}>Agentes de IA</p>
+      <div className="d-agents">
+        {AGENTES.map(({id,label,desc,cor,bgAccent}) => (
+          <Link key={id} href={`/agentes/${id}`} className="agent-card">
+            <div style={{ display:'flex', alignItems:'center', gap:9, marginBottom:10 }}>
+              <div style={{ width:10, height:10, borderRadius:3, background:cor, flexShrink:0 }}/>
+              <span style={{ fontSize:13.5, fontWeight:700, color:'#180D3C', letterSpacing:'-0.01em' }}>{label}</span>
+            </div>
+            <p style={{ fontSize:12, color:'#584D80', lineHeight:1.55, margin:'0 0 14px' }}>{desc}</p>
+            <div style={{ display:'inline-flex', alignItems:'center', gap:5, fontSize:12, fontWeight:700, color:cor, background:bgAccent, padding:'5px 12px', borderRadius:50 }}>
+              Usar agente →
+            </div>
+          </Link>
+        ))}
+      </div>
+
+      {/* ── Radar + Calendário ── */}
+      <div className="d-mid">
+        {/* Radar */}
+        <div className="surf">
+          <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', marginBottom:4 }}>
+            <div>
+              <p style={{ fontSize:13.5, fontWeight:700, color:'#180D3C', margin:'0 0 2px', letterSpacing:'-0.01em' }}>Radar de Campanha</p>
+              <p style={{ fontSize:11.5, color:'#857CAA', margin:0 }}>Benchmarks de campanhas vencedoras vs. média</p>
+            </div>
+          </div>
+          <RadarSVG />
+          <div style={{ display:'flex', gap:18, paddingTop:12, borderTop:'1px solid #EEE9F8' }}>
+            <div style={{ display:'flex', alignItems:'center', gap:7 }}>
+              <div style={{ width:20, height:2, background:'#7B4FD8', borderRadius:2 }}/>
+              <span style={{ fontSize:11, color:'#584D80', fontWeight:500 }}>Campanha vencedora</span>
+            </div>
+            <div style={{ display:'flex', alignItems:'center', gap:7 }}>
+              <div style={{ width:20, height:0, borderTop:'2px dashed #B0A8CC', borderRadius:2 }}/>
+              <span style={{ fontSize:11, color:'#857CAA', fontWeight:500 }}>Média</span>
+            </div>
           </div>
         </div>
 
-        {/* Calendário estratégico */}
-        <div style={{ background: '#fff', borderRadius: 14, border: '1px solid #EDEAF5', padding: '18px 16px' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
-            <h2 style={{ fontSize: 13, fontWeight: 600, color: '#1A1333', margin: 0, letterSpacing: '-0.01em' }}>Calendário eleitoral</h2>
-            <Link href="/calendario" style={{ fontSize: 12, color: '#7B4FD8', fontWeight: 500 }}>Ver tudo</Link>
+        {/* Calendário eleitoral */}
+        <div className="surf">
+          <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:14 }}>
+            <p style={{ fontSize:13.5, fontWeight:700, color:'#180D3C', margin:0, letterSpacing:'-0.01em' }}>Calendário eleitoral</p>
+            <Link href="/calendario" style={{ fontSize:12, color:'#7B4FD8', fontWeight:600 }}>Ver tudo →</Link>
           </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-            {proximasDatas.map(({ data, label, dias, relevancia }) => {
-              const estilo = getRelevanciaStyle(relevancia, dias)
-              const d = new Date(data + 'T00:00:00')
-              const dia = d.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' })
+          <div style={{ display:'flex', flexDirection:'column', gap:6 }}>
+            {proximasDatas.map(({data,label,dias,rel}) => {
+              const d = new Date(data+'T00:00:00')
+              const isCrit = rel === 'critica'
               return (
-                <div key={data} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '9px 10px', borderRadius: 9, background: relevancia === 'critica' ? 'rgba(198,40,40,0.04)' : '#FAFAFA', border: `1px solid ${relevancia === 'critica' ? 'rgba(198,40,40,0.12)' : '#F0EDF8'}` }}>
-                  <div style={{ textAlign: 'center', minWidth: 34 }}>
-                    <div style={{ fontSize: 15, fontWeight: 700, color: relevancia === 'critica' ? '#C62828' : '#2D1B6E', lineHeight: 1 }}>{d.getDate()}</div>
-                    <div style={{ fontSize: 9, color: '#A09CBD', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{d.toLocaleDateString('pt-BR', { month: 'short' }).replace('.', '')}</div>
+                <div key={data} style={{ display:'flex', alignItems:'center', gap:10, padding:'10px 12px', borderRadius:10, background: isCrit ? 'rgba(220,53,69,0.05)' : '#FAFAFE', border:`1px solid ${isCrit?'rgba(220,53,69,0.15)':'#EEE9F8'}` }}>
+                  <div style={{ width:36, textAlign:'center', flexShrink:0 }}>
+                    <div style={{ fontSize:17, fontWeight:800, color: isCrit ? '#C62828' : '#2D1B6E', lineHeight:1 }}>{d.getDate()}</div>
+                    <div style={{ fontSize:9, color:'#857CAA', textTransform:'uppercase', letterSpacing:'0.06em', fontWeight:600 }}>{d.toLocaleDateString('pt-BR',{month:'short'}).replace('.','')} </div>
                   </div>
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ fontSize: 12.5, fontWeight: 500, color: '#1A1333', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{label}</div>
+                  <div style={{ flex:1, minWidth:0 }}>
+                    <p style={{ fontSize:13, fontWeight:600, color: isCrit ? '#C62828' : '#180D3C', margin:0, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{label}</p>
                   </div>
-                  <span style={{ fontSize: 10, fontWeight: 600, padding: '2px 7px', borderRadius: 20, background: estilo.bg, color: estilo.color, whiteSpace: 'nowrap', flexShrink: 0 }}>
-                    {estilo.label}
+                  <span style={{ fontSize:11, fontWeight:700, padding:'3px 9px', borderRadius:20, background: isCrit ? 'rgba(198,40,40,0.1)' : dias<=14 ? 'rgba(123,79,216,0.1)' : 'rgba(90,80,160,0.07)', color: isCrit ? '#C62828' : dias<=14 ? '#7B4FD8' : '#584D80', flexShrink:0 }}>
+                    {dias===0 ? 'Hoje' : `${dias}d`}
                   </span>
                 </div>
               )
@@ -351,105 +268,70 @@ export default async function DashboardPage() {
         </div>
       </div>
 
-      {/* ── Grid inferior: Radar + TSE ── */}
-      <div className="d-lower" style={{ marginBottom: 24 }}>
-        {/* Radar de campanha */}
-        <div style={{ background: '#fff', borderRadius: 14, border: '1px solid #EDEAF5', padding: '18px 16px' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 4 }}>
+      {/* ── TSE + Histórico recente ── */}
+      <div className="d-bot">
+        {/* TSE */}
+        <div className="surf">
+          <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:14 }}>
             <div>
-              <h2 style={{ fontSize: 13, fontWeight: 600, color: '#1A1333', margin: 0, letterSpacing: '-0.01em' }}>Radar de Campanha</h2>
-              <p style={{ fontSize: 11.5, color: '#A09CBD', margin: '3px 0 0' }}>Parâmetros de campanhas vencedoras vs. média</p>
+              <p style={{ fontSize:13.5, fontWeight:700, color:'#180D3C', margin:'0 0 2px', letterSpacing:'-0.01em' }}>Pesquisas Eleitorais 2026</p>
+              <p style={{ fontSize:11.5, color:'#857CAA', margin:0 }}>Institutos registrados no TSE</p>
             </div>
+            <a href="https://divulgacandcontas.tse.jus.br/divulga/#/pesquisas-eleitorais" target="_blank" rel="noopener noreferrer" style={{ fontSize:12, color:'#7B4FD8', fontWeight:600, textDecoration:'none' }}>TSE ↗</a>
           </div>
-          <RadarCampanha />
-          <div style={{ display: 'flex', gap: 16, marginTop: 8, paddingTop: 12, borderTop: '1px solid #F0EDF8' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-              <div style={{ width: 24, height: 2, background: '#7B4FD8', borderRadius: 2 }} />
-              <span style={{ fontSize: 11, color: '#6B648C' }}>Campanha vencedora</span>
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-              <div style={{ width: 24, height: 2, borderRadius: 2, borderTop: '1px dashed #C4BFD8', borderBottom: '1px dashed #C4BFD8' }} />
-              <span style={{ fontSize: 11, color: '#6B648C' }}>Média</span>
-            </div>
-          </div>
-        </div>
-
-        {/* Pesquisas TSE */}
-        <div style={{ background: '#fff', borderRadius: 14, border: '1px solid #EDEAF5', padding: '18px 16px' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
-            <div>
-              <h2 style={{ fontSize: 13, fontWeight: 600, color: '#1A1333', margin: 0, letterSpacing: '-0.01em' }}>Pesquisas Eleitorais</h2>
-              <p style={{ fontSize: 11.5, color: '#A09CBD', margin: '3px 0 0' }}>Institutos registrados no TSE — eleições 2026</p>
-            </div>
-            <a
-              href="https://divulgacandcontas.tse.jus.br/divulga/#/pesquisas-eleitorais"
-              target="_blank"
-              rel="noopener noreferrer"
-              style={{ fontSize: 11, fontWeight: 500, color: '#7B4FD8', textDecoration: 'none', whiteSpace: 'nowrap' }}
-            >
-              TSE ↗
-            </a>
-          </div>
-
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginBottom: 16 }}>
-            {INSTITUTOS_TSE.map(({ nome, tipo, freq }) => (
-              <div key={nome} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '9px 12px', borderRadius: 9, background: '#FAFAFA', border: '1px solid #F0EDF8' }}>
-                <div style={{ width: 6, height: 6, borderRadius: '50%', background: '#7B4FD8', flexShrink: 0 }} />
-                <div style={{ flex: 1 }}>
-                  <span style={{ fontSize: 13, fontWeight: 600, color: '#1A1333' }}>{nome}</span>
-                  <span style={{ fontSize: 11, color: '#A09CBD', marginLeft: 8 }}>{tipo}</span>
-                </div>
-                <span style={{ fontSize: 11, color: '#B4B0CC', fontWeight: 400 }}>{freq}</span>
+          <div style={{ display:'flex', flexDirection:'column', gap:5, marginBottom:14 }}>
+            {[
+              {nome:'Datafolha', freq:'Mensal'},
+              {nome:'Quaest',    freq:'Quinzenal'},
+              {nome:'AtlasIntel',freq:'Semanal'},
+              {nome:'PoderData', freq:'Mensal'},
+              {nome:'IPEC/Ipsos',freq:'Mensal'},
+            ].map(({nome,freq}) => (
+              <div key={nome} style={{ display:'flex', alignItems:'center', gap:10, padding:'8px 12px', borderRadius:9, background:'#FAFAFE', border:'1px solid #EEE9F8' }}>
+                <div style={{ width:6, height:6, borderRadius:'50%', background:'#7B4FD8', flexShrink:0 }}/>
+                <span style={{ flex:1, fontSize:13, fontWeight:600, color:'#180D3C' }}>{nome}</span>
+                <span style={{ fontSize:11, color:'#857CAA' }}>{freq}</span>
               </div>
             ))}
           </div>
-
-          <div style={{ padding: '12px', background: 'rgba(198,40,40,0.04)', borderRadius: 10, border: '1px solid rgba(198,40,40,0.1)' }}>
-            <div style={{ fontSize: 11, color: '#A09CBD', marginBottom: 4, fontWeight: 500 }}>Contagem regressiva</div>
-            <div style={{ display: 'flex', alignItems: 'baseline', gap: 6 }}>
-              <span style={{ fontSize: 28, fontWeight: 700, color: '#C62828', letterSpacing: '-0.04em', lineHeight: 1 }}>{diasPrimTurno}</span>
-              <span style={{ fontSize: 13, color: '#A09CBD' }}>dias para o 1º turno</span>
-            </div>
-            <div style={{ fontSize: 12, color: '#C62828', fontWeight: 500, marginTop: 4 }}>2 de outubro de 2026</div>
-          </div>
-
-          <a
-            href="https://divulgacandcontas.tse.jus.br/divulga/#/pesquisas-eleitorais"
-            target="_blank"
-            rel="noopener noreferrer"
-            style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, marginTop: 14, padding: '10px', background: '#FAFAFA', border: '1px solid #EDEAF5', borderRadius: 9, fontSize: 13, fontWeight: 500, color: '#6B648C', textDecoration: 'none' }}
-          >
+          <a href="https://divulgacandcontas.tse.jus.br/divulga/#/pesquisas-eleitorais" target="_blank" rel="noopener noreferrer"
+            style={{ display:'flex', alignItems:'center', justifyContent:'center', gap:6, padding:'10px', background:'#F7F4FF', border:'1px solid #DDD8EE', borderRadius:10, fontSize:13, fontWeight:600, color:'#584D80', textDecoration:'none' }}>
             Ver todas as pesquisas no TSE
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
-              <polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/>
-            </svg>
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
           </a>
         </div>
-      </div>
 
-      {/* ── Últimas gerações ── */}
-      {ultimas && ultimas.length > 0 && (
-        <div>
-          <h2 style={{ fontSize: 13, fontWeight: 600, color: '#1A1333', margin: '0 0 12px', letterSpacing: '-0.01em' }}>Gerado recentemente</h2>
-          <div className="d-gens">
-            {ultimas.map((g, i) => {
-              const ag = AGENTES.find(a => a.id === g.agente)
-              return (
-                <Link key={i} href={`/historico`} style={{ display: 'block', background: '#fff', border: '1px solid #EDEAF5', borderRadius: 12, padding: 14, textDecoration: 'none', borderLeft: `3px solid ${ag?.dot ?? '#7B4FD8'}` }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-                    <span style={{ fontSize: 13, fontWeight: 600, color: '#1A1333' }}>{ag?.label ?? g.agente}</span>
-                    <span style={{ fontSize: 11, color: '#B4B0CC' }}>{new Date(g.criado_em).toLocaleDateString('pt-BR')}</span>
-                  </div>
-                  <p style={{ fontSize: 12.5, color: '#A09CBD', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', lineHeight: 1.5 }}>
-                    {g.output.slice(0, 110)}…
-                  </p>
-                </Link>
-              )
-            })}
+        {/* Gerado recentemente */}
+        <div className="surf">
+          <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:14 }}>
+            <p style={{ fontSize:13.5, fontWeight:700, color:'#180D3C', margin:0, letterSpacing:'-0.01em' }}>Gerado recentemente</p>
+            <Link href="/historico" style={{ fontSize:12, color:'#7B4FD8', fontWeight:600 }}>Ver tudo →</Link>
           </div>
+          {!ultimas || ultimas.length === 0 ? (
+            <div style={{ textAlign:'center', padding:'32px 16px', color:'#857CAA' }}>
+              <div style={{ fontSize:32, marginBottom:10 }}>✦</div>
+              <p style={{ fontSize:13, margin:0, color:'#857CAA' }}>Nenhuma geração ainda.<br/>Use um agente para começar.</p>
+            </div>
+          ) : (
+            <div className="d-gens">
+              {ultimas.map((g,i) => {
+                const ag = AGENTES.find(a=>a.id===g.agente)
+                return (
+                  <Link key={i} href="/historico" style={{ display:'block', background:'#FAFAFE', border:'1px solid #EEE9F8', borderRadius:10, padding:'12px 14px', textDecoration:'none', borderLeft:`3px solid ${ag?.cor??'#7B4FD8'}` }}>
+                    <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:6 }}>
+                      <span style={{ fontSize:12.5, fontWeight:700, color:'#180D3C' }}>{ag?.label ?? g.agente}</span>
+                      <span style={{ fontSize:11, color:'#857CAA' }}>{new Date(g.criado_em).toLocaleDateString('pt-BR')}</span>
+                    </div>
+                    <p style={{ fontSize:12, color:'#584D80', margin:0, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap', lineHeight:1.5 }}>
+                      {g.output.slice(0,100)}…
+                    </p>
+                  </Link>
+                )
+              })}
+            </div>
+          )}
         </div>
-      )}
+      </div>
     </div>
   )
 }

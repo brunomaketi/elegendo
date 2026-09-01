@@ -1,34 +1,24 @@
 :root {
-  --bg: #F7F5FB;
+  --bg: #ECEAF6;
   --surface: #FFFFFF;
-  --border: #EDEAF5;
+  --border: #DDD8EE;
+  --border-subtle: #EEE9F8;
   --purple: #7B4FD8;
-  --purple-deep: #2D1B6E;
+  --purple-deep: #180D3C;
   --purple-mid: #4A3098;
-  --text-primary: #1A1333;
-  --text-secondary: #6B648C;
-  --text-muted: #A09CBD;
+  --text-primary: #180D3C;
+  --text-secondary: #584D80;
+  --text-muted: #857CAA;
   --green: #1D9E75;
-  --blue: #378ADD;
-  --red: #E04B4A;
+  --blue: #2D7DD2;
+  --red: #DC3545;
+  --yellow: #FFD166;
 }
 
-*, *::before, *::after {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-html {
-  height: 100%;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-html, body {
-  max-width: 100vw;
-  overflow-x: hidden;
-}
+html { height: 100%; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+html, body { max-width: 100vw; overflow-x: hidden; }
 
 body {
   min-height: 100%;
@@ -39,11 +29,5 @@ body {
   line-height: 1.5;
 }
 
-a {
-  color: inherit;
-  text-decoration: none;
-}
-
-button {
-  font-family: inherit;
-}
+a { color: inherit; text-decoration: none; }
+button { font-family: inherit; }
