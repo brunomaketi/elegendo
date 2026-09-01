@@ -44,7 +44,7 @@ export default function CopyPage() {
           </div>
         </div>
       </div>
-      <AgentForm agente="copy" fields={FIELDS} agentColor="#7B4FD8" agentBg="rgba(123,79,216,0.08)"/>
+      <AgentForm agente="copy" fields={FIELDS} agentColor="#7B4FD8"/>
     </div>
   )
 }

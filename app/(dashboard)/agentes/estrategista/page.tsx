@@ -42,7 +42,7 @@ export default function EstrategistaPage() {
           </div>
         </div>
       </div>
-      <AgentForm agente="estrategista" fields={FIELDS} agentColor="#2D7DD2" agentBg="rgba(45,125,210,0.08)"/>
+      <AgentForm agente="estrategista" fields={FIELDS} agentColor="#2D7DD2"/>
     </div>
   )
 }

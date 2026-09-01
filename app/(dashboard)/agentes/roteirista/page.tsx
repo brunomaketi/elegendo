@@ -39,7 +39,7 @@ export default function RoteiristPage() {
           </div>
         </div>
       </div>
-      <AgentForm agente="roteirista" fields={FIELDS} agentColor="#0EA472" agentBg="rgba(14,164,114,0.08)"/>
+      <AgentForm agente="roteirista" fields={FIELDS} agentColor="#0EA472"/>
     </div>
   )
 }

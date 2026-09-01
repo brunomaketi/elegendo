@@ -44,7 +44,7 @@ export default function ConscienciaPage() {
           </div>
         </div>
       </div>
-      <AgentForm agente="consciencia" fields={FIELDS} agentColor="#D97706" agentBg="rgba(217,119,6,0.08)"/>
+      <AgentForm agente="consciencia" fields={FIELDS} agentColor="#D97706"/>
     </div>
   )
 }
