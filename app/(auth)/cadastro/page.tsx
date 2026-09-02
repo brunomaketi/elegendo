@@ -42,7 +42,7 @@ export default function CadastroPage() {
 
           {/* Conteúdo */}
           <div style={{ position: 'relative', zIndex: 2 }}>
-            <h1 style={{ fontSize: 38, fontWeight: 800, color: '#2D1B6E', lineHeight: 1.15, margin: '0 0 36px', letterSpacing: '-0.02em' }}>
+            <h1 style={{ fontSize: 38, fontWeight: 800, color: '#091710', lineHeight: 1.15, margin: '0 0 36px', letterSpacing: '-0.02em' }}>
               Comece a<br />ganhar votos.
             </h1>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
@@ -54,8 +54,8 @@ export default function CadastroPage() {
                 <div key={title} style={{ display: 'flex', gap: 14, alignItems: 'flex-start' }}>
                   <div style={{ width: 36, height: 36, borderRadius: 10, background: 'rgba(255,255,255,0.6)', border: '1px solid rgba(255,255,255,0.8)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16, flexShrink: 0 }}>{icon}</div>
                   <div>
-                    <div style={{ fontSize: 14, fontWeight: 700, color: '#2D1B6E', marginBottom: 3 }}>{title}</div>
-                    <div style={{ fontSize: 12, color: 'rgba(45,27,110,0.6)', lineHeight: 1.5 }}>{desc}</div>
+                    <div style={{ fontSize: 14, fontWeight: 700, color: '#091710', marginBottom: 3 }}>{title}</div>
+                    <div style={{ fontSize: 12, color: 'rgba(9,23,16,0.6)', lineHeight: 1.5 }}>{desc}</div>
                   </div>
                 </div>
               ))}
@@ -64,10 +64,10 @@ export default function CadastroPage() {
 
           {/* Brand */}
           <div style={{ position: 'relative', zIndex: 2, display: 'flex', alignItems: 'center', gap: 8 }}>
-            <div style={{ width: 28, height: 28, borderRadius: 8, background: '#2D1B6E', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <div style={{ width: 28, height: 28, borderRadius: 8, background: '#091710', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><rect x="1" y="3" width="3" height="8" rx="1" fill="white"/><rect x="5.5" y="1" width="3" height="12" rx="1" fill="white"/><rect x="10" y="4" width="3" height="6" rx="1" fill="white"/></svg>
             </div>
-            <span style={{ fontSize: 15, fontWeight: 800, color: '#2D1B6E', letterSpacing: '0.04em' }}>ELEGENDO</span>
+            <span style={{ fontSize: 15, fontWeight: 800, color: '#091710', letterSpacing: '0.04em' }}>ELEGENDO</span>
           </div>
         </div>
 

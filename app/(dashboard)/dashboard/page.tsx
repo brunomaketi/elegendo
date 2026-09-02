@@ -202,7 +202,7 @@ export default async function DashboardPage() {
         {[
           {label:'Gerações este mês', val:String(total),       sub: limite?`de ${limite} disponíveis`:'ilimitadas', color:'#0EA472'},
           {label:'Total histórico',   val:String(totalGeral??0),sub:'desde o início',                               color:'#2D7DD2'},
-          {label:'Agentes ativos',    val:'4',                  sub:'todos disponíveis',                             color:'#7B4FD8'},
+          {label:'Agentes ativos',    val:'4',                  sub:'todos disponíveis',                             color:'#0EA472'},
           {label:'Dias p/ 1º turno',  val:String(diasTurno),    sub:'2 out 2026',                                   color:'#DC3545'},
         ].map(({label,val,sub,color})=>(
           <div key={label} className="card">
@@ -290,6 +290,60 @@ export default async function DashboardPage() {
               <div style={{fontSize:11,color:'#7BA090',marginTop:2}}>Plano {plano}</div>
             </div>
           )}
+        </div>
+      </div>
+
+
+      {/* ── Widget: Cenário Presidencial 2026 ── */}
+      <div style={{marginBottom:14,background:'#fff',border:'1px solid #D4E8DC',borderRadius:16,padding:'16px 20px',overflow:'hidden',position:'relative'}}>
+        <div style={{position:'absolute',top:-30,right:-20,width:120,height:120,borderRadius:'50%',background:'rgba(14,164,114,0.04)',pointerEvents:'none'}}/>
+        <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:14}}>
+          <div>
+            <p style={{fontSize:12,fontWeight:700,color:'#091710',margin:'0 0 2px',letterSpacing:'-0.01em'}}>Cenário Presidencial 2026</p>
+            <p style={{fontSize:11,color:'#7BA090',margin:0}}>Agregado Datafolha · Quaest · AtlasIntel · ago 2026</p>
+          </div>
+          <a href="/pesquisas" style={{fontSize:12,fontWeight:700,color:'#0EA472',textDecoration:'none',whiteSpace:'nowrap'}}>Ver análise completa →</a>
+        </div>
+        <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:16,marginBottom:14}}>
+          {/* Candidato 1 */}
+          <div style={{padding:'12px 14px',background:'rgba(14,164,114,0.05)',borderRadius:12,border:'1px solid rgba(14,164,114,0.15)'}}>
+            <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start',marginBottom:6}}>
+              <div>
+                <div style={{fontSize:13,fontWeight:700,color:'#091710'}}>Tarcísio de Freitas</div>
+                <div style={{fontSize:11,color:'#7BA090'}}>Republicanos</div>
+              </div>
+              <div style={{fontSize:26,fontWeight:800,color:'#0EA472',letterSpacing:'-0.03em',lineHeight:1}}>34%</div>
+            </div>
+            <div style={{height:5,background:'#E6F3EB',borderRadius:4,overflow:'hidden'}}>
+              <div style={{width:'68%',height:'100%',background:'#0EA472',borderRadius:4}}/>
+            </div>
+          </div>
+          {/* Candidato 2 */}
+          <div style={{padding:'12px 14px',background:'rgba(220,53,69,0.04)',borderRadius:12,border:'1px solid rgba(220,53,69,0.12)'}}>
+            <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start',marginBottom:6}}>
+              <div>
+                <div style={{fontSize:13,fontWeight:700,color:'#091710'}}>Lula</div>
+                <div style={{fontSize:11,color:'#7BA090'}}>PT</div>
+              </div>
+              <div style={{fontSize:26,fontWeight:800,color:'#DC3545',letterSpacing:'-0.03em',lineHeight:1}}>29%</div>
+            </div>
+            <div style={{height:5,background:'rgba(220,53,69,0.1)',borderRadius:4,overflow:'hidden'}}>
+              <div style={{width:'58%',height:'100%',background:'#DC3545',borderRadius:4}}/>
+            </div>
+          </div>
+        </div>
+        {/* Mini barras */}
+        <div style={{display:'flex',flexDirection:'column',gap:6}}>
+          {[{n:'Tarcísio',p:34,c:'#0EA472'},{n:'Lula',p:29,c:'#DC3545'},{n:'Tebet',p:9,c:'#2D7DD2'},{n:'Ciro',p:6,c:'#D97706'},{n:'Indecisos',p:22,c:'#D4E8DC'}].map(d=>(
+            <div key={d.n} style={{display:'flex',alignItems:'center',gap:10}}>
+              <span style={{width:70,fontSize:11.5,fontWeight:500,color:'#7BA090',textAlign:'right',flexShrink:0}}>{d.n}</span>
+              <div style={{flex:1,height:16,background:'#F1F6F3',borderRadius:5,overflow:'hidden'}}>
+                <div style={{width:`${d.p/34*100}%`,height:'100%',background:d.c,borderRadius:5,display:'flex',alignItems:'center',paddingRight:6,justifyContent:'flex-end',minWidth:30}}>
+                  <span style={{fontSize:10,fontWeight:700,color:d.c==='#D4E8DC'?'#A8C4B8':'#fff'}}>{d.p}%</span>
+                </div>
+              </div>
+            </div>
+          ))}
         </div>
       </div>
 

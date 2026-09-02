@@ -67,7 +67,7 @@ export default function PerfilPage() {
   const completude = Math.round((preenchidos / camposObrigatorios.length) * 100)
 
   if (loading) return (
-    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '60vh', color: 'rgba(45,27,110,0.4)', fontFamily: 'var(--font-inter), sans-serif' }}>
+    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '60vh', color: 'rgba(9,23,16,0.4)', fontFamily: 'var(--font-inter), sans-serif' }}>
       Carregando perfil...
     </div>
   )
@@ -77,7 +77,7 @@ export default function PerfilPage() {
 
       {/* Banner primeiro acesso */}
       {primeiroAcesso && (
-        <div style={{ background: 'linear-gradient(135deg, #2D1B6E, #4A2FA0)', borderRadius: 16, padding: '20px 24px', marginBottom: 28, display: 'flex', alignItems: 'flex-start', gap: 16 }}>
+        <div style={{ background: 'linear-gradient(135deg, #091710, #4A2FA0)', borderRadius: 16, padding: '20px 24px', marginBottom: 28, display: 'flex', alignItems: 'flex-start', gap: 16 }}>
           <span style={{ fontSize: 28, flexShrink: 0 }}>👋</span>
           <div>
             <div style={{ fontSize: 16, fontWeight: 800, color: '#fff', marginBottom: 4 }}>
@@ -96,15 +96,15 @@ export default function PerfilPage() {
           {form.nome?.charAt(0).toUpperCase() || '?'}
         </div>
         <div style={{ flex: 1 }}>
-          <h1 style={{ fontSize: '24px', fontWeight: 800, color: '#2D1B6E', margin: '0 0 3px', letterSpacing: '-0.01em' }}>
+          <h1 style={{ fontSize: '24px', fontWeight: 800, color: '#091710', margin: '0 0 3px', letterSpacing: '-0.01em' }}>
             {form.nome || 'Seu nome'}
           </h1>
-          <p style={{ fontSize: '13px', color: 'rgba(45,27,110,0.4)', margin: '0 0 14px' }}>{email}</p>
+          <p style={{ fontSize: '13px', color: 'rgba(9,23,16,0.4)', margin: '0 0 14px' }}>{email}</p>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             <div style={{ width: 160, background: 'rgba(123,79,216,0.1)', borderRadius: 4, height: 6, overflow: 'hidden' }}>
               <div style={{ height: '100%', borderRadius: 4, background: completude === 100 ? '#1D9E75' : completude > 50 ? '#7B4FD8' : '#E24B4A', width: `${completude}%`, transition: 'width 0.3s' }} />
             </div>
-            <span style={{ fontSize: 12, fontWeight: 600, color: completude === 100 ? '#1D9E75' : 'rgba(45,27,110,0.5)' }}>
+            <span style={{ fontSize: 12, fontWeight: 600, color: completude === 100 ? '#1D9E75' : 'rgba(9,23,16,0.5)' }}>
               {completude}% completo
             </span>
             {completude === 100 && (
@@ -116,7 +116,7 @@ export default function PerfilPage() {
 
       {/* Tipo de conta */}
       <div style={{ marginBottom: '24px' }}>
-        <div style={{ fontSize: '11px', fontWeight: 700, color: 'rgba(45,27,110,0.4)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '10px' }}>
+        <div style={{ fontSize: '11px', fontWeight: 700, color: 'rgba(9,23,16,0.4)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '10px' }}>
           Tipo de conta
         </div>
         <div style={{ display: 'flex', gap: 10 }}>
@@ -124,10 +124,10 @@ export default function PerfilPage() {
             { val: 'candidato', label: 'Candidato', icon: '🗳️', desc: 'Estou disputando uma eleição' },
             { val: 'assessor',  label: 'Assessor / Gestor', icon: '📋', desc: 'Gerencio campanhas de candidatos' },
           ].map(({ val, label, icon, desc }) => (
-            <button key={val} type="button" onClick={() => set('tipo_conta', val)} style={{ flex: 1, padding: '14px 16px', borderRadius: 14, cursor: 'pointer', textAlign: 'left', border: `2px solid ${form.tipo_conta === val ? '#7B4FD8' : 'rgba(123,79,216,0.12)'}`, background: form.tipo_conta === val ? 'linear-gradient(135deg, #2D1B6E, #4A2FA0)' : 'rgba(255,255,255,0.7)', backdropFilter: 'blur(8px)', transition: 'all 0.15s' }}>
+            <button key={val} type="button" onClick={() => set('tipo_conta', val)} style={{ flex: 1, padding: '14px 16px', borderRadius: 14, cursor: 'pointer', textAlign: 'left', border: `2px solid ${form.tipo_conta === val ? '#7B4FD8' : 'rgba(123,79,216,0.12)'}`, background: form.tipo_conta === val ? 'linear-gradient(135deg, #091710, #4A2FA0)' : 'rgba(255,255,255,0.7)', backdropFilter: 'blur(8px)', transition: 'all 0.15s' }}>
               <div style={{ fontSize: 18, marginBottom: 4 }}>{icon}</div>
-              <div style={{ fontSize: 14, fontWeight: 700, color: form.tipo_conta === val ? '#fff' : '#2D1B6E', marginBottom: 2 }}>{label}</div>
-              <div style={{ fontSize: 12, color: form.tipo_conta === val ? 'rgba(255,255,255,0.55)' : 'rgba(45,27,110,0.4)' }}>{desc}</div>
+              <div style={{ fontSize: 14, fontWeight: 700, color: form.tipo_conta === val ? '#fff' : '#091710', marginBottom: 2 }}>{label}</div>
+              <div style={{ fontSize: 12, color: form.tipo_conta === val ? 'rgba(255,255,255,0.55)' : 'rgba(9,23,16,0.4)' }}>{desc}</div>
             </button>
           ))}
         </div>
@@ -139,7 +139,7 @@ export default function PerfilPage() {
           {/* Coluna esquerda */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
             <div style={{ background: 'rgba(255,255,255,0.75)', backdropFilter: 'blur(8px)', border: '1px solid rgba(123,79,216,0.1)', borderRadius: 16, padding: 20 }}>
-              <div style={{ fontSize: 11, fontWeight: 700, color: 'rgba(45,27,110,0.4)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 16 }}>
+              <div style={{ fontSize: 11, fontWeight: 700, color: 'rgba(9,23,16,0.4)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 16 }}>
                 Informações pessoais
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
@@ -201,10 +201,10 @@ export default function PerfilPage() {
           {/* Coluna direita */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
             <div style={{ background: 'rgba(255,255,255,0.75)', backdropFilter: 'blur(8px)', border: '1px solid rgba(123,79,216,0.1)', borderRadius: 16, padding: 20 }}>
-              <div style={{ fontSize: 11, fontWeight: 700, color: 'rgba(45,27,110,0.4)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 4 }}>
+              <div style={{ fontSize: 11, fontWeight: 700, color: 'rgba(9,23,16,0.4)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 4 }}>
                 {form.tipo_conta === 'candidato' ? 'Contexto da campanha' : 'Contexto de trabalho'}
               </div>
-              <p style={{ fontSize: 12, color: 'rgba(45,27,110,0.45)', margin: '0 0 14px', lineHeight: 1.6 }}>
+              <p style={{ fontSize: 12, color: 'rgba(9,23,16,0.45)', margin: '0 0 14px', lineHeight: 1.6 }}>
                 {form.tipo_conta === 'candidato'
                   ? 'Este texto alimenta todos os agentes. Quanto mais detalhado, mais preciso o conteúdo gerado.'
                   : 'Descreva sua experiência, os candidatos que gerencia e como trabalha.'}
@@ -218,7 +218,7 @@ export default function PerfilPage() {
                 rows={10}
                 style={{ ...inp, resize: 'vertical', minHeight: '240px' }}
               />
-              <div style={{ fontSize: 11, color: 'rgba(45,27,110,0.35)', marginTop: 8 }}>
+              <div style={{ fontSize: 11, color: 'rgba(9,23,16,0.35)', marginTop: 8 }}>
                 {form.bio_politica.length} caracteres · Recomendado: 200+
               </div>
             </div>
@@ -226,7 +226,7 @@ export default function PerfilPage() {
             {/* Dica */}
             <div style={{ padding: '14px 16px', background: 'rgba(123,79,216,0.06)', borderRadius: 12, border: '1px solid rgba(123,79,216,0.15)' }}>
               <div style={{ fontSize: 12, fontWeight: 700, color: '#7B4FD8', marginBottom: 4 }}>💡 Dica dos agentes</div>
-              <p style={{ fontSize: 12, color: 'rgba(45,27,110,0.55)', margin: 0, lineHeight: 1.6 }}>
+              <p style={{ fontSize: 12, color: 'rgba(9,23,16,0.55)', margin: 0, lineHeight: 1.6 }}>
                 {form.tipo_conta === 'candidato'
                   ? 'Inclua: cargo, cidade, pautas principais, histórico eleitoral, público-alvo e tom de comunicação.'
                   : 'Inclua: quantos candidatos gerencia, em quais cidades, quais cargos e qual é seu estilo de comunicação.'}
@@ -252,7 +252,7 @@ export default function PerfilPage() {
 function Field({ label, required, children }: { label: string; required?: boolean; children: React.ReactNode }) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
-      <label style={{ fontSize: 11, fontWeight: 700, color: 'rgba(45,27,110,0.45)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+      <label style={{ fontSize: 11, fontWeight: 700, color: 'rgba(9,23,16,0.45)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
         {label}{required && <span style={{ color: '#7B4FD8', marginLeft: 3 }}>*</span>}
       </label>
       {children}
@@ -262,7 +262,7 @@ function Field({ label, required, children }: { label: string; required?: boolea
 
 const inp: React.CSSProperties = {
   padding: '9px 12px', borderRadius: 10, border: '1px solid rgba(123,79,216,0.15)',
-  fontSize: 13, color: '#2D1B6E', background: '#fff',
+  fontSize: 13, color: '#091710', background: '#fff',
   width: '100%', boxSizing: 'border-box', outline: 'none',
   fontFamily: 'var(--font-inter), sans-serif',
 }

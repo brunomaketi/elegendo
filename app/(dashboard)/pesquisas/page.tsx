@@ -26,8 +26,11 @@ const TENDENCIA = {
   tebet:    [7,7,8,8,9,9,9,9,9],
 }
 
+// ⚠️ NOTA: Dados de governadores para 2026 são ESTIMATIVAS. Candidaturas ainda não oficializadas.
+// Tarcísio de Freitas é o atual Governador de SP — candidato provável à Presidência.
+// Ricardo Nunes é PREFEITO de São Paulo (eleito out/2024) — não é candidato a governador.
 const GOVERNADORES: Record<string,{nome:string;partido:string;pct:number;cor:string}[]> = {
-  'São Paulo':          [{ nome:'Ricardo Nunes',     partido:'MDB',  pct:38, cor:'#2D7DD2' }, { nome:'Guilherme Boulos', partido:'PSOL', pct:24, cor:'#DC3545' }, { nome:'Outros', partido:'', pct:22, cor:'#D4E8DC' }, { nome:'Indecisos', partido:'', pct:16, cor:'#E6F3EB' }],
+  'São Paulo':          [{ nome:'Corrida em aberto', partido:'Gov SP 2026', pct:38, cor:'#0EA472' }, { nome:'Guilherme Boulos', partido:'PSOL/PT', pct:26, cor:'#DC3545' }, { nome:'Outros', partido:'', pct:20, cor:'#D4E8DC' }, { nome:'Indecisos', partido:'', pct:16, cor:'#E6F3EB' }],
   'Minas Gerais':       [{ nome:'Romeu Zema',        partido:'Novo', pct:42, cor:'#0EA472' }, { nome:'Alexandre Kalil',  partido:'PSD',  pct:28, cor:'#D97706' }, { nome:'Outros/Indecisos', partido:'', pct:30, cor:'#D4E8DC' }],
   'Rio de Janeiro':     [{ nome:'Cláudio Castro',    partido:'PL',   pct:35, cor:'#7B4FD8' }, { nome:'Thiago Pampolha', partido:'PT',   pct:22, cor:'#DC3545' }, { nome:'Eduardo Paes', partido:'PSD', pct:18, cor:'#2D7DD2' }, { nome:'Outros/Indecisos', partido:'', pct:25, cor:'#D4E8DC' }],
   'Rio Grande do Sul':  [{ nome:'Eduardo Leite',     partido:'PSDB', pct:48, cor:'#2D7DD2' }, { nome:'Edegar Pretto',    partido:'PT',   pct:24, cor:'#DC3545' }, { nome:'Outros', partido:'', pct:28, cor:'#D4E8DC' }],
@@ -210,8 +213,9 @@ export default function PesquisasPage() {
         </div>
         <div style={{background:'rgba(14,164,114,0.05)',border:'1px solid rgba(14,164,114,0.15)',borderRadius:14,padding:'12px 16px',display:'flex',alignItems:'center'}}>
           <p style={{fontSize:12.5,color:'#3A5F4E',margin:0,lineHeight:1.65}}>
-            <strong style={{fontWeight:700,display:'block',marginBottom:3}}>Dados de referência — Eleições Gerais 2026</strong>
-            Pesquisas consolidadas de Datafolha, Quaest, AtlasIntel e PoderData. Dados estimados para fins estratégicos.
+            <strong style={{fontWeight:700,display:'block',marginBottom:3,color:'#DC3545'}}>⚠️ Dados de referência estimados — não oficiais</strong>
+            Pesquisas presidenciais consolidadas de Datafolha, Quaest, AtlasIntel e PoderData. 
+            Dados de governadores são <strong>projeções</strong> — candidaturas estaduais para 2026 ainda em definição.
             Consulte o <a href="https://divulgacandcontas.tse.jus.br/divulga/#/pesquisas-eleitorais" target="_blank" rel="noopener noreferrer" style={{color:'#0EA472',fontWeight:700}}>TSE</a> para pesquisas oficiais registradas.
           </p>
         </div>
