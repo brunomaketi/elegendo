@@ -12,10 +12,10 @@ const PRES_PODERDATA = [
 ]
 
 const PRES_QUAEST = [
-  { nome:'Lula',             partido:'PT',           pct:35, cor:'#DC3545' },
-  { nome:'Flávio Bolsonaro', partido:'PL',           pct:26, cor:'#003399' },
-  { nome:'Ratinho Júnior',   partido:'PSD',          pct:9,  cor:'#0EA472' },
-  { nome:'Outros/NS/NR',     partido:'—',            pct:30, cor:'#D4E8DC' },
+  { nome:'Lula',             partido:'PT',           pct:36, cor:'#DC3545' },
+  { nome:'Flávio Bolsonaro', partido:'PL',           pct:28, cor:'#003399' },
+  { nome:'Ronaldo Caiado',   partido:'PSD',          pct:8,  cor:'#0EA472' },
+  { nome:'Outros/NS/NR',     partido:'—',            pct:28, cor:'#D4E8DC' },
 ]
 
 const PESQUISAS_REAIS = [
@@ -31,7 +31,7 @@ const PESQUISAS_REAIS = [
     cobertura:'Nacional', amostra:'2.000', margem:'±2pp', cor:'#2D7DD2',
     contratante:'Genial Investimentos', confianca:'95%',
     link:'https://divulgacandcontas.tse.jus.br/divulga/#/pesquisas-eleitorais',
-    resultado:'Lula 35% · Flávio Bolsonaro 26% · Ratinho Jr. 9%'
+    resultado:'Lula ~36% · Flávio Bolsonaro ~28% · Ronaldo Caiado ~8%'
   },
   {
     id:'Ver TSE', instituto:'Datafolha', data:'ago 2026', cargo:'Presidente',
@@ -42,10 +42,11 @@ const PESQUISAS_REAIS = [
   },
 ]
 
-const CANDIDATOS_PRES = [
-  { nome:'Luiz Inácio Lula da Silva', partido:'PT', numero:'13', cor:'#DC3545', link:'https://divulgacandcontas.tse.jus.br/divulga/#/candidato/BR/BR/' },
-  { nome:'Flávio Bolsonaro', partido:'PL', numero:'22', cor:'#003399', link:'https://divulgacandcontas.tse.jus.br/divulga/#/candidato/BR/BR/20322002026' },
-  { nome:'Ratinho Júnior', partido:'PSD', numero:'55', cor:'#D97706', link:'https://divulgacandcontas.tse.jus.br/divulga/#/pesquisas-eleitorais' },
+interface Candidato { nome:string; nomeCompleto?:string; partido:string; numero:string; cor:string; link:string; vice?:string }
+const CANDIDATOS_PRES: Candidato[] = [
+  { nome:'Lula', nomeCompleto:'Luiz Inácio Lula da Silva', partido:'PT', numero:'13', cor:'#DC3545', link:'https://divulgacandcontas.tse.jus.br/divulga/#/candidato/BR/BR/' },
+  { nome:'Flávio Bolsonaro', nomeCompleto:'Flávio Nantes Bolsonaro', partido:'PL', numero:'22', cor:'#003399', link:'https://divulgacandcontas.tse.jus.br/divulga/#/candidato/BR/BR/20322002026' },
+  { nome:'Ronaldo Caiado', nomeCompleto:'Ronaldo Ramos Caiado', partido:'PSD', numero:'55', cor:'#0EA472', link:'https://divulgacandcontas.tse.jus.br/divulga/#/candidato/BR/BR/', vice:'Gilberto Kassab (PSD)' },
 ]
 
 function getDias(){ const h=new Date();h.setHours(0,0,0,0);return Math.ceil((new Date('2026-10-02').getTime()-h.getTime())/86400000) }
