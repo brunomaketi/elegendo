@@ -262,12 +262,12 @@ export default async function DashboardPage() {
             <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start'}}>
               <div>
                 <p style={{fontSize:13,fontWeight:700,color:'#091710',margin:'0 0 1px'}}>Pesquisa Presidencial 2026</p>
-                <p style={{fontSize:11,color:'#7BA090',margin:0}}>PoderData · 26 ago · ±2pp</p>
+                <p style={{fontSize:11,color:'#7BA090',margin:0}}>AtlasIntel · 31 ago 2026 · ±1pp</p>
               </div>
               <a href="/pesquisas" style={{fontSize:11.5,fontWeight:700,color:'#0EA472',textDecoration:'none',whiteSpace:'nowrap' as const}}>Ver análise →</a>
             </div>
             <div style={{display:'flex',flexDirection:'column',gap:7,flex:1,justifyContent:'center'}}>
-              {([{n:'Lula',p:38,c:'#DC3545',pt:'PT'},{n:'Flávio Bolsonaro',p:35,c:'#003399',pt:'PL'},{n:'Ronaldo Caiado',p:8,c:'#0EA472',pt:'PSD'}] as const).map(d=>(
+              {([{n:'Lula',p:43,c:'#DC3545',pt:'PT'},{n:'Flávio Bolsonaro',p:34,c:'#003399',pt:'PL'},{n:'Augusto Cury',p:8,c:'#D97706',pt:'Avante'},{n:'Renan Santos',p:8,c:'#7B4FD8',pt:'Missão'},{n:'Caiado',p:3,c:'#0EA472',pt:'PSD'}] as const).map(d=>(
                 <div key={d.n} style={{display:'flex',alignItems:'center',gap:8}}>
                   <div style={{width:82,flexShrink:0}}>
                     <div style={{fontSize:12,fontWeight:600,color:'#091710',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap' as const}}>{d.n}</div>
@@ -281,7 +281,7 @@ export default async function DashboardPage() {
                 </div>
               ))}
             </div>
-            <p style={{fontSize:10,color:'#A8C4B8',margin:0}}>Empatados na margem de erro</p>
+            <p style={{fontSize:10,color:'#A8C4B8',margin:0}}>AtlasIntel · TSE BR-07972/2026 · 31 ago · ±1pp</p>
           </div>
 
           {/* 3. Contagem + Status (coluna) */}

@@ -5,17 +5,22 @@ import Link from 'next/link'
 // ── Dados REAIS de pesquisas registradas no TSE ─────────────────────────
 // Fontes: PoderData, Quaest, Datafolha, AtlasIntel — agosto 2026
 
+// AtlasIntel · 25-30 ago 2026 · TSE BR-07972/2026 · 5.014 eleitores · ±1pp
 const PRES_PODERDATA = [
-  { nome:'Lula',             partido:'PT',          numero:'13',  pct:38, cor:'#DC3545', situacao:'Titular' },
-  { nome:'Flávio Bolsonaro', partido:'PL',           numero:'22',  pct:35, cor:'#003399', situacao:'Titular' },
-  { nome:'Outros/NS/NR',     partido:'—',            numero:'—',   pct:27, cor:'#D4E8DC', situacao:'' },
+  { nome:'Lula',             partido:'PT',      numero:'13', pct:43, cor:'#DC3545', situacao:'Titular' },
+  { nome:'Flávio Bolsonaro', partido:'PL',      numero:'22', pct:34, cor:'#003399', situacao:'Titular' },
+  { nome:'Augusto Cury',     partido:'Avante',  numero:'70', pct:8,  cor:'#D97706', situacao:'' },
+  { nome:'Renan Santos',     partido:'Missão',  numero:'—',  pct:8,  cor:'#7B4FD8', situacao:'' },
+  { nome:'Ronaldo Caiado',   partido:'PSD',     numero:'55', pct:3,  cor:'#0EA472', situacao:'' },
+  { nome:'Outros/NS/NR',     partido:'—',       numero:'—',  pct:4,  cor:'#D4E8DC', situacao:'' },
 ]
 
+// PoderData · 23-26 ago 2026 · TSE BR-04974/2026 · 2.400 entrevistados · ±2pp
 const PRES_QUAEST = [
-  { nome:'Lula',             partido:'PT',           pct:36, cor:'#DC3545' },
-  { nome:'Flávio Bolsonaro', partido:'PL',           pct:28, cor:'#003399' },
-  { nome:'Ronaldo Caiado',   partido:'PSD',          pct:8,  cor:'#0EA472' },
-  { nome:'Outros/NS/NR',     partido:'—',            pct:28, cor:'#D4E8DC' },
+  { nome:'Lula',             partido:'PT',      pct:38, cor:'#DC3545' },
+  { nome:'Flávio Bolsonaro', partido:'PL',      pct:35, cor:'#003399' },
+  { nome:'Ronaldo Caiado',   partido:'PSD',     pct:5,  cor:'#0EA472' },
+  { nome:'Outros/NS/NR',     partido:'—',       pct:22, cor:'#D4E8DC' },
 ]
 
 const PESQUISAS_REAIS = [
@@ -46,6 +51,8 @@ interface Candidato { nome:string; nomeCompleto?:string; partido:string; numero:
 const CANDIDATOS_PRES: Candidato[] = [
   { nome:'Lula', nomeCompleto:'Luiz Inácio Lula da Silva', partido:'PT', numero:'13', cor:'#DC3545', link:'https://divulgacandcontas.tse.jus.br/divulga/#/candidato/BR/BR/' },
   { nome:'Flávio Bolsonaro', nomeCompleto:'Flávio Nantes Bolsonaro', partido:'PL', numero:'22', cor:'#003399', link:'https://divulgacandcontas.tse.jus.br/divulga/#/candidato/BR/BR/20322002026' },
+  { nome:'Augusto Cury', nomeCompleto:'Augusto Jorge Cury', partido:'Avante', numero:'70', cor:'#D97706', link:'https://divulgacandcontas.tse.jus.br/divulga/#/candidato/BR/BR/' },
+  { nome:'Renan Santos', nomeCompleto:'Renan Paulo Santos Silva', partido:'Missão', numero:'—', cor:'#7B4FD8', link:'https://divulgacandcontas.tse.jus.br/divulga/#/candidato/BR/BR/' },
   { nome:'Ronaldo Caiado', nomeCompleto:'Ronaldo Ramos Caiado', partido:'PSD', numero:'55', cor:'#0EA472', link:'https://divulgacandcontas.tse.jus.br/divulga/#/candidato/BR/BR/', vice:'Gilberto Kassab (PSD)' },
 ]
 
@@ -193,7 +200,7 @@ export default function PesquisasPage() {
               <p style={{fontSize:11.5,color:'#7BA090',margin:0}}>Espontâneo · dados de ago/2026</p>
             </div>
             <div style={{display:'flex',gap:6}}>
-              {[{id:'poderdata',label:'PoderData'},{id:'quaest',label:'Quaest'}].map(f=>(
+              {[{id:'poderdata',label:'AtlasIntel 1º T.'},{id:'quaest',label:'PoderData'}].map(f=>(
                 <button key={f.id} className="tab" onClick={()=>setFonte(f.id as 'poderdata'|'quaest')}
                   style={{background:fonte===f.id?'linear-gradient(135deg,#0EA472,#054E39)':'transparent',border:`1px solid ${fonte===f.id?'transparent':'#D4E8DC'}`,color:fonte===f.id?'#fff':'#7BA090'}}>
                   {f.label}
@@ -205,9 +212,9 @@ export default function PesquisasPage() {
           <div style={{marginTop:14,padding:'10px 12px',background:'rgba(14,164,114,0.05)',borderRadius:10,border:'1px solid rgba(14,164,114,0.1)'}}>
             <p style={{fontSize:11.5,color:'#3A5F4E',margin:0,lineHeight:1.5}}>
               {fonte==='poderdata' ? (
-                <><strong>PoderData · TSE nº BR-04974/2026</strong><br/>23-26 ago 2026 · 2.400 entrevistados · Margem ±2pp · 95% de confiança<br/>Contratante: Poder360 (próprio)</>
+                <><strong>AtlasIntel · TSE nº BR-07972/2026</strong><br/>25-30 ago 2026 · 5.014 eleitores · Margem ±1pp · 95% de confiança<br/>Contratante: Recursos próprios (AtlasIntel)</>
               ) : (
-                <><strong>Genial/Quaest · ago 2026</strong><br/>Contratante: Genial Investimentos · Margem ±2pp · 95% de confiança</>
+                <><strong>PoderData · TSE nº BR-04974/2026</strong><br/>23-26 ago 2026 · 2.400 entrevistados · Margem ±2pp · 95% de confiança<br/>Contratante: Poder360 (próprio)</>
               )}
             </p>
           </div>
