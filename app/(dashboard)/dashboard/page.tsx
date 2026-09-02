@@ -167,13 +167,11 @@ export default async function DashboardPage() {
   return (
     <div style={{padding:'22px 20px',minHeight:'100vh',background:'#F1F6F3',fontFamily:"var(--font-inter),'Inter',sans-serif"}}>
       <style>{`
-        .g2{display:grid;grid-template-columns:1fr;gap:14px}
         .g3{display:grid;grid-template-columns:1fr;gap:14px}
         .g4{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
         .gbot{display:grid;grid-template-columns:1fr;gap:14px}
         .grecs{display:grid;grid-template-columns:1fr;gap:8px}
         @media(min-width:860px){
-          .g2{grid-template-columns:1fr 340px}
           .g3{grid-template-columns:1fr 1fr 340px}
           .g4{grid-template-columns:repeat(4,1fr)}
           .gbot{grid-template-columns:1fr 1fr}
@@ -221,114 +219,104 @@ export default async function DashboardPage() {
         </div>
       )}
 
-      {/* ── Trend Chart + Upgrade/Countdown ── */}
-      <div className="g2" style={{marginBottom:14}}>
-        {/* Chart card compacto */}
-        <div style={{background:'linear-gradient(135deg,#054E39 0%,#0A7A56 100%)',borderRadius:16,padding:'16px 18px',position:'relative',overflow:'hidden'}}>
-          <div style={{position:'absolute',top:-30,right:-20,width:100,height:100,borderRadius:'50%',background:'rgba(14,164,114,0.2)',pointerEvents:'none'}}/>
-          <div style={{position:'relative',zIndex:1}}>
-            <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:12}}>
+      {/* ── Row: Atividade + Pesquisas + Contagem ── */}
+      <div style={{display:'grid',gridTemplateColumns:'1fr',gap:14,marginBottom:14}}>
+        <style>{`.trio{display:grid;grid-template-columns:1fr;gap:14px}@media(min-width:860px){.trio{grid-template-columns:1fr 1fr 252px}}`}</style>
+        <div className="trio">
+
+          {/* 1. Atividade compacta */}
+          <div style={{background:'linear-gradient(135deg,#054E39 0%,#0A7A56 100%)',borderRadius:16,padding:'16px 18px',position:'relative',overflow:'hidden',minHeight:0}}>
+            <div style={{position:'absolute',top:-20,right:-10,width:80,height:80,borderRadius:'50%',background:'rgba(14,164,114,0.2)',pointerEvents:'none'}}/>
+            <div style={{position:'relative',zIndex:1}}>
+              <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start',marginBottom:10}}>
+                <div>
+                  <p style={{fontSize:10.5,color:'rgba(255,255,255,0.45)',margin:'0 0 2px',fontWeight:500}}>Atividade — 7 dias</p>
+                  <div style={{display:'flex',alignItems:'baseline',gap:5}}>
+                    <span style={{fontSize:24,fontWeight:800,color:'#fff',letterSpacing:'-0.04em',lineHeight:1}}>{totalGeral??0}</span>
+                    <span style={{fontSize:11,color:'rgba(255,255,255,0.4)'}}>total</span>
+                  </div>
+                </div>
+                <div style={{textAlign:'right'}}>
+                  <p style={{fontSize:10,color:'rgba(255,255,255,0.4)',margin:'0 0 1px'}}>este mês</p>
+                  <span style={{fontSize:17,fontWeight:700,color:'#5DFFC0',letterSpacing:'-0.02em'}}>{total}{limite?`/${limite}`:''}</span>
+                </div>
+              </div>
+              <div style={{display:'flex',alignItems:'flex-end',gap:3,height:30}}>
+                {seteData.map(([dia,qtd])=>{
+                  const d=new Date(dia+'T12:00:00')
+                  const isToday=dia===new Date().toISOString().slice(0,10)
+                  const h=actMax7>0?Math.max((qtd/actMax7)*30,qtd>0?4:2):2
+                  return(
+                    <div key={dia} style={{flex:1,display:'flex',flexDirection:'column',alignItems:'center',gap:2}}>
+                      <div style={{width:'100%',height:h,background:isToday?'#5DFFC0':qtd>0?'rgba(255,255,255,0.5)':'rgba(255,255,255,0.1)',borderRadius:3}}/>
+                      <span style={{fontSize:7.5,color:isToday?'rgba(255,255,255,0.7)':'rgba(255,255,255,0.2)',fontWeight:isToday?700:400}}>{d.toLocaleDateString('pt-BR',{weekday:'short'}).replace('.','')}</span>
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
+          </div>
+
+          {/* 2. Pesquisa presidencial */}
+          <div style={{background:'#fff',border:'1px solid #D4E8DC',borderRadius:16,padding:'16px 18px',display:'flex',flexDirection:'column',gap:10}}>
+            <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start'}}>
               <div>
-                <p style={{fontSize:10.5,color:'rgba(255,255,255,0.45)',margin:'0 0 2px',fontWeight:500}}>Atividade — 7 dias</p>
-                <div style={{display:'flex',alignItems:'baseline',gap:6}}>
-                  <span style={{fontSize:26,fontWeight:800,color:'#fff',letterSpacing:'-0.04em',lineHeight:1}}>{totalGeral??0}</span>
-                  <span style={{fontSize:12,color:'rgba(255,255,255,0.4)'}}>gerações</span>
-                </div>
+                <p style={{fontSize:13,fontWeight:700,color:'#091710',margin:'0 0 1px'}}>Pesquisa Presidencial 2026</p>
+                <p style={{fontSize:11,color:'#7BA090',margin:0}}>PoderData · 26 ago · ±2pp</p>
               </div>
-              <div style={{textAlign:'right'}}>
-                <p style={{fontSize:10,color:'rgba(255,255,255,0.4)',margin:'0 0 1px'}}>este mês</p>
-                <span style={{fontSize:19,fontWeight:700,color:'#5DFFC0',letterSpacing:'-0.02em'}}>{total}{limite?`/${limite}`:''}</span>
-              </div>
+              <a href="/pesquisas" style={{fontSize:11.5,fontWeight:700,color:'#0EA472',textDecoration:'none',whiteSpace:'nowrap' as const}}>Ver análise →</a>
             </div>
-            <div style={{display:'flex',alignItems:'flex-end',gap:3,height:32}}>
-              {seteData.map(([dia,qtd])=>{
-                const d=new Date(dia+'T12:00:00')
-                const isToday=dia===new Date().toISOString().slice(0,10)
-                const h=actMax7>0?Math.max((qtd/actMax7)*32,qtd>0?4:2):2
-                return(
-                  <div key={dia} style={{flex:1,display:'flex',flexDirection:'column',alignItems:'center',gap:2}}>
-                    <div style={{width:'100%',height:h,background:isToday?'#5DFFC0':qtd>0?'rgba(255,255,255,0.5)':'rgba(255,255,255,0.1)',borderRadius:3}}/>
-                    <span style={{fontSize:8,color:isToday?'rgba(255,255,255,0.7)':'rgba(255,255,255,0.2)',fontWeight:isToday?700:400}}>{d.toLocaleDateString('pt-BR',{weekday:'short'}).replace('.','')}</span>
+            <div style={{display:'flex',flexDirection:'column',gap:7,flex:1,justifyContent:'center'}}>
+              {([{n:'Lula',p:38,c:'#DC3545',pt:'PT'},{n:'Flávio Bolsonaro',p:35,c:'#003399',pt:'PL'},{n:'Ronaldo Caiado',p:8,c:'#0EA472',pt:'PSD'}] as const).map(d=>(
+                <div key={d.n} style={{display:'flex',alignItems:'center',gap:8}}>
+                  <div style={{width:82,flexShrink:0}}>
+                    <div style={{fontSize:12,fontWeight:600,color:'#091710',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap' as const}}>{d.n}</div>
+                    <div style={{fontSize:9.5,color:'#A8C4B8'}}>{d.pt}</div>
                   </div>
-                )
-              })}
-            </div>
-          </div>
-        </div>
-
-        {/* Widget pesquisas presidenciais */}
-        <div style={{background:'#fff',border:'1px solid #D4E8DC',borderRadius:16,padding:'16px 18px',display:'flex',flexDirection:'column',gap:10}}>
-          <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start'}}>
-            <div>
-              <p style={{fontSize:13,fontWeight:700,color:'#091710',margin:'0 0 1px',letterSpacing:'-0.01em'}}>Pesquisa Presidencial 2026</p>
-              <p style={{fontSize:11,color:'#7BA090',margin:0}}>PoderData · 26 ago 2026 · ±2pp</p>
-            </div>
-            <a href="/pesquisas" style={{fontSize:12,fontWeight:700,color:'#0EA472',textDecoration:'none'}}>Análise completa →</a>
-          </div>
-          <div style={{display:'flex',flexDirection:'column',gap:7}}>
-            {([{n:'Lula',p:38,c:'#DC3545',partido:'PT'},{n:'Flávio Bolsonaro',p:35,c:'#003399',partido:'PL'},{n:'Ronaldo Caiado',p:8,c:'#0EA472',partido:'PSD'}] as const).map(d=>(
-              <div key={d.n} style={{display:'flex',alignItems:'center',gap:9}}>
-                <div style={{width:86,flexShrink:0}}>
-                  <div style={{fontSize:12,fontWeight:600,color:'#091710',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{d.n}</div>
-                  <div style={{fontSize:10,color:'#A8C4B8'}}>{d.partido}</div>
-                </div>
-                <div style={{flex:1,height:20,background:'#F1F6F3',borderRadius:6,overflow:'hidden'}}>
-                  <div style={{width:`${(d.p/38)*100}%`,height:'100%',background:d.c,borderRadius:6,display:'flex',alignItems:'center',paddingRight:7,justifyContent:'flex-end',minWidth:28}}>
-                    <span style={{fontSize:11,fontWeight:800,color:'#fff'}}>{d.p}%</span>
+                  <div style={{flex:1,height:18,background:'#F1F6F3',borderRadius:5,overflow:'hidden'}}>
+                    <div style={{width:`${(d.p/38)*100}%`,height:'100%',background:d.c,borderRadius:5,display:'flex',alignItems:'center',paddingRight:6,justifyContent:'flex-end',minWidth:24}}>
+                      <span style={{fontSize:10.5,fontWeight:800,color:'#fff'}}>{d.p}%</span>
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
+            <p style={{fontSize:10,color:'#A8C4B8',margin:0}}>Empatados na margem de erro</p>
           </div>
-          <p style={{fontSize:10.5,color:'#A8C4B8',margin:0}}>Lula e Flávio empatados na margem de erro</p>
-        </div>
 
-                {/* Countdown + upgrade */}
-        <div style={{display:'flex',flexDirection:'column',gap:14}}>
-          {/* Contagem */}
-          <div className="card" style={{flex:1,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',textAlign:'center',background:'#091710',border:'none'}}>
-            <p style={{fontSize:11,color:'rgba(255,255,255,0.4)',margin:'0 0 8px',fontWeight:500}}>dias para o 1º turno</p>
-            <div style={{fontSize:52,fontWeight:800,color:'#5DFFC0',letterSpacing:'-0.05em',lineHeight:1,marginBottom:6}}>{diasTurno}</div>
-            <div style={{fontSize:12,color:'rgba(255,255,255,0.45)',fontWeight:500}}>2 de outubro de 2026</div>
+          {/* 3. Contagem + Status (coluna) */}
+          <div style={{display:'flex',flexDirection:'column',gap:10}}>
+            <div style={{flex:1,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',textAlign:'center',background:'#091710',borderRadius:14,padding:'16px',minHeight:100}}>
+              <p style={{fontSize:10.5,color:'rgba(255,255,255,0.4)',margin:'0 0 6px',fontWeight:500}}>dias para o 1º turno</p>
+              <div style={{fontSize:46,fontWeight:800,color:'#5DFFC0',letterSpacing:'-0.05em',lineHeight:1,marginBottom:4}}>{diasTurno}</div>
+              <div style={{fontSize:11.5,color:'rgba(255,255,255,0.4)',fontWeight:500}}>2 out 2026</div>
+            </div>
+            {isGratis ? (
+              <div style={{background:'#0EA472',borderRadius:14,padding:'14px'}}>
+                <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:6}}>
+                  <span style={{fontSize:11.5,color:'rgba(255,255,255,0.75)',fontWeight:500}}>Plano gratuito</span>
+                  <span style={{fontSize:11,fontWeight:700,color:'#fff',background:'rgba(255,255,255,0.2)',padding:'2px 7px',borderRadius:20}}>{total}/5</span>
+                </div>
+                <div style={{height:4,background:'rgba(255,255,255,0.2)',borderRadius:4,overflow:'hidden',marginBottom:10}}>
+                  <div style={{height:'100%',width:`${pct}%`,background:pct>=80?'#FFD166':'#fff',borderRadius:4}}/>
+                </div>
+                <Link href="/planos" style={{display:'block',textAlign:'center',padding:'8px',background:'#fff',color:'#054E39',borderRadius:50,fontSize:12,fontWeight:700,textDecoration:'none'}}>
+                  Upgrade →
+                </Link>
+              </div>
+            ) : (
+              <div style={{background:'rgba(14,164,114,0.08)',border:'1px solid rgba(14,164,114,0.2)',borderRadius:14,padding:'14px',textAlign:'center'}}>
+                <div style={{fontSize:20,fontWeight:800,color:'#0EA472',marginBottom:3}}>∞</div>
+                <div style={{fontSize:12,fontWeight:600,color:'#091710'}}>Ilimitado</div>
+                <div style={{fontSize:10.5,color:'#7BA090',marginTop:2}}>Plano {plano}</div>
+              </div>
+            )}
           </div>
-          {/* Upgrade ou status */}
-          {isGratis ? (
-            <div className="card" style={{background:'#0EA472',border:'none',padding:'16px'}}>
-              <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:8}}>
-                <span style={{fontSize:12,color:'rgba(255,255,255,0.7)',fontWeight:500}}>Plano gratuito</span>
-                <span style={{fontSize:12,fontWeight:700,color:'#fff',background:'rgba(255,255,255,0.2)',padding:'2px 8px',borderRadius:20}}>{total}/5</span>
-              </div>
-              <div style={{height:5,background:'rgba(255,255,255,0.2)',borderRadius:4,overflow:'hidden',marginBottom:12}}>
-                <div style={{height:'100%',width:`${pct}%`,background:pct>=80?'#FFD166':'#fff',borderRadius:4,transition:'width .5s'}}/>
-              </div>
-              <Link href="/planos" style={{display:'block',textAlign:'center',padding:'9px',background:'#fff',color:'#054E39',borderRadius:50,fontSize:13,fontWeight:700,textDecoration:'none'}}>
-                Upgrade para ilimitado →
-              </Link>
-            </div>
-          ) : (
-            <div className="card" style={{textAlign:'center'}}>
-              <div style={{fontSize:22,fontWeight:800,color:'#0EA472',marginBottom:4}}>∞</div>
-              <div style={{fontSize:13,fontWeight:600,color:'#091710'}}>Gerações ilimitadas</div>
-              <div style={{fontSize:11,color:'#7BA090',marginTop:2}}>Plano {plano}</div>
-            </div>
-          )}
+
         </div>
       </div>
 
 
-      {/* ── Link pesquisas ── */}
-      <a href="/pesquisas" style={{display:'flex',alignItems:'center',justifyContent:'space-between',gap:12,padding:'12px 18px',background:'rgba(14,164,114,0.05)',border:'1px solid rgba(14,164,114,0.15)',borderRadius:12,textDecoration:'none',marginBottom:14}}>
-        <div style={{display:'flex',alignItems:'center',gap:10}}>
-          <div style={{width:32,height:32,borderRadius:9,background:'linear-gradient(135deg,#0EA472,#054E39)',display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0}}>
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
-          </div>
-          <div>
-            <div style={{fontSize:13,fontWeight:700,color:'#091710'}}>Pesquisas Eleitorais 2026</div>
-            <div style={{fontSize:12,color:'#7BA090'}}>Lula 38% · Flávio Bolsonaro 35% — PoderData, ago 2026</div>
-          </div>
-        </div>
-        <span style={{fontSize:13,fontWeight:700,color:'#0EA472',whiteSpace:'nowrap'}}>Ver análise →</span>
-      </a>
 
       {/* ── Agentes ── */}
       <p style={{fontSize:12,fontWeight:600,color:'#7BA090',margin:'0 0 10px',letterSpacing:'0.01em'}}>Agentes de IA</p>
