@@ -294,58 +294,19 @@ export default async function DashboardPage() {
       </div>
 
 
-      {/* ── Widget: Cenário Presidencial 2026 ── */}
-      <div style={{marginBottom:14,background:'#fff',border:'1px solid #D4E8DC',borderRadius:16,padding:'16px 20px',overflow:'hidden',position:'relative'}}>
-        <div style={{position:'absolute',top:-30,right:-20,width:120,height:120,borderRadius:'50%',background:'rgba(14,164,114,0.04)',pointerEvents:'none'}}/>
-        <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:14}}>
+      {/* ── Link pesquisas ── */}
+      <a href="/pesquisas" style={{display:'flex',alignItems:'center',justifyContent:'space-between',gap:12,padding:'12px 18px',background:'rgba(14,164,114,0.05)',border:'1px solid rgba(14,164,114,0.15)',borderRadius:12,textDecoration:'none',marginBottom:14}}>
+        <div style={{display:'flex',alignItems:'center',gap:10}}>
+          <div style={{width:32,height:32,borderRadius:9,background:'linear-gradient(135deg,#0EA472,#054E39)',display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0}}>
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+          </div>
           <div>
-            <p style={{fontSize:12,fontWeight:700,color:'#091710',margin:'0 0 2px',letterSpacing:'-0.01em'}}>Cenário Presidencial 2026</p>
-            <p style={{fontSize:11,color:'#7BA090',margin:0}}>Agregado Datafolha · Quaest · AtlasIntel · ago 2026</p>
-          </div>
-          <a href="/pesquisas" style={{fontSize:12,fontWeight:700,color:'#0EA472',textDecoration:'none',whiteSpace:'nowrap'}}>Ver análise completa →</a>
-        </div>
-        <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:16,marginBottom:14}}>
-          {/* Candidato 1 */}
-          <div style={{padding:'12px 14px',background:'rgba(14,164,114,0.05)',borderRadius:12,border:'1px solid rgba(14,164,114,0.15)'}}>
-            <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start',marginBottom:6}}>
-              <div>
-                <div style={{fontSize:13,fontWeight:700,color:'#091710'}}>Tarcísio de Freitas</div>
-                <div style={{fontSize:11,color:'#7BA090'}}>Republicanos</div>
-              </div>
-              <div style={{fontSize:26,fontWeight:800,color:'#0EA472',letterSpacing:'-0.03em',lineHeight:1}}>34%</div>
-            </div>
-            <div style={{height:5,background:'#E6F3EB',borderRadius:4,overflow:'hidden'}}>
-              <div style={{width:'68%',height:'100%',background:'#0EA472',borderRadius:4}}/>
-            </div>
-          </div>
-          {/* Candidato 2 */}
-          <div style={{padding:'12px 14px',background:'rgba(220,53,69,0.04)',borderRadius:12,border:'1px solid rgba(220,53,69,0.12)'}}>
-            <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start',marginBottom:6}}>
-              <div>
-                <div style={{fontSize:13,fontWeight:700,color:'#091710'}}>Lula</div>
-                <div style={{fontSize:11,color:'#7BA090'}}>PT</div>
-              </div>
-              <div style={{fontSize:26,fontWeight:800,color:'#DC3545',letterSpacing:'-0.03em',lineHeight:1}}>29%</div>
-            </div>
-            <div style={{height:5,background:'rgba(220,53,69,0.1)',borderRadius:4,overflow:'hidden'}}>
-              <div style={{width:'58%',height:'100%',background:'#DC3545',borderRadius:4}}/>
-            </div>
+            <div style={{fontSize:13,fontWeight:700,color:'#091710'}}>Pesquisas Eleitorais 2026</div>
+            <div style={{fontSize:12,color:'#7BA090'}}>Lula 38% · Flávio Bolsonaro 35% — PoderData, ago 2026</div>
           </div>
         </div>
-        {/* Mini barras */}
-        <div style={{display:'flex',flexDirection:'column',gap:6}}>
-          {[{n:'Tarcísio',p:34,c:'#0EA472'},{n:'Lula',p:29,c:'#DC3545'},{n:'Tebet',p:9,c:'#2D7DD2'},{n:'Ciro',p:6,c:'#D97706'},{n:'Indecisos',p:22,c:'#D4E8DC'}].map(d=>(
-            <div key={d.n} style={{display:'flex',alignItems:'center',gap:10}}>
-              <span style={{width:70,fontSize:11.5,fontWeight:500,color:'#7BA090',textAlign:'right',flexShrink:0}}>{d.n}</span>
-              <div style={{flex:1,height:16,background:'#F1F6F3',borderRadius:5,overflow:'hidden'}}>
-                <div style={{width:`${d.p/34*100}%`,height:'100%',background:d.c,borderRadius:5,display:'flex',alignItems:'center',paddingRight:6,justifyContent:'flex-end',minWidth:30}}>
-                  <span style={{fontSize:10,fontWeight:700,color:d.c==='#D4E8DC'?'#A8C4B8':'#fff'}}>{d.p}%</span>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
+        <span style={{fontSize:13,fontWeight:700,color:'#0EA472',whiteSpace:'nowrap'}}>Ver análise →</span>
+      </a>
 
       {/* ── Agentes ── */}
       <p style={{fontSize:12,fontWeight:600,color:'#7BA090',margin:'0 0 10px',letterSpacing:'0.01em'}}>Agentes de IA</p>
