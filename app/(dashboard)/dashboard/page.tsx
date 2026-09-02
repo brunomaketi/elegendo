@@ -223,37 +223,32 @@ export default async function DashboardPage() {
 
       {/* ── Trend Chart + Upgrade/Countdown ── */}
       <div className="g2" style={{marginBottom:14}}>
-        {/* Chart card */}
-        <div style={{background:'linear-gradient(135deg,#054E39 0%,#0A7A56 100%)',borderRadius:16,padding:'20px 22px',position:'relative',overflow:'hidden'}}>
-          <div style={{position:'absolute',top:-50,right:-30,width:180,height:180,borderRadius:'50%',background:'rgba(14,164,114,0.25)',pointerEvents:'none'}}/>
+        {/* Chart card compacto */}
+        <div style={{background:'linear-gradient(135deg,#054E39 0%,#0A7A56 100%)',borderRadius:16,padding:'16px 18px',position:'relative',overflow:'hidden'}}>
+          <div style={{position:'absolute',top:-30,right:-20,width:100,height:100,borderRadius:'50%',background:'rgba(14,164,114,0.2)',pointerEvents:'none'}}/>
           <div style={{position:'relative',zIndex:1}}>
-            <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start',marginBottom:14}}>
+            <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:12}}>
               <div>
-                <p style={{fontSize:11,color:'rgba(255,255,255,0.5)',margin:'0 0 4px',fontWeight:500}}>Atividade — 30 dias</p>
-                <div style={{display:'flex',alignItems:'baseline',gap:8}}>
-                  <span style={{fontSize:32,fontWeight:800,color:'#fff',letterSpacing:'-0.04em',lineHeight:1}}>{totalGeral??0}</span>
-                  <span style={{fontSize:13,color:'rgba(255,255,255,0.45)'}}>gerações totais</span>
+                <p style={{fontSize:10.5,color:'rgba(255,255,255,0.45)',margin:'0 0 2px',fontWeight:500}}>Atividade — 7 dias</p>
+                <div style={{display:'flex',alignItems:'baseline',gap:6}}>
+                  <span style={{fontSize:26,fontWeight:800,color:'#fff',letterSpacing:'-0.04em',lineHeight:1}}>{totalGeral??0}</span>
+                  <span style={{fontSize:12,color:'rgba(255,255,255,0.4)'}}>gerações</span>
                 </div>
               </div>
               <div style={{textAlign:'right'}}>
-                <p style={{fontSize:11,color:'rgba(255,255,255,0.4)',margin:'0 0 2px'}}>este mês</p>
-                <span style={{fontSize:22,fontWeight:700,color:'#5DFFC0',letterSpacing:'-0.03em'}}>{total}{limite?`/${limite}`:''}</span>
+                <p style={{fontSize:10,color:'rgba(255,255,255,0.4)',margin:'0 0 1px'}}>este mês</p>
+                <span style={{fontSize:19,fontWeight:700,color:'#5DFFC0',letterSpacing:'-0.02em'}}>{total}{limite?`/${limite}`:''}</span>
               </div>
             </div>
-            {/* Line chart */}
-            <div style={{marginBottom:10,borderRadius:8,overflow:'hidden'}}>
-              <TrendLine data={trendData}/>
-            </div>
-            {/* 7-day bars */}
-            <div style={{display:'flex',alignItems:'flex-end',gap:4,height:28}}>
+            <div style={{display:'flex',alignItems:'flex-end',gap:3,height:32}}>
               {seteData.map(([dia,qtd])=>{
                 const d=new Date(dia+'T12:00:00')
                 const isToday=dia===new Date().toISOString().slice(0,10)
-                const h=actMax7>0?Math.max((qtd/actMax7)*28,qtd>0?4:2):2
+                const h=actMax7>0?Math.max((qtd/actMax7)*32,qtd>0?4:2):2
                 return(
-                  <div key={dia} style={{flex:1,display:'flex',flexDirection:'column',alignItems:'center',gap:3}}>
-                    <div style={{width:'100%',height:h,background:isToday?'#5DFFC0':qtd>0?'rgba(255,255,255,0.5)':'rgba(255,255,255,0.12)',borderRadius:3}}/>
-                    <span style={{fontSize:8.5,color:isToday?'rgba(255,255,255,0.7)':'rgba(255,255,255,0.25)',fontWeight:isToday?700:400}}>{d.toLocaleDateString('pt-BR',{weekday:'short'}).replace('.','')}</span>
+                  <div key={dia} style={{flex:1,display:'flex',flexDirection:'column',alignItems:'center',gap:2}}>
+                    <div style={{width:'100%',height:h,background:isToday?'#5DFFC0':qtd>0?'rgba(255,255,255,0.5)':'rgba(255,255,255,0.1)',borderRadius:3}}/>
+                    <span style={{fontSize:8,color:isToday?'rgba(255,255,255,0.7)':'rgba(255,255,255,0.2)',fontWeight:isToday?700:400}}>{d.toLocaleDateString('pt-BR',{weekday:'short'}).replace('.','')}</span>
                   </div>
                 )
               })}
@@ -261,7 +256,34 @@ export default async function DashboardPage() {
           </div>
         </div>
 
-        {/* Countdown + upgrade */}
+        {/* Widget pesquisas presidenciais */}
+        <div style={{background:'#fff',border:'1px solid #D4E8DC',borderRadius:16,padding:'16px 18px',display:'flex',flexDirection:'column',gap:10}}>
+          <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start'}}>
+            <div>
+              <p style={{fontSize:13,fontWeight:700,color:'#091710',margin:'0 0 1px',letterSpacing:'-0.01em'}}>Pesquisa Presidencial 2026</p>
+              <p style={{fontSize:11,color:'#7BA090',margin:0}}>PoderData · 26 ago 2026 · ±2pp</p>
+            </div>
+            <a href="/pesquisas" style={{fontSize:12,fontWeight:700,color:'#0EA472',textDecoration:'none'}}>Análise completa →</a>
+          </div>
+          <div style={{display:'flex',flexDirection:'column',gap:7}}>
+            {([{n:'Lula',p:38,c:'#DC3545',partido:'PT'},{n:'Flávio Bolsonaro',p:35,c:'#003399',partido:'PL'},{n:'Ronaldo Caiado',p:8,c:'#0EA472',partido:'PSD'}] as const).map(d=>(
+              <div key={d.n} style={{display:'flex',alignItems:'center',gap:9}}>
+                <div style={{width:86,flexShrink:0}}>
+                  <div style={{fontSize:12,fontWeight:600,color:'#091710',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{d.n}</div>
+                  <div style={{fontSize:10,color:'#A8C4B8'}}>{d.partido}</div>
+                </div>
+                <div style={{flex:1,height:20,background:'#F1F6F3',borderRadius:6,overflow:'hidden'}}>
+                  <div style={{width:`${(d.p/38)*100}%`,height:'100%',background:d.c,borderRadius:6,display:'flex',alignItems:'center',paddingRight:7,justifyContent:'flex-end',minWidth:28}}>
+                    <span style={{fontSize:11,fontWeight:800,color:'#fff'}}>{d.p}%</span>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+          <p style={{fontSize:10.5,color:'#A8C4B8',margin:0}}>Lula e Flávio empatados na margem de erro</p>
+        </div>
+
+                {/* Countdown + upgrade */}
         <div style={{display:'flex',flexDirection:'column',gap:14}}>
           {/* Contagem */}
           <div className="card" style={{flex:1,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',textAlign:'center',background:'#091710',border:'none'}}>

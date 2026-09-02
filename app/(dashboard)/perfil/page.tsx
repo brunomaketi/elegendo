@@ -1,23 +1,25 @@
 'use client'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase'
 
 const CARGOS = ['Vereador(a)', 'Deputado(a) Estadual', 'Deputado(a) Federal', 'Senador(a)', 'Governador(a)', 'Presidente']
 const ESTADOS = ['AC','AL','AP','AM','BA','CE','DF','ES','GO','MA','MT','MS','MG','PA','PB','PR','PE','PI','RJ','RN','RS','RO','RR','SC','SP','SE','TO']
+const ESPECIALIDADES = ['Marketing Digital', 'Assessoria de Imprensa', 'Gestão de Campanha', 'Social Media', 'Produção de Conteúdo', 'Consultoria Política', 'Outro']
 
 type TipoConta = 'candidato' | 'assessor'
 
-export default function PerfilPage() {
+function PerfilContent() {
   const supabase = createClient()
   const searchParams = useSearchParams()
   const primeiroAcesso = searchParams.get('primeiro_acesso') === 'true'
 
   const [form, setForm] = useState({
-    nome: '', tipo_conta: 'candidato' as TipoConta,
-    cargo: '', cidade: '', estado: '', partido: '',
-    instagram: '', bio_politica: '',
-    agencia: '', especialidade: '',
+    nome:'', tipo_conta:'candidato' as TipoConta,
+    cargo:'', cidade:'', estado:'', partido:'',
+    instagram:'', bio_politica:'',
+    agencia:'', especialidade:'',
+    instagram_profissional:'', contexto_trabalho:'',
   })
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
@@ -32,14 +34,12 @@ export default function PerfilPage() {
         if (data) setForm({
           nome: data.nome ?? '',
           tipo_conta: (data.tipo_conta as TipoConta) ?? 'candidato',
-          cargo: data.cargo ?? '',
-          cidade: data.cidade ?? '',
-          estado: data.estado ?? '',
-          partido: data.partido ?? '',
-          instagram: data.instagram ?? '',
-          bio_politica: data.bio_politica ?? '',
-          agencia: data.agencia ?? '',
-          especialidade: data.especialidade ?? '',
+          cargo: data.cargo ?? '', cidade: data.cidade ?? '',
+          estado: data.estado ?? '', partido: data.partido ?? '',
+          instagram: data.instagram ?? '', bio_politica: data.bio_politica ?? '',
+          agencia: data.agencia ?? '', especialidade: data.especialidade ?? '',
+          instagram_profissional: data.instagram_profissional ?? '',
+          contexto_trabalho: data.contexto_trabalho ?? '',
         })
         setLoading(false)
       })
@@ -47,222 +47,186 @@ export default function PerfilPage() {
   }, [])
 
   const handleSave = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setSaving(true)
-    setOk(false)
+    e.preventDefault(); setSaving(true); setOk(false)
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return
-    await supabase.from('profiles').update({ ...form, atualizado_em: new Date().toISOString() }).eq('id', user.id)
-    setSaving(false)
-    setOk(true)
-    setTimeout(() => setOk(false), 3000)
+    const fields: Record<string,string> = form.tipo_conta === 'candidato'
+      ? { nome:form.nome, tipo_conta:form.tipo_conta, cargo:form.cargo, cidade:form.cidade, estado:form.estado, partido:form.partido, instagram:form.instagram, bio_politica:form.bio_politica }
+      : { nome:form.nome, tipo_conta:form.tipo_conta, agencia:form.agencia, especialidade:form.especialidade, instagram_profissional:form.instagram_profissional, contexto_trabalho:form.contexto_trabalho }
+    await supabase.from('profiles').update(fields).eq('id', user.id)
+    setSaving(false); setOk(true)
+    if (primeiroAcesso) window.location.href = '/dashboard'
+    else setTimeout(() => setOk(false), 3000)
   }
 
-  const set = (key: string, val: string) => setForm(p => ({ ...p, [key]: val }))
+  const f = (name: string, val: string) => setForm(p => ({ ...p, [name]: val }))
 
-  const camposObrigatorios = form.tipo_conta === 'candidato'
-    ? ['nome', 'cargo', 'cidade', 'estado', 'partido', 'bio_politica']
-    : ['nome', 'agencia', 'especialidade', 'bio_politica']
-  const preenchidos = camposObrigatorios.filter(c => form[c as keyof typeof form]).length
-  const completude = Math.round((preenchidos / camposObrigatorios.length) * 100)
+  const isCand = form.tipo_conta === 'candidato'
+  const bioLen = (isCand ? form.bio_politica : form.contexto_trabalho).length
+  const bioTgt = 200
+
+  const inp = { padding:'11px 14px', borderRadius:10, border:'1.5px solid #D4E8DC', fontSize:14, color:'#091710', background:'#fff', width:'100%', boxSizing:'border-box' as const, outline:'none', fontFamily:'inherit', transition:'border-color .15s' }
 
   if (loading) return (
-    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '60vh', color: 'rgba(9,23,16,0.4)', fontFamily: 'var(--font-inter), sans-serif' }}>
+    <div style={{ display:'flex', alignItems:'center', justifyContent:'center', height:'60vh', color:'#7BA090', fontSize:13 }}>
       Carregando perfil...
     </div>
   )
 
-  return (
-    <div style={{ maxWidth: '900px', margin: '0 auto', padding: '32px 28px', fontFamily: 'var(--font-inter), sans-serif' }}>
+  const avatar = form.nome?.charAt(0).toUpperCase() || email?.charAt(0).toUpperCase() || 'U'
 
-      {/* Banner primeiro acesso */}
-      {primeiroAcesso && (
-        <div style={{ background: 'linear-gradient(135deg, #091710, #4A2FA0)', borderRadius: 16, padding: '20px 24px', marginBottom: 28, display: 'flex', alignItems: 'flex-start', gap: 16 }}>
-          <span style={{ fontSize: 28, flexShrink: 0 }}>👋</span>
-          <div>
-            <div style={{ fontSize: 16, fontWeight: 800, color: '#fff', marginBottom: 4 }}>
-              Bem-vindo ao Elegendo! Vamos configurar seu perfil.
-            </div>
-            <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.6)', margin: 0, lineHeight: 1.6 }}>
-              Preencha seus dados abaixo para que os agentes de IA gerem conteúdo personalizado para sua campanha. Quanto mais detalhado, melhor o resultado.
-            </p>
-          </div>
-        </div>
-      )}
+  return (
+    <div style={{ maxWidth:860, margin:'0 auto', padding:'28px 20px', fontFamily:"var(--font-inter),'Inter',sans-serif" }}>
+      <style>{`
+        .finp:focus{border-color:#0EA472!important;box-shadow:0 0 0 3px rgba(14,164,114,0.1)!important}
+        .type-card{border-radius:14px;border:2px solid #D4E8DC;padding:16px 18px;cursor:pointer;transition:all .15s;display:flex;align-items:flex-start;gap:12}
+        .type-card.active{border-color:#0EA472;background:rgba(14,164,114,0.04)}
+        .surf{background:#fff;border:1px solid #D4E8DC;border-radius:14px;padding:20px}
+      `}</style>
 
       {/* Header */}
-      <div style={{ display: 'flex', alignItems: 'flex-start', gap: '20px', marginBottom: '32px', flexWrap: 'wrap' }}>
-        <div style={{ width: 72, height: 72, borderRadius: '50%', background: 'rgba(123,79,216,0.12)', border: '3px solid rgba(123,79,216,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 26, fontWeight: 700, color: '#7B4FD8', flexShrink: 0 }}>
-          {form.nome?.charAt(0).toUpperCase() || '?'}
-        </div>
-        <div style={{ flex: 1 }}>
-          <h1 style={{ fontSize: '24px', fontWeight: 800, color: '#091710', margin: '0 0 3px', letterSpacing: '-0.01em' }}>
-            {form.nome || 'Seu nome'}
-          </h1>
-          <p style={{ fontSize: '13px', color: 'rgba(9,23,16,0.4)', margin: '0 0 14px' }}>{email}</p>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <div style={{ width: 160, background: 'rgba(123,79,216,0.1)', borderRadius: 4, height: 6, overflow: 'hidden' }}>
-              <div style={{ height: '100%', borderRadius: 4, background: completude === 100 ? '#1D9E75' : completude > 50 ? '#7B4FD8' : '#E24B4A', width: `${completude}%`, transition: 'width 0.3s' }} />
-            </div>
-            <span style={{ fontSize: 12, fontWeight: 600, color: completude === 100 ? '#1D9E75' : 'rgba(9,23,16,0.5)' }}>
-              {completude}% completo
-            </span>
-            {completude === 100 && (
-              <span style={{ fontSize: 11, padding: '2px 10px', background: 'rgba(29,158,117,0.1)', color: '#1D9E75', borderRadius: 20, fontWeight: 700 }}>✓ Perfil completo</span>
-            )}
-          </div>
-        </div>
+      <div style={{ marginBottom:24 }}>
+        <p style={{ fontSize:11,color:'#7BA090',margin:'0 0 4px',textTransform:'uppercase' as const,letterSpacing:'0.08em',fontWeight:700 }}>Conta</p>
+        <h1 style={{ fontSize:24,fontWeight:800,color:'#091710',margin:0,letterSpacing:'-0.02em' }}>Configurações</h1>
       </div>
 
-      {/* Tipo de conta */}
-      <div style={{ marginBottom: '24px' }}>
-        <div style={{ fontSize: '11px', fontWeight: 700, color: 'rgba(9,23,16,0.4)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '10px' }}>
-          Tipo de conta
+      {/* Profile card */}
+      <div className="surf" style={{ marginBottom:16, display:'flex', alignItems:'center', gap:16 }}>
+        <div style={{ width:56,height:56,borderRadius:'50%',background:'linear-gradient(135deg,#0EA472,#054E39)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:22,fontWeight:800,color:'#fff',flexShrink:0 }}>
+          {avatar}
         </div>
-        <div style={{ display: 'flex', gap: 10 }}>
-          {[
-            { val: 'candidato', label: 'Candidato', icon: '🗳️', desc: 'Estou disputando uma eleição' },
-            { val: 'assessor',  label: 'Assessor / Gestor', icon: '📋', desc: 'Gerencio campanhas de candidatos' },
-          ].map(({ val, label, icon, desc }) => (
-            <button key={val} type="button" onClick={() => set('tipo_conta', val)} style={{ flex: 1, padding: '14px 16px', borderRadius: 14, cursor: 'pointer', textAlign: 'left', border: `2px solid ${form.tipo_conta === val ? '#7B4FD8' : 'rgba(123,79,216,0.12)'}`, background: form.tipo_conta === val ? 'linear-gradient(135deg, #091710, #4A2FA0)' : 'rgba(255,255,255,0.7)', backdropFilter: 'blur(8px)', transition: 'all 0.15s' }}>
-              <div style={{ fontSize: 18, marginBottom: 4 }}>{icon}</div>
-              <div style={{ fontSize: 14, fontWeight: 700, color: form.tipo_conta === val ? '#fff' : '#091710', marginBottom: 2 }}>{label}</div>
-              <div style={{ fontSize: 12, color: form.tipo_conta === val ? 'rgba(255,255,255,0.55)' : 'rgba(9,23,16,0.4)' }}>{desc}</div>
-            </button>
-          ))}
+        <div style={{ flex:1 }}>
+          <div style={{ fontSize:17,fontWeight:700,color:'#091710',marginBottom:2 }}>{form.nome || 'Sem nome'}</div>
+          <div style={{ fontSize:13,color:'#7BA090' }}>{email}</div>
         </div>
+        {ok && (
+          <div style={{ display:'flex',alignItems:'center',gap:6,padding:'8px 16px',background:'rgba(14,164,114,0.1)',borderRadius:50,fontSize:13,fontWeight:600,color:'#0EA472' }}>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M20 6L9 17l-5-5"/></svg>
+            Salvo com sucesso
+          </div>
+        )}
       </div>
 
       <form onSubmit={handleSave}>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
-
-          {/* Coluna esquerda */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-            <div style={{ background: 'rgba(255,255,255,0.75)', backdropFilter: 'blur(8px)', border: '1px solid rgba(123,79,216,0.1)', borderRadius: 16, padding: 20 }}>
-              <div style={{ fontSize: 11, fontWeight: 700, color: 'rgba(9,23,16,0.4)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 16 }}>
-                Informações pessoais
-              </div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-                <Field label="Nome completo" required>
-                  <input value={form.nome} onChange={e => set('nome', e.target.value)} placeholder="João Silva" required style={inp} />
-                </Field>
-
-                {form.tipo_conta === 'candidato' ? (
-                  <>
-                    <Field label="Cargo disputado">
-                      <select value={form.cargo} onChange={e => set('cargo', e.target.value)} style={inp}>
-                        <option value="">Selecione...</option>
-                        {CARGOS.map(c => <option key={c} value={c}>{c}</option>)}
-                      </select>
-                    </Field>
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 80px', gap: 10 }}>
-                      <Field label="Cidade">
-                        <input value={form.cidade} onChange={e => set('cidade', e.target.value)} placeholder="Americana" style={inp} />
-                      </Field>
-                      <Field label="Estado">
-                        <select value={form.estado} onChange={e => set('estado', e.target.value)} style={inp}>
-                          <option value="">UF</option>
-                          {ESTADOS.map(s => <option key={s} value={s}>{s}</option>)}
-                        </select>
-                      </Field>
-                    </div>
-                    <Field label="Partido">
-                      <input value={form.partido} onChange={e => set('partido', e.target.value)} placeholder="PT, PL, MDB..." style={inp} />
-                    </Field>
-                    <Field label="Instagram">
-                      <input value={form.instagram} onChange={e => set('instagram', e.target.value)} placeholder="@seucandidato" style={inp} />
-                    </Field>
-                  </>
-                ) : (
-                  <>
-                    <Field label="Agência / Empresa" required>
-                      <input value={form.agencia} onChange={e => set('agencia', e.target.value)} placeholder="Maketi Agency" required style={inp} />
-                    </Field>
-                    <Field label="Especialidade" required>
-                      <select value={form.especialidade} onChange={e => set('especialidade', e.target.value)} style={inp}>
-                        <option value="">Selecione...</option>
-                        <option value="Marketing Digital">Marketing Digital</option>
-                        <option value="Tráfego Pago">Tráfego Pago</option>
-                        <option value="Conteúdo e Redes Sociais">Conteúdo e Redes Sociais</option>
-                        <option value="Estratégia Política">Estratégia Política</option>
-                        <option value="Comunicação Institucional">Comunicação Institucional</option>
-                        <option value="Assessoria Completa">Assessoria Completa</option>
-                      </select>
-                    </Field>
-                    <Field label="Instagram profissional">
-                      <input value={form.instagram} onChange={e => set('instagram', e.target.value)} placeholder="@suaagencia" style={inp} />
-                    </Field>
-                  </>
+        {/* Tipo de conta */}
+        <div className="surf" style={{ marginBottom:16 }}>
+          <p style={{ fontSize:12,fontWeight:700,color:'#3A5F4E',textTransform:'uppercase' as const,letterSpacing:'0.06em',margin:'0 0 12px' }}>Tipo de conta</p>
+          <div style={{ display:'grid',gridTemplateColumns:'1fr 1fr',gap:10 }}>
+            {([
+              { id:'candidato', label:'Candidato', desc:'Estou disputando uma eleição', icon:<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg> },
+              { id:'assessor', label:'Assessor / Gestor', desc:'Gerencio campanhas de candidatos', icon:<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg> },
+            ] as const).map(t => (
+              <div key={t.id} className={`type-card${form.tipo_conta===t.id?' active':''}`} onClick={() => f('tipo_conta', t.id)}>
+                <div style={{ width:36,height:36,borderRadius:10,background:form.tipo_conta===t.id?'rgba(14,164,114,0.1)':'#F1F6F3',display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0,color:form.tipo_conta===t.id?'#0EA472':'#7BA090' }}>
+                  {t.icon}
+                </div>
+                <div>
+                  <div style={{ fontSize:14,fontWeight:700,color:form.tipo_conta===t.id?'#091710':'#3A5F4E' }}>{t.label}</div>
+                  <div style={{ fontSize:12,color:'#A8C4B8',marginTop:2 }}>{t.desc}</div>
+                </div>
+                {form.tipo_conta===t.id&&(
+                  <div style={{ marginLeft:'auto',width:18,height:18,borderRadius:'50%',background:'#0EA472',display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0 }}>
+                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3" strokeLinecap="round"><path d="M20 6L9 17l-5-5"/></svg>
+                  </div>
                 )}
               </div>
-            </div>
-          </div>
-
-          {/* Coluna direita */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-            <div style={{ background: 'rgba(255,255,255,0.75)', backdropFilter: 'blur(8px)', border: '1px solid rgba(123,79,216,0.1)', borderRadius: 16, padding: 20 }}>
-              <div style={{ fontSize: 11, fontWeight: 700, color: 'rgba(9,23,16,0.4)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 4 }}>
-                {form.tipo_conta === 'candidato' ? 'Contexto da campanha' : 'Contexto de trabalho'}
-              </div>
-              <p style={{ fontSize: 12, color: 'rgba(9,23,16,0.45)', margin: '0 0 14px', lineHeight: 1.6 }}>
-                {form.tipo_conta === 'candidato'
-                  ? 'Este texto alimenta todos os agentes. Quanto mais detalhado, mais preciso o conteúdo gerado.'
-                  : 'Descreva sua experiência, os candidatos que gerencia e como trabalha.'}
-              </p>
-              <textarea
-                value={form.bio_politica}
-                onChange={e => set('bio_politica', e.target.value)}
-                placeholder={form.tipo_conta === 'candidato'
-                  ? 'Ex: Sou vereador em Americana/SP buscando reeleição. Minhas pautas são segurança pública, saúde e moradia. Fui eleito em 2020 com 3.800 votos...'
-                  : 'Ex: Sou gestor de redes sociais com 3 anos de experiência em campanhas políticas. Atualmente gerencio 2 candidatos a vereador em Campinas/SP...'}
-                rows={10}
-                style={{ ...inp, resize: 'vertical', minHeight: '240px' }}
-              />
-              <div style={{ fontSize: 11, color: 'rgba(9,23,16,0.35)', marginTop: 8 }}>
-                {form.bio_politica.length} caracteres · Recomendado: 200+
-              </div>
-            </div>
-
-            {/* Dica */}
-            <div style={{ padding: '14px 16px', background: 'rgba(123,79,216,0.06)', borderRadius: 12, border: '1px solid rgba(123,79,216,0.15)' }}>
-              <div style={{ fontSize: 12, fontWeight: 700, color: '#7B4FD8', marginBottom: 4 }}>💡 Dica dos agentes</div>
-              <p style={{ fontSize: 12, color: 'rgba(9,23,16,0.55)', margin: 0, lineHeight: 1.6 }}>
-                {form.tipo_conta === 'candidato'
-                  ? 'Inclua: cargo, cidade, pautas principais, histórico eleitoral, público-alvo e tom de comunicação.'
-                  : 'Inclua: quantos candidatos gerencia, em quais cidades, quais cargos e qual é seu estilo de comunicação.'}
-              </p>
-            </div>
+            ))}
           </div>
         </div>
 
-        {/* Botão salvar */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginTop: 24 }}>
-          <button type="submit" disabled={saving} style={{ padding: '12px 28px', borderRadius: 50, border: 'none', background: saving ? 'rgba(123,79,216,0.4)' : 'linear-gradient(135deg, #7B4FD8, #5B3BAA)', color: '#fff', fontSize: 14, fontWeight: 700, cursor: saving ? 'not-allowed' : 'pointer', fontFamily: 'var(--font-inter), sans-serif', boxShadow: saving ? 'none' : '0 4px 16px rgba(123,79,216,0.3)' }}>
-            {saving ? 'Salvando...' : primeiroAcesso ? 'Salvar e ir para o dashboard →' : 'Salvar perfil'}
-          </button>
-          {ok && (
-            <span style={{ fontSize: 13, color: '#1D9E75', fontWeight: 700 }}>✓ Salvo com sucesso!</span>
-          )}
-        </div>
+        {/* Informações */}
+        {isCand ? (
+          <div style={{ display:'grid',gridTemplateColumns:'1fr 1fr',gap:16,marginBottom:16 }}>
+            <div className="surf" style={{ gridColumn:'1/-1' }}>
+              <p style={{ fontSize:12,fontWeight:700,color:'#3A5F4E',textTransform:'uppercase' as const,letterSpacing:'0.06em',margin:'0 0 14px' }}>Informações pessoais</p>
+              <div style={{ display:'grid',gridTemplateColumns:'1fr 1fr',gap:12 }}>
+                <div>
+                  <label style={{ fontSize:11,fontWeight:700,color:'#3A5F4E',display:'block',marginBottom:5,textTransform:'uppercase' as const,letterSpacing:'0.05em' }}>Nome completo *</label>
+                  <input value={form.nome} onChange={e=>f('nome',e.target.value)} required placeholder="Seu nome completo" className="finp" style={inp}/>
+                </div>
+                <div>
+                  <label style={{ fontSize:11,fontWeight:700,color:'#3A5F4E',display:'block',marginBottom:5,textTransform:'uppercase' as const,letterSpacing:'0.05em' }}>Cargo disputado *</label>
+                  <select value={form.cargo} onChange={e=>f('cargo',e.target.value)} required className="finp" style={{...inp,appearance:'auto' as const}}>
+                    <option value="">Selecione...</option>
+                    {CARGOS.map(c=><option key={c} value={c}>{c}</option>)}
+                  </select>
+                </div>
+                <div>
+                  <label style={{ fontSize:11,fontWeight:700,color:'#3A5F4E',display:'block',marginBottom:5,textTransform:'uppercase' as const,letterSpacing:'0.05em' }}>Cidade *</label>
+                  <input value={form.cidade} onChange={e=>f('cidade',e.target.value)} required placeholder="Sua cidade" className="finp" style={inp}/>
+                </div>
+                <div>
+                  <label style={{ fontSize:11,fontWeight:700,color:'#3A5F4E',display:'block',marginBottom:5,textTransform:'uppercase' as const,letterSpacing:'0.05em' }}>Estado *</label>
+                  <select value={form.estado} onChange={e=>f('estado',e.target.value)} required className="finp" style={{...inp,appearance:'auto' as const}}>
+                    <option value="">UF...</option>
+                    {ESTADOS.map(e=><option key={e} value={e}>{e}</option>)}
+                  </select>
+                </div>
+                <div>
+                  <label style={{ fontSize:11,fontWeight:700,color:'#3A5F4E',display:'block',marginBottom:5,textTransform:'uppercase' as const,letterSpacing:'0.05em' }}>Partido</label>
+                  <input value={form.partido} onChange={e=>f('partido',e.target.value)} placeholder="PT, PSD, Republicanos..." className="finp" style={inp}/>
+                </div>
+                <div>
+                  <label style={{ fontSize:11,fontWeight:700,color:'#3A5F4E',display:'block',marginBottom:5,textTransform:'uppercase' as const,letterSpacing:'0.05em' }}>Instagram</label>
+                  <input value={form.instagram} onChange={e=>f('instagram',e.target.value)} placeholder="@seuperfil" className="finp" style={inp}/>
+                </div>
+              </div>
+            </div>
+            <div className="surf" style={{ gridColumn:'1/-1' }}>
+              <div style={{ display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:10 }}>
+                <label style={{ fontSize:11,fontWeight:700,color:'#3A5F4E',textTransform:'uppercase' as const,letterSpacing:'0.05em' }}>Bio política para os agentes *</label>
+                <span style={{ fontSize:11,color:bioLen>=bioTgt?'#0EA472':'#A8C4B8',fontWeight:600 }}>{bioLen}/{bioTgt}+</span>
+              </div>
+              <textarea value={form.bio_politica} onChange={e=>f('bio_politica',e.target.value)} rows={4} placeholder="Conte sua história política, principais pautas, base eleitoral e diferencial. Quanto mais detalhes, melhor o conteúdo gerado." className="finp" style={{...inp,resize:'vertical' as const,minHeight:100}}/>
+              <div style={{ marginTop:10,padding:'10px 12px',background:'rgba(14,164,114,0.05)',borderRadius:10,border:'1px solid rgba(14,164,114,0.12)',fontSize:12,color:'#3A5F4E',lineHeight:1.6 }}>
+                <strong style={{ fontWeight:700 }}>Dica dos agentes:</strong> Inclua quantos mandatos tem, quais bairros atende, estilo de comunicação e casos de sucesso que os agentes possam referenciar.
+              </div>
+            </div>
+          </div>
+        ) : (
+          <div style={{ marginBottom:16 }}>
+            <div className="surf" style={{ marginBottom:16 }}>
+              <p style={{ fontSize:12,fontWeight:700,color:'#3A5F4E',textTransform:'uppercase' as const,letterSpacing:'0.06em',margin:'0 0 14px' }}>Informações profissionais</p>
+              <div style={{ display:'grid',gridTemplateColumns:'1fr 1fr',gap:12 }}>
+                <div>
+                  <label style={{ fontSize:11,fontWeight:700,color:'#3A5F4E',display:'block',marginBottom:5,textTransform:'uppercase' as const,letterSpacing:'0.05em' }}>Nome completo *</label>
+                  <input value={form.nome} onChange={e=>f('nome',e.target.value)} required placeholder="Seu nome" className="finp" style={inp}/>
+                </div>
+                <div>
+                  <label style={{ fontSize:11,fontWeight:700,color:'#3A5F4E',display:'block',marginBottom:5,textTransform:'uppercase' as const,letterSpacing:'0.05em' }}>Agência / Empresa *</label>
+                  <input value={form.agencia} onChange={e=>f('agencia',e.target.value)} required placeholder="Nome da agência" className="finp" style={inp}/>
+                </div>
+                <div>
+                  <label style={{ fontSize:11,fontWeight:700,color:'#3A5F4E',display:'block',marginBottom:5,textTransform:'uppercase' as const,letterSpacing:'0.05em' }}>Especialidade *</label>
+                  <select value={form.especialidade} onChange={e=>f('especialidade',e.target.value)} required className="finp" style={{...inp,appearance:'auto' as const}}>
+                    <option value="">Selecione...</option>
+                    {ESPECIALIDADES.map(s=><option key={s} value={s}>{s}</option>)}
+                  </select>
+                </div>
+                <div>
+                  <label style={{ fontSize:11,fontWeight:700,color:'#3A5F4E',display:'block',marginBottom:5,textTransform:'uppercase' as const,letterSpacing:'0.05em' }}>Instagram profissional</label>
+                  <input value={form.instagram_profissional} onChange={e=>f('instagram_profissional',e.target.value)} placeholder="@agencia" className="finp" style={inp}/>
+                </div>
+              </div>
+            </div>
+            <div className="surf">
+              <div style={{ display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:10 }}>
+                <label style={{ fontSize:11,fontWeight:700,color:'#3A5F4E',textTransform:'uppercase' as const,letterSpacing:'0.05em' }}>Contexto de trabalho</label>
+                <span style={{ fontSize:11,color:bioLen>=bioTgt?'#0EA472':'#A8C4B8',fontWeight:600 }}>{bioLen}/{bioTgt}+</span>
+              </div>
+              <textarea value={form.contexto_trabalho} onChange={e=>f('contexto_trabalho',e.target.value)} rows={4} placeholder="Descreva sua experiência, os candidatos que gerencia e como trabalha." className="finp" style={{...inp,resize:'vertical' as const,minHeight:100}}/>
+            </div>
+          </div>
+        )}
+
+        <button type="submit" disabled={saving} style={{ padding:'13px 32px',borderRadius:50,border:'none',background:saving?'rgba(14,164,114,0.5)':'linear-gradient(135deg,#0EA472,#054E39)',color:'#fff',fontSize:14,fontWeight:700,cursor:saving?'not-allowed':'pointer',boxShadow:saving?'none':'0 4px 16px rgba(14,164,114,0.35)',fontFamily:'inherit' }}>
+          {saving ? 'Salvando...' : ok ? 'Salvo!' : 'Salvar perfil'}
+        </button>
       </form>
     </div>
   )
 }
 
-function Field({ label, required, children }: { label: string; required?: boolean; children: React.ReactNode }) {
-  return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
-      <label style={{ fontSize: 11, fontWeight: 700, color: 'rgba(9,23,16,0.45)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
-        {label}{required && <span style={{ color: '#7B4FD8', marginLeft: 3 }}>*</span>}
-      </label>
-      {children}
-    </div>
-  )
-}
-
-const inp: React.CSSProperties = {
-  padding: '9px 12px', borderRadius: 10, border: '1px solid rgba(123,79,216,0.15)',
-  fontSize: 13, color: '#091710', background: '#fff',
-  width: '100%', boxSizing: 'border-box', outline: 'none',
-  fontFamily: 'var(--font-inter), sans-serif',
+export default function PerfilPage() {
+  return <Suspense fallback={null}><PerfilContent/></Suspense>
 }

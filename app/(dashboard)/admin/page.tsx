@@ -1,288 +1,247 @@
 'use client'
 import { useEffect, useState } from 'react'
 
-const AGENTE_LABEL: Record<string, string> = {
-  roteirista: 'Roteirista',
-  estrategista: 'Estrategista',
-  copy: 'Copy Político',
-  consciencia: 'Consciência',
+const AG: Record<string,{label:string;cor:string}> = {
+  roteirista:  { label:'Roteirista',   cor:'#0EA472' },
+  estrategista:{ label:'Estrategista', cor:'#2D7DD2' },
+  copy:        { label:'Copy',         cor:'#7B4FD8' },
+  consciencia: { label:'Consciência',  cor:'#D97706' },
 }
-
-const PLANO_COR: Record<string, { bg: string; color: string; label: string }> = {
-  gratuito:  { bg: 'rgba(138,138,154,0.1)',  color: '#8A8A9A', label: 'Gratuito' },
-  essencial: { bg: 'rgba(123,79,216,0.1)',   color: '#7B4FD8', label: 'Essencial' },
-  pro:       { bg: 'rgba(29,158,117,0.1)',   color: '#1D9E75', label: 'Pro' },
-  agencia:   { bg: 'rgba(55,138,221,0.1)',   color: '#378ADD', label: 'Agência' },
+const PLANO_CONFIG: Record<string,{label:string;cor:string;bg:string}> = {
+  gratuito:  { label:'Gratuito',  cor:'#7BA090', bg:'rgba(123,160,144,0.1)' },
+  essencial: { label:'Essencial', cor:'#0EA472', bg:'rgba(14,164,114,0.1)' },
+  pro:       { label:'Pro',       cor:'#0EA472', bg:'rgba(14,164,114,0.12)' },
+  agencia:   { label:'Agência',   cor:'#2D7DD2', bg:'rgba(45,125,210,0.1)' },
 }
 
 type Stats = {
   totais: { usuarios: number; geracoes: number; tokens: number; custoUSD: number; custoBRL: number }
   mes: { geracoes: number; tokens: number; custoUSD: number; custoBRL: number }
-  statsPorPlano: Record<string, number>
-  statsPorAgente: Record<string, number>
-  geracoesPorDia: Record<string, number>
-  usuarios: Array<{ id: string; nome: string; email: string; plano: string; cargo: string; cidade: string; estado: string; criado_em: string; totalGeracoes: number }>
-  ultimasGeracoes: Array<{ id: string; agente: string; email: string; nome: string; tokens_usados: number; criado_em: string }>
+  statsPorPlano: Record<string,number>
+  statsPorAgente: Record<string,number>
+  geracoesPorDia: Record<string,number>
+  usuarios: Array<{id:string;nome:string;email:string;plano:string;cargo:string;cidade:string;estado:string;criado_em:string;totalGeracoes:number}>
+  ultimasGeracoes: Array<{id:string;agente:string;email:string;nome:string;tokens_usados:number;criado_em:string}>
 }
 
+function ago(d:string){ const s=Math.floor((Date.now()-new Date(d).getTime())/1000); if(s<60)return'agora'; if(s<3600)return`${Math.floor(s/60)}min`; if(s<86400)return`${Math.floor(s/3600)}h`; if(s<604800)return`${Math.floor(s/86400)}d`; return new Date(d).toLocaleDateString('pt-BR',{day:'2-digit',month:'short'}) }
+
 export default function AdminPage() {
-  const [stats, setStats] = useState<Stats | null>(null)
+  const [stats, setStats] = useState<Stats|null>(null)
   const [loading, setLoading] = useState(true)
   const [erro, setErro] = useState('')
-  const [aba, setAba] = useState<'visao' | 'usuarios' | 'geracoes'>('visao')
+  const [aba, setAba] = useState<'visao'|'usuarios'|'geracoes'>('visao')
   const [busca, setBusca] = useState('')
 
   useEffect(() => {
-    fetch('/api/admin/stats')
-      .then(r => r.json())
-      .then(d => { if (d.error) setErro(d.error); else setStats(d) })
-      .catch(() => setErro('Erro ao carregar dados.'))
-      .finally(() => setLoading(false))
+    fetch('/api/admin/stats').then(r=>r.json()).then(d=>{ if(d.error)setErro(d.error); else setStats(d) }).catch(()=>setErro('Erro ao carregar.')).finally(()=>setLoading(false))
   }, [])
 
-  if (loading) return (
-    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '60vh', fontFamily: 'var(--font-inter), sans-serif', color: 'rgba(45,27,110,0.4)' }}>
-      Carregando painel...
-    </div>
-  )
-
-  if (erro) return (
-    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '60vh', fontFamily: 'var(--font-inter), sans-serif' }}>
-      <div style={{ textAlign: 'center' }}>
-        <div style={{ fontSize: 40, marginBottom: 12 }}>🔒</div>
-        <p style={{ fontSize: 16, fontWeight: 700, color: '#C62828' }}>{erro}</p>
-      </div>
-    </div>
-  )
-
+  if (loading) return <div style={{display:'flex',alignItems:'center',justifyContent:'center',height:'60vh',fontFamily:'var(--font-inter),sans-serif',color:'#7BA090',fontSize:13}}>Carregando...</div>
+  if (erro) return <div style={{display:'flex',alignItems:'center',justifyContent:'center',height:'60vh',fontFamily:'var(--font-inter),sans-serif'}}><div style={{textAlign:'center'}}><div style={{width:48,height:48,borderRadius:14,background:'rgba(220,53,69,0.08)',display:'flex',alignItems:'center',justifyContent:'center',margin:'0 auto 14px'}}><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#DC3545" strokeWidth="1.7" strokeLinecap="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg></div><p style={{fontSize:15,fontWeight:700,color:'#DC3545'}}>{erro}</p></div></div>
   if (!stats) return null
 
-  const usuariosFiltrados = stats.usuarios.filter(u =>
-    busca === '' || u.nome?.toLowerCase().includes(busca.toLowerCase()) ||
-    u.email?.toLowerCase().includes(busca.toLowerCase()) ||
-    u.plano?.toLowerCase().includes(busca.toLowerCase())
-  )
-
+  const usuariosFiltrados = stats.usuarios.filter(u => busca===''||[u.nome,u.email,u.plano].some(v=>v?.toLowerCase().includes(busca.toLowerCase())))
   const diasLabels = Object.keys(stats.geracoesPorDia).slice(-14)
-  const diasValues = diasLabels.map(d => stats.geracoesPorDia[d])
+  const diasValues = diasLabels.map(d=>stats.geracoesPorDia[d])
   const maxVal = Math.max(...diasValues, 1)
 
-  const abaStyle = (id: string) => ({
-    padding: '10px 20px', borderRadius: 10, border: 'none',
-    background: aba === id ? 'linear-gradient(135deg, #7B4FD8, #5B3BAA)' : 'transparent',
-    color: aba === id ? '#fff' : 'rgba(45,27,110,0.5)',
-    fontSize: 13, fontWeight: 700 as const, cursor: 'pointer',
-    fontFamily: 'var(--font-inter), sans-serif', transition: 'all 0.15s',
+  const F = {fontFamily:'var(--font-inter),sans-serif'}
+  const tab = (id: string) => ({
+    padding:'9px 20px', borderRadius:9, border:'none',
+    background: aba===id?'linear-gradient(135deg,#0EA472,#054E39)':'transparent',
+    color: aba===id?'#fff':'#7BA090', fontSize:13, fontWeight:700 as const,
+    cursor:'pointer' as const, ...F, transition:'all .12s',
   })
 
   return (
-    <div style={{ maxWidth: 1100, margin: '0 auto', padding: '24px 20px', fontFamily: 'var(--font-inter), sans-serif' }}>
+    <div style={{maxWidth:1100,margin:'0 auto',padding:'26px 20px',...F}}>
+      <style>{`.atab-row{display:flex;gap:8px;background:#fff;border:1px solid #D4E8DC;border-radius:12px;padding:5px;width:fit-content;margin-bottom:22px} .user-row:hover{background:#FAFCFB} .surf{background:#fff;border:1px solid #D4E8DC;border-radius:14px;padding:18px}`}</style>
 
-      {/* Header */}
-      <div style={{ marginBottom: 28 }}>
-        <p style={{ fontSize: 11, color: 'rgba(45,27,110,0.4)', margin: '0 0 4px', textTransform: 'uppercase', letterSpacing: '0.08em', fontWeight: 700 }}>Acesso restrito</p>
-        <h1 style={{ fontSize: 26, fontWeight: 800, color: '#2D1B6E', margin: '0 0 4px', letterSpacing: '-0.01em' }}>Painel Administrativo</h1>
-        <p style={{ fontSize: 13, color: 'rgba(45,27,110,0.45)', margin: 0 }}>Visão completa da plataforma Elegendo.</p>
-      </div>
-
-      {/* Alerta custo do mês */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '14px 18px', background: stats.mes.custoUSD > 10 ? 'rgba(224,75,74,0.06)' : 'rgba(29,158,117,0.06)', borderRadius: 14, border: `1px solid ${stats.mes.custoUSD > 10 ? 'rgba(224,75,74,0.2)' : 'rgba(29,158,117,0.2)'}`, marginBottom: 24 }}>
-        <span style={{ fontSize: 20 }}>{stats.mes.custoUSD > 10 ? '⚠️' : '✅'}</span>
-        <div style={{ flex: 1 }}>
-          <div style={{ fontSize: 13, fontWeight: 700, color: '#2D1B6E' }}>
-            Custo este mês: <span style={{ color: stats.mes.custoUSD > 10 ? '#C62828' : '#1D9E75' }}>R$ {stats.mes.custoBRL.toFixed(2)}</span> (US$ {stats.mes.custoUSD.toFixed(2)})
-          </div>
-          <div style={{ fontSize: 12, color: 'rgba(45,27,110,0.45)', marginTop: 2 }}>
-            {stats.mes.geracoes} gerações · {stats.mes.tokens.toLocaleString('pt-BR')} tokens · Modelo: Haiku 4.5
-          </div>
-        </div>
-        <div style={{ fontSize: 11, color: 'rgba(45,27,110,0.4)', textAlign: 'right' }}>
-          <div>Total histórico</div>
-          <div style={{ fontWeight: 700, color: '#2D1B6E' }}>R$ {stats.totais.custoBRL.toFixed(2)}</div>
-        </div>
+      <div style={{marginBottom:22}}>
+        <p style={{fontSize:11,color:'#7BA090',margin:'0 0 4px',textTransform:'uppercase' as const,letterSpacing:'0.08em',fontWeight:700}}>Sistema</p>
+        <h1 style={{fontSize:24,fontWeight:800,color:'#091710',margin:0,letterSpacing:'-0.02em'}}>Painel Administrativo</h1>
       </div>
 
       {/* KPIs */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: 12, marginBottom: 28 }}>
+      <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(160px,1fr))',gap:10,marginBottom:22}}>
         {[
-          { label: 'Usuários',        value: stats.totais.usuarios,                        cor: '#7B4FD8', icon: '👥' },
-          { label: 'Gerações totais', value: stats.totais.geracoes,                        cor: '#1D9E75', icon: '✨' },
-          { label: 'Tokens totais',   value: stats.totais.tokens.toLocaleString('pt-BR'),  cor: '#378ADD', icon: '⚡' },
-          { label: 'Custo total USD', value: `$${stats.totais.custoUSD.toFixed(2)}`,       cor: '#C9A84C', icon: '💵' },
-          { label: 'Custo total BRL', value: `R$${stats.totais.custoBRL.toFixed(2)}`,      cor: '#C62828', icon: '💰' },
-          { label: 'Planos pagos',    value: (stats.statsPorPlano.pro ?? 0) + (stats.statsPorPlano.essencial ?? 0) + (stats.statsPorPlano.agencia ?? 0), cor: '#1D9E75', icon: '🎯' },
-        ].map(({ label, value, cor, icon }) => (
-          <div key={label} style={{ background: 'rgba(255,255,255,0.8)', backdropFilter: 'blur(8px)', border: '1px solid rgba(123,79,216,0.12)', borderRadius: 16, padding: '14px 16px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
-              <span style={{ fontSize: 11, color: 'rgba(45,27,110,0.5)', fontWeight: 500 }}>{label}</span>
-              <span style={{ fontSize: 15 }}>{icon}</span>
-            </div>
-            <div style={{ fontSize: 22, fontWeight: 800, color: cor, lineHeight: 1 }}>{value}</div>
+          {label:'Usuários',         val:stats.totais.usuarios,  cor:'#0EA472', fmt:(v:number)=>String(v)},
+          {label:'Gerações totais',  val:stats.totais.geracoes,  cor:'#2D7DD2', fmt:(v:number)=>String(v)},
+          {label:'Gerações este mês',val:stats.mes.geracoes,     cor:'#D97706', fmt:(v:number)=>String(v)},
+          {label:'Custo mês (BRL)',  val:stats.mes.custoBRL,     cor:'#DC3545', fmt:(v:number)=>`R$ ${v.toFixed(2)}`},
+          {label:'Custo total (BRL)',val:stats.totais.custoBRL,  cor:'#091710', fmt:(v:number)=>`R$ ${v.toFixed(2)}`},
+        ].map(s=>(
+          <div key={s.label} className="surf">
+            <p style={{fontSize:11,color:'#7BA090',fontWeight:600,margin:'0 0 6px'}}>{s.label}</p>
+            <div style={{fontSize:20,fontWeight:800,color:s.cor,letterSpacing:'-0.02em',lineHeight:1}}>{s.fmt(s.val)}</div>
           </div>
         ))}
       </div>
 
-      {/* Distribuição por plano + por agente */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 28 }}>
-        <div style={{ background: 'rgba(255,255,255,0.8)', backdropFilter: 'blur(8px)', border: '1px solid rgba(123,79,216,0.1)', borderRadius: 16, padding: 20 }}>
-          <h2 style={{ fontSize: 11, fontWeight: 700, color: 'rgba(45,27,110,0.45)', textTransform: 'uppercase', letterSpacing: '0.08em', margin: '0 0 16px' }}>Usuários por plano</h2>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-            {Object.entries(PLANO_COR).map(([plano, cfg]) => {
-              const qtd = stats.statsPorPlano[plano] ?? 0
-              const pct = stats.totais.usuarios > 0 ? Math.round((qtd / stats.totais.usuarios) * 100) : 0
-              return (
-                <div key={plano}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 5 }}>
-                    <span style={{ fontSize: 13, fontWeight: 600, color: '#2D1B6E' }}>{cfg.label}</span>
-                    <span style={{ fontSize: 13, fontWeight: 700, color: cfg.color }}>{qtd} <span style={{ fontSize: 11, color: 'rgba(45,27,110,0.4)', fontWeight: 400 }}>({pct}%)</span></span>
+      {/* Tabs */}
+      <div className="atab-row">
+        {(['visao','usuarios','geracoes'] as const).map(t=>(
+          <button key={t} style={tab(t)} onClick={()=>setAba(t)}>
+            {t==='visao'?'Visão geral':t==='usuarios'?'Usuários':'Gerações'}
+          </button>
+        ))}
+      </div>
+
+      {/* VISÃO GERAL */}
+      {aba==='visao' && (
+        <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(300px,1fr))',gap:16}}>
+          {/* Por plano */}
+          <div className="surf">
+            <p style={{fontSize:13,fontWeight:700,color:'#091710',margin:'0 0 14px'}}>Usuários por plano</p>
+            {Object.entries(stats.statsPorPlano).map(([plano,count])=>{
+              const cfg=PLANO_CONFIG[plano]??{label:plano,cor:'#7BA090',bg:'rgba(123,160,144,0.1)'}
+              const pct=stats.totais.usuarios>0?Math.round((count/stats.totais.usuarios)*100):0
+              return(
+                <div key={plano} style={{marginBottom:10}}>
+                  <div style={{display:'flex',justifyContent:'space-between',marginBottom:5}}>
+                    <div style={{display:'flex',alignItems:'center',gap:8}}>
+                      <span style={{fontSize:11,fontWeight:700,padding:'2px 8px',borderRadius:20,background:cfg.bg,color:cfg.cor}}>{cfg.label}</span>
+                    </div>
+                    <div style={{display:'flex',gap:8,alignItems:'center'}}>
+                      <span style={{fontSize:13,fontWeight:700,color:'#091710'}}>{count}</span>
+                      <span style={{fontSize:11,color:'#A8C4B8'}}>{pct}%</span>
+                    </div>
                   </div>
-                  <div style={{ height: 6, background: 'rgba(45,27,110,0.06)', borderRadius: 4, overflow: 'hidden' }}>
-                    <div style={{ height: '100%', width: `${pct}%`, background: cfg.color, borderRadius: 4 }} />
+                  <div style={{height:5,background:'#F1F6F3',borderRadius:4,overflow:'hidden'}}>
+                    <div style={{width:`${pct}%`,height:'100%',background:cfg.cor,borderRadius:4}}/>
                   </div>
                 </div>
               )
             })}
           </div>
-        </div>
 
-        <div style={{ background: 'rgba(255,255,255,0.8)', backdropFilter: 'blur(8px)', border: '1px solid rgba(123,79,216,0.1)', borderRadius: 16, padding: 20 }}>
-          <h2 style={{ fontSize: 11, fontWeight: 700, color: 'rgba(45,27,110,0.45)', textTransform: 'uppercase', letterSpacing: '0.08em', margin: '0 0 16px' }}>Gerações por agente</h2>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-            {Object.entries(stats.statsPorAgente).sort((a, b) => b[1] - a[1]).map(([agente, qtd]) => {
-              const pct = stats.totais.geracoes > 0 ? Math.round((qtd / stats.totais.geracoes) * 100) : 0
-              return (
-                <div key={agente}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 5 }}>
-                    <span style={{ fontSize: 13, fontWeight: 600, color: '#2D1B6E' }}>{AGENTE_LABEL[agente] ?? agente}</span>
-                    <span style={{ fontSize: 13, fontWeight: 700, color: '#7B4FD8' }}>{qtd} <span style={{ fontSize: 11, color: 'rgba(45,27,110,0.4)', fontWeight: 400 }}>({pct}%)</span></span>
+          {/* Por agente */}
+          <div className="surf">
+            <p style={{fontSize:13,fontWeight:700,color:'#091710',margin:'0 0 14px'}}>Gerações por agente</p>
+            {Object.entries(stats.statsPorAgente).map(([agente,count])=>{
+              const cfg=AG[agente]??{label:agente,cor:'#7BA090'}
+              const total=Object.values(stats.statsPorAgente).reduce((s,v)=>s+v,0)
+              const pct=total>0?Math.round((count/total)*100):0
+              return(
+                <div key={agente} style={{marginBottom:10}}>
+                  <div style={{display:'flex',justifyContent:'space-between',marginBottom:5}}>
+                    <div style={{display:'flex',alignItems:'center',gap:7}}>
+                      <div style={{width:8,height:8,borderRadius:2,background:cfg.cor}}/>
+                      <span style={{fontSize:13,color:'#091710',fontWeight:500}}>{cfg.label}</span>
+                    </div>
+                    <div style={{display:'flex',gap:8,alignItems:'center'}}>
+                      <span style={{fontSize:13,fontWeight:700,color:'#091710'}}>{count}</span>
+                      <span style={{fontSize:11,color:'#A8C4B8'}}>{pct}%</span>
+                    </div>
                   </div>
-                  <div style={{ height: 6, background: 'rgba(45,27,110,0.06)', borderRadius: 4, overflow: 'hidden' }}>
-                    <div style={{ height: '100%', width: `${pct}%`, background: 'linear-gradient(90deg, #7B4FD8, #5B3BAA)', borderRadius: 4 }} />
+                  <div style={{height:5,background:'#F1F6F3',borderRadius:4,overflow:'hidden'}}>
+                    <div style={{width:`${pct}%`,height:'100%',background:cfg.cor,borderRadius:4}}/>
                   </div>
                 </div>
               )
             })}
-            {Object.keys(stats.statsPorAgente).length === 0 && (
-              <p style={{ fontSize: 13, color: 'rgba(45,27,110,0.4)', margin: 0 }}>Nenhuma geração ainda.</p>
-            )}
           </div>
-        </div>
-      </div>
 
-      {/* Gráfico 14 dias */}
-      <div style={{ background: 'rgba(255,255,255,0.8)', backdropFilter: 'blur(8px)', border: '1px solid rgba(123,79,216,0.1)', borderRadius: 16, padding: 20, marginBottom: 28 }}>
-        <h2 style={{ fontSize: 11, fontWeight: 700, color: 'rgba(45,27,110,0.45)', textTransform: 'uppercase', letterSpacing: '0.08em', margin: '0 0 20px' }}>Gerações — últimos 14 dias</h2>
-        <div style={{ display: 'flex', alignItems: 'flex-end', gap: 6, height: 80 }}>
-          {diasLabels.map((dia, i) => {
-            const val = diasValues[i]
-            const altura = maxVal > 0 ? Math.max((val / maxVal) * 80, val > 0 ? 4 : 2) : 2
-            const dataFmt = new Date(dia + 'T12:00:00').toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })
-            return (
-              <div key={dia} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
-                <span style={{ fontSize: 9, color: 'rgba(45,27,110,0.4)', fontWeight: 600 }}>{val > 0 ? val : ''}</span>
-                <div style={{ width: '100%', height: altura, background: val > 0 ? 'linear-gradient(180deg, #7B4FD8, #5B3BAA)' : 'rgba(45,27,110,0.06)', borderRadius: 4 }} />
-                <span style={{ fontSize: 8, color: 'rgba(45,27,110,0.3)', whiteSpace: 'nowrap' }}>{dataFmt}</span>
-              </div>
-            )
-          })}
-        </div>
-      </div>
-
-      {/* Abas */}
-      <div style={{ display: 'flex', gap: 4, marginBottom: 20, background: 'rgba(255,255,255,0.6)', borderRadius: 14, padding: 6, border: '1px solid rgba(123,79,216,0.1)' }}>
-        <button onClick={() => setAba('visao')} style={abaStyle('visao')}>📊 Visão geral</button>
-        <button onClick={() => setAba('usuarios')} style={abaStyle('usuarios')}>👥 Usuários ({stats.totais.usuarios})</button>
-        <button onClick={() => setAba('geracoes')} style={abaStyle('geracoes')}>✨ Gerações ({stats.totais.geracoes})</button>
-      </div>
-
-      {/* Visão geral */}
-      {aba === 'visao' && (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 12 }}>
-          {stats.usuarios.slice(0, 6).map(u => {
-            const cfg = PLANO_COR[u.plano] ?? PLANO_COR.gratuito
-            return (
-              <div key={u.id} style={{ background: 'rgba(255,255,255,0.75)', border: '1px solid rgba(123,79,216,0.1)', borderRadius: 14, padding: 16 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
-                  <div style={{ width: 36, height: 36, borderRadius: '50%', background: cfg.bg, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14, fontWeight: 700, color: cfg.color, flexShrink: 0 }}>
-                    {u.nome?.charAt(0).toUpperCase() ?? '?'}
+          {/* Atividade 14 dias */}
+          <div className="surf" style={{gridColumn:'1/-1'}}>
+            <p style={{fontSize:13,fontWeight:700,color:'#091710',margin:'0 0 14px'}}>Atividade — últimos 14 dias</p>
+            <div style={{display:'flex',alignItems:'flex-end',gap:6,height:60}}>
+              {diasLabels.map((dia,i)=>{
+                const v=diasValues[i]
+                const h=v>0?Math.max((v/maxVal)*60,4):2
+                const isToday=dia===new Date().toISOString().slice(0,10)
+                return(
+                  <div key={dia} style={{flex:1,display:'flex',flexDirection:'column' as const,alignItems:'center',gap:3}}>
+                    {v>0&&<span style={{fontSize:9,color:'#7BA090',fontWeight:600}}>{v}</span>}
+                    <div title={`${dia}: ${v}`} style={{width:'100%',height:h,background:isToday?'#0EA472':v>0?'rgba(14,164,114,0.5)':'#E6F3EB',borderRadius:3}}/>
+                    <span style={{fontSize:8,color:isToday?'#0EA472':'#A8C4B8',fontWeight:isToday?700:400,whiteSpace:'nowrap' as const}}>
+                      {new Date(dia+'T12:00:00').toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'})}
+                    </span>
                   </div>
-                  <div style={{ minWidth: 0 }}>
-                    <div style={{ fontSize: 13, fontWeight: 700, color: '#2D1B6E', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{u.nome || '—'}</div>
-                    <div style={{ fontSize: 11, color: 'rgba(45,27,110,0.4)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{u.email}</div>
-                  </div>
-                </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <span style={{ fontSize: 11, fontWeight: 600, padding: '2px 8px', borderRadius: 20, background: cfg.bg, color: cfg.color }}>{cfg.label}</span>
-                  <span style={{ fontSize: 11, color: 'rgba(45,27,110,0.4)' }}>{u.totalGeracoes} gerações</span>
-                </div>
-              </div>
-            )
-          })}
+                )
+              })}
+            </div>
+          </div>
         </div>
       )}
 
-      {/* Usuários */}
-      {aba === 'usuarios' && (
+      {/* USUÁRIOS */}
+      {aba==='usuarios' && (
         <div>
-          <input type="text" placeholder="Buscar por nome, email ou plano..." value={busca} onChange={e => setBusca(e.target.value)} style={{ width: '100%', padding: '11px 16px', borderRadius: 12, border: '1px solid rgba(123,79,216,0.15)', fontSize: 14, color: '#2D1B6E', background: 'rgba(255,255,255,0.8)', outline: 'none', fontFamily: 'var(--font-inter), sans-serif', boxSizing: 'border-box', marginBottom: 16 }} />
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-            {usuariosFiltrados.map(u => {
-              const cfg = PLANO_COR[u.plano] ?? PLANO_COR.gratuito
-              const dataCadastro = new Date(u.criado_em).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' })
-              return (
-                <div key={u.id} style={{ background: 'rgba(255,255,255,0.8)', border: '1px solid rgba(123,79,216,0.1)', borderRadius: 14, padding: '14px 18px', display: 'flex', alignItems: 'center', gap: 14, flexWrap: 'wrap' }}>
-                  <div style={{ width: 38, height: 38, borderRadius: '50%', background: cfg.bg, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14, fontWeight: 700, color: cfg.color, flexShrink: 0 }}>
-                    {u.nome?.charAt(0).toUpperCase() ?? '?'}
-                  </div>
-                  <div style={{ flex: 1, minWidth: 180 }}>
-                    <div style={{ fontSize: 14, fontWeight: 700, color: '#2D1B6E' }}>{u.nome || '(sem nome)'}</div>
-                    <div style={{ fontSize: 12, color: 'rgba(45,27,110,0.45)' }}>{u.email}</div>
-                  </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
-                    {u.cargo && <span style={{ fontSize: 11, color: 'rgba(45,27,110,0.5)', background: 'rgba(45,27,110,0.05)', padding: '2px 8px', borderRadius: 20 }}>{u.cargo}</span>}
-                    {u.cidade && <span style={{ fontSize: 11, color: 'rgba(45,27,110,0.45)' }}>{u.cidade}{u.estado ? `/${u.estado}` : ''}</span>}
-                    <span style={{ fontSize: 11, fontWeight: 600, padding: '3px 10px', borderRadius: 20, background: cfg.bg, color: cfg.color }}>{cfg.label}</span>
-                    <span style={{ fontSize: 11, color: 'rgba(45,27,110,0.4)', whiteSpace: 'nowrap' }}>{u.totalGeracoes} gerações</span>
-                    <span style={{ fontSize: 11, color: 'rgba(45,27,110,0.35)', whiteSpace: 'nowrap' }}>Cadastro: {dataCadastro}</span>
-                  </div>
-                </div>
-              )
-            })}
-            {usuariosFiltrados.length === 0 && (
-              <div style={{ textAlign: 'center', padding: '40px', color: 'rgba(45,27,110,0.4)', fontSize: 14 }}>Nenhum usuário encontrado.</div>
-            )}
+          <div style={{position:'relative',marginBottom:14}}>
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#A8C4B8" strokeWidth="2" strokeLinecap="round" style={{position:'absolute',left:14,top:'50%',transform:'translateY(-50%)'}}>
+              <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+            </svg>
+            <input value={busca} onChange={e=>setBusca(e.target.value)} placeholder="Buscar usuário por nome, email ou plano..."
+              style={{width:'100%',padding:'11px 14px 11px 40px',borderRadius:11,border:'1.5px solid #D4E8DC',fontSize:13.5,background:'#fff',outline:'none',boxSizing:'border-box' as const,fontFamily:'inherit',color:'#091710'}}/>
+          </div>
+          <div className="surf" style={{overflow:'auto'}}>
+            <table style={{width:'100%',borderCollapse:'collapse' as const,fontSize:13}}>
+              <thead>
+                <tr style={{borderBottom:'2px solid #E6F3EB'}}>
+                  {['Usuário','Plano','Cargo','Cidade/UF','Gerações','Cadastro'].map(h=>(
+                    <th key={h} style={{padding:'10px 12px',textAlign:'left' as const,fontSize:11,fontWeight:700,color:'#7BA090',textTransform:'uppercase' as const,letterSpacing:'0.05em',whiteSpace:'nowrap' as const}}>{h}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {usuariosFiltrados.map((u,i)=>{
+                  const pc=PLANO_CONFIG[u.plano]??{label:u.plano,cor:'#7BA090',bg:'rgba(123,160,144,0.1)'}
+                  return(
+                    <tr key={u.id} className="user-row" style={{borderBottom:'1px solid #E6F3EB'}}>
+                      <td style={{padding:'10px 12px'}}>
+                        <div style={{fontWeight:600,color:'#091710'}}>{u.nome||'—'}</div>
+                        <div style={{fontSize:11,color:'#A8C4B8'}}>{u.email}</div>
+                      </td>
+                      <td style={{padding:'10px 12px'}}><span style={{fontSize:11,fontWeight:700,padding:'2px 8px',borderRadius:20,background:pc.bg,color:pc.cor}}>{pc.label}</span></td>
+                      <td style={{padding:'10px 12px',color:'#3A5F4E'}}>{u.cargo||'—'}</td>
+                      <td style={{padding:'10px 12px',color:'#3A5F4E'}}>{[u.cidade,u.estado].filter(Boolean).join('/')}</td>
+                      <td style={{padding:'10px 12px',fontWeight:700,color:'#091710'}}>{u.totalGeracoes}</td>
+                      <td style={{padding:'10px 12px',color:'#A8C4B8',fontSize:12}}>{ago(u.criado_em)}</td>
+                    </tr>
+                  )
+                })}
+              </tbody>
+            </table>
           </div>
         </div>
       )}
 
-      {/* Gerações */}
-      {aba === 'geracoes' && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-          {stats.ultimasGeracoes.map(g => {
-            const dataFmt = new Date(g.criado_em).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })
-            const custoGeracaoUSD = (g.tokens_usados ?? 0) * (5 / 1_000_000)
-            return (
-              <div key={g.id} style={{ background: 'rgba(255,255,255,0.8)', border: '1px solid rgba(123,79,216,0.1)', borderRadius: 14, padding: '12px 18px', display: 'flex', alignItems: 'center', gap: 14, flexWrap: 'wrap' }}>
-                <div style={{ width: 36, height: 36, borderRadius: 10, background: 'rgba(123,79,216,0.08)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16, flexShrink: 0 }}>
-                  {g.agente === 'roteirista' ? '🎬' : g.agente === 'estrategista' ? '🧠' : g.agente === 'copy' ? '✍️' : '📊'}
-                </div>
-                <div style={{ flex: 1, minWidth: 150 }}>
-                  <div style={{ fontSize: 13, fontWeight: 700, color: '#2D1B6E' }}>{AGENTE_LABEL[g.agente] ?? g.agente}</div>
-                  <div style={{ fontSize: 11, color: 'rgba(45,27,110,0.45)' }}>{g.nome} · {g.email}</div>
-                </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
-                  {g.tokens_usados && (
-                    <span style={{ fontSize: 11, color: '#7B4FD8', background: 'rgba(123,79,216,0.08)', padding: '2px 8px', borderRadius: 20, fontWeight: 600 }}>{g.tokens_usados} tokens</span>
-                  )}
-                  <span style={{ fontSize: 11, color: '#1D9E75', background: 'rgba(29,158,117,0.08)', padding: '2px 8px', borderRadius: 20, fontWeight: 600 }}>~${custoGeracaoUSD.toFixed(4)}</span>
-                  <span style={{ fontSize: 11, color: 'rgba(45,27,110,0.4)', whiteSpace: 'nowrap' }}>{dataFmt}</span>
-                </div>
-              </div>
-            )
-          })}
-          {stats.ultimasGeracoes.length === 0 && (
-            <div style={{ textAlign: 'center', padding: '40px', color: 'rgba(45,27,110,0.4)', fontSize: 14 }}>Nenhuma geração ainda.</div>
-          )}
+      {/* GERAÇÕES */}
+      {aba==='geracoes' && (
+        <div className="surf" style={{overflow:'auto'}}>
+          <p style={{fontSize:13,fontWeight:700,color:'#091710',margin:'0 0 14px'}}>Últimas gerações — todos os usuários</p>
+          <table style={{width:'100%',borderCollapse:'collapse' as const,fontSize:13}}>
+            <thead>
+              <tr style={{borderBottom:'2px solid #E6F3EB'}}>
+                {['Usuário','Agente','Tokens','Quando'].map(h=>(
+                  <th key={h} style={{padding:'10px 12px',textAlign:'left' as const,fontSize:11,fontWeight:700,color:'#7BA090',textTransform:'uppercase' as const,letterSpacing:'0.05em',whiteSpace:'nowrap' as const}}>{h}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {stats.ultimasGeracoes.map((g,i)=>{
+                const cfg=AG[g.agente]??{label:g.agente,cor:'#7BA090'}
+                return(
+                  <tr key={g.id} className="user-row" style={{borderBottom:'1px solid #E6F3EB'}}>
+                    <td style={{padding:'10px 12px'}}>
+                      <div style={{fontWeight:600,color:'#091710'}}>{g.nome||'—'}</div>
+                      <div style={{fontSize:11,color:'#A8C4B8'}}>{g.email}</div>
+                    </td>
+                    <td style={{padding:'10px 12px'}}>
+                      <div style={{display:'flex',alignItems:'center',gap:6}}>
+                        <div style={{width:8,height:8,borderRadius:2,background:cfg.cor,flexShrink:0}}/>
+                        <span style={{color:'#091710',fontWeight:500}}>{cfg.label}</span>
+                      </div>
+                    </td>
+                    <td style={{padding:'10px 12px',color:'#3A5F4E',fontWeight:500}}>{(g.tokens_usados||0).toLocaleString()}</td>
+                    <td style={{padding:'10px 12px',color:'#A8C4B8',fontSize:12}}>{ago(g.criado_em)}</td>
+                  </tr>
+                )
+              })}
+            </tbody>
+          </table>
         </div>
       )}
     </div>

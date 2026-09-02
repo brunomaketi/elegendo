@@ -132,6 +132,29 @@ export function AgentForm({ agente, fields, agentColor = '#0EA472' }: AgentFormP
 
   const handleCopy = () => { navigator.clipboard.writeText(output); setCopied(true); setTimeout(() => setCopied(false), 2000) }
 
+
+  const handlePDF = () => {
+    const w = window.open('','_blank','width=900,height=700')
+    if (!w) return
+    const lines = output.split('\n')
+    let html = ''
+    for (const line of lines) {
+      const t = line.trim()
+      if (!t) { html += '<br/>'; continue }
+      if (t.startsWith('### ')) { html += '<h3>'+t.slice(4)+'</h3>'; continue }
+      if (t.startsWith('## '))  { html += '<h2>'+t.slice(3)+'</h2>'; continue }
+      if (t.startsWith('# '))   { html += '<h1>'+t.slice(2)+'</h1>'; continue }
+      if (t === '---')           { html += '<hr/>'; continue }
+      const p = t.replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>').replace(/\*(.+?)\*/g,'<em>$1</em>')
+      if (t.startsWith('- ') || t.startsWith('* ')) { html += '<li>'+p.slice(2)+'</li>'; continue }
+      html += '<p>'+p+'</p>'
+    }
+    const date = new Date().toLocaleDateString('pt-BR')
+    const time = new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})
+    w.document.write('<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Elegendo</title><style>body{font-family:Inter,sans-serif;max-width:780px;margin:32px auto;padding:0 32px;color:#091710;line-height:1.8}.hdr{background:linear-gradient(135deg,#054E39,#0EA472);color:#fff;padding:20px 24px;border-radius:12px;margin-bottom:28px}h1{font-size:20px;font-weight:800;color:#091710;margin:18px 0 8px;border-bottom:2px solid #D4E8DC;padding-bottom:8px}h2{font-size:16px;font-weight:700;color:#0EA472;margin:14px 0 5px;border-left:3px solid #0EA472;padding-left:10px}h3{font-size:14px;font-weight:700;margin:10px 0 4px}p,li{font-size:14px;color:#3A5F4E;margin:5px 0;line-height:1.8}li{margin-left:20px}hr{border:none;border-top:1px solid #D4E8DC;margin:16px 0}strong{font-weight:700;color:#091710}@media print{body{margin:16px}}</style></head><body><div class="hdr"><div style="font-size:17px;font-weight:800;color:#fff">Elegendo — Conteúdo Gerado</div><div style="font-size:12px;color:rgba(255,255,255,0.65);margin-top:4px">'+date+' às '+time+'</div></div>'+html+'</body></html>')
+    w.document.close()
+    setTimeout(() => w.print(), 600)
+  }
   return (
     <>
       <style>{`
@@ -255,7 +278,11 @@ export function AgentForm({ agente, fields, agentColor = '#0EA472' }: AgentFormP
               <button onClick={handleCopy} style={{ padding:'11px 22px',background:`linear-gradient(135deg,${agentColor},#054E39)`,color:'#fff',borderRadius:50,border:'none',fontSize:13,fontWeight:700,cursor:'pointer',boxShadow:`0 4px 14px ${agentColor}30` }}>
                 {copied?'Copiado!':'Copiar conteúdo'}
               </button>
-              <button onClick={() => { setOutput(''); setDone(false); setError('') }} style={{ padding:'11px 22px',background:'transparent',color:'#3A5F4E',borderRadius:50,border:'1px solid #D4E8DC',fontSize:13,fontWeight:600,cursor:'pointer' }}>
+              <button onClick={handlePDF} style={{ padding:'11px 22px',background:'transparent',color:'#3A5F4E',borderRadius:50,border:'1px solid #D4E8DC',fontSize:13,fontWeight:600,cursor:'pointer',display:'flex',alignItems:'center',gap:6,fontFamily:'inherit' }}>
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+                Baixar PDF
+              </button>
+              <button onClick={() => { setOutput(''); setDone(false); setError('') }} style={{ padding:'11px 22px',background:'transparent',color:'#A8C4B8',borderRadius:50,border:'1px solid #E6F3EB',fontSize:13,fontWeight:600,cursor:'pointer',fontFamily:'inherit' }}>
                 Gerar novamente
               </button>
             </div>
