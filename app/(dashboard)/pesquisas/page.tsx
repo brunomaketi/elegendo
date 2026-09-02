@@ -71,7 +71,7 @@ function BarChart({ data }: { data:{nome:string;partido?:string;pct:number;cor:s
   )
 }
 
-function DonutChart({ data }: { data:{nome:string;pct:number;cor:string}[] }) {
+function DonutChart({ data }: { data:{nome:string;partido?:string;pct:number;cor:string}[] }) {
   const r=52,cx=68,cy=68,sw=20
   const circ=2*Math.PI*r
   let cum=0
